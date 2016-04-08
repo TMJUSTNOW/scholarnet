@@ -1,0 +1,79 @@
+<div class="modal fade custom-width" id="upgrading">
+		<div class="modal-dialog" style="width: 60%;">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<a href="" class="close">&times;</a>
+					<h4 class="modal-title">Account Upgrading</h4>
+				</div>
+
+				<div class="modal-body clearfix">
+					<div class="col-md-4">
+						<div class="list-group list-group-minimal"><!-- Add class "list-group-minimal" for less padding between list items -->
+							<a href="javascript:;" onclick="upgradeInstitute();" class="list-group-item">
+								Updated Institute
+							</a>
+							<a href="javascript:;" onclick="upgradeCourse();" class="list-group-item">
+								Updated Course
+							</a>
+							<a href="javascript:;" onclick="upgradeYear();" class="list-group-item">
+								Update Year
+							</a>
+							<a href="javascript:;" onclick="upgradeDisplayName();" class="list-group-item">
+								Change Display Name
+							</a>
+						</div>
+					</div>
+					<div class="col-md-8" id="upgradeFormContainer">
+					</div>
+				</div>
+
+				<div class="modal-footer">
+					<a href="" class="btn btn-danger">Close</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+<script>
+	$('#upgrading').on('hidden.bs.modal', function (e) {
+	  	location.reload();
+	});
+	function upgradeInstitute(){
+		var html = '<center><img src="/static/images/loader2.gif" class="img img-responsive" /></center>';
+		$("#upgradeFormContainer").html(html);
+		setTimeout(
+		  function()
+		  {
+			//loading the form
+			$("#upgradeFormContainer").load("/app/upgradeInstituteLoadForm/");
+		  }, 2000);
+	}
+
+	function upgradeCourse(){
+		var html = '<center><img src="/static/images/loader2.gif" class="img img-responsive" /></center>';
+		$("#upgradeFormContainer").html(html);
+		setTimeout(
+			function(){
+				$("#upgradeFormContainer").load("/app/upgradeCourseLoadForm/");
+			},2000);
+	}
+
+	function upgradeYear(){
+		var html = '<center><img src="/static/images/loader2.gif" class="img img-responsive" /></center>';
+		$("#upgradeFormContainer").html(html);
+		setTimeout(
+			function(){
+				$("#upgradeFormContainer").load("/app/upgradeYearLoadForm/");
+			}, 2000);
+	}
+
+	function upgradeDisplayName(){
+		var html = '<center><img src="/static/images/loader2.gif" class="img img-responsive" /></center>';
+		$("#upgradeFormContainer").html(html);
+		setTimeout(
+			function(){
+				$("#upgradeFormContainer").load("/app/upgradeDisplayNameLoadForm/");
+			}, 2000);
+	}
+</script>

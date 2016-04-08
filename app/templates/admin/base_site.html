@@ -1,0 +1,22 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }} | {% trans 'ScholarNet' %}{% endblock %}
+
+
+{% block extrastyle %}
+<style>
+#header{ background-color: orange; border-bottom: solid 3px green;min-height:45px; }
+
+#branding h1{ color: #fff; }
+.module h2, .module caption, .inline-group h2 { background:#ccc url(/admin_media/img/admin/nav-bg.gif) bottom left repeat-x; color: #333940; }
+a.section:link, a.section:visited { color: #666666; }
+</style>
+{% endblock %}
+
+
+{% block branding %}
+<h1 id="site-name">{% trans 'ScholarNet' %}</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

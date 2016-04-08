@@ -1,0 +1,490 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+	{% block main_css %}
+		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Arimo:400,700,400italic">
+		<link rel="stylesheet" href="{% static 'assets/css/fonts/linecons/css/linecons.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/fonts/fontawesome/css/font-awesome.min.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-core.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-forms.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-components.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-skins.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+
+		<script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+
+	<style>
+		#viewComments .modal {
+		  position: fixed;
+		  top: 0;
+		  right: 0;
+		  bottom: 0;
+		  left: 0;
+		  overflow: hidden;
+		  overflow-x: hidden;
+		}
+
+		#viewComments .modal-dialog {
+		  position: fixed;
+		  margin: 0;
+		  width: 100%;
+		  height: 100%;
+		  padding: 0;
+		  overflow-x: hidden;
+		}
+
+		#viewComments .modal-content {
+		  position: absolute;
+		  top: 0;
+		  right: 0;
+		  bottom: 0;
+		  left: 0;
+		  border: 2px solid #3c7dcf;
+		  border-radius: 0;
+		  box-shadow: none;
+		  overflow-x: hidden;
+		  overflow-y: scroll;
+		}
+
+		#viewComments .modal-body {
+		  position: absolute;
+		  top: 0px;
+		  bottom: 60px;
+		  width: 100%;
+		  font-weight: 300;
+		  overflow-y: auto;
+		   overflow-x: hidden;
+		}
+
+		#viewComments .modal-footer {
+		  position: absolute;
+		  right: 0;
+		  bottom: 0;
+		  left: 0;
+		  height: 60px;
+		  padding: 10px;
+		  background: #f1f3f5;
+		}
+
+		#viewComments .btn {
+		  height: 40px;
+		  border-radius: 0;
+
+		  // focus
+		  &:focus,
+		  &:active,
+		  &:active:focus {
+			box-shadow: none;
+			outline: none;
+		  }
+		}
+
+		#viewComments .btn-modal {
+		  position: absolute;
+		  top: 50%;
+		  left: 50%;
+		  margin-top: -20px;
+		  margin-left: -100px;
+		  width: 200px;
+		}
+
+		.btn-primary,
+		.btn-primary:hover,
+		.btn-primary:focus,
+		.btn-primary:active {
+		  font-weight: 300;
+		  font-size: 1.6rem;
+		  color: #fff;
+		  color: lighten(#484b5b, 20%);
+		  color: #fff;
+		  text-align: center;
+		  background: #60cc69;
+		  border: 1px solid #36a940;
+		  border-bottom: 3px solid #36a940;
+		  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+
+		  // active
+		  &:active {
+			border-bottom: 1px solid #36a940;
+		  }
+		}
+
+		.btn-default,
+		.btn-default:hover,
+		.btn-default:focus,
+		.btn-default:active {
+		  font-weight: 300;
+		  font-size: 1.6rem;
+		  color: #fff;
+		  text-align: center;
+		  background: darken(#dcdfe4, 10%);
+		  border: 1px solid darken(#dcdfe4, 20%);
+		  border-bottom: 3px solid darken(#dcdfe4, 20%);
+
+		  // active
+		  &:active {
+			border-bottom: 1px solid darken(#dcdfe4, 20%);
+		  }
+		}
+
+		.btn-secondary,
+		.btn-secondary:hover,
+		.btn-secondary:focus,
+		.btn-secondary:active {
+		  color: #cc7272;
+		  background: transparent;
+		  border: 0;
+		}
+
+		h1,
+		h2,
+		h3 {
+		  color: #60cc69;
+		  line-height: 1.5;
+
+		  // first
+		  &:first-child {
+			margin-top: 0;
+		  }
+		}
+
+		p {
+		  font-size: 1.4em;
+		  line-height: 1.5;
+		  color: lighten(#5f6377, 20%);
+
+		  // last
+		  &:last-child {
+			margin-bottom: 0;
+		  }
+		}
+
+		::-webkit-scrollbar {
+		  -webkit-appearance: none;
+		  width: 10px;
+		  background: #f1f3f5;
+		  border-left: 1px solid darken(#f1f3f5, 10%);
+		}
+
+		::-webkit-scrollbar-thumb {
+		  background: darken(#f1f3f5, 20%);
+		}
+	</style>
+	{% endblock %}
+
+	{% block body %}
+		<div class="page-container"><!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
+
+		<!-- Add "fixed" class to make the sidebar fixed always to the browser viewport. -->
+		<!-- Adding class "toggle-others" will keep only one menu item open at a time. -->
+		<!-- Adding class "collapsed" collapse sidebar root elements and show only icons. -->
+	{% include "home/sidemenu.html" %}
+
+		<div class="main-content">
+
+			{% include "home/topnav.html" %}
+			<div>
+				<ol class="breadcrumb bc-1" >
+					<li>
+						<a href="/app/home/"><i class="fa-home"></i>Home</a>
+					</li>
+					<li>
+						<a href="/app/subjectReader/{{ postObj.subject.id }}/">{{ postObj.subject.name }}</a>
+					</li>
+					<li class="active">
+						<strong>Article</strong>
+					</li>
+				</ol>
+			</div>
+			<div class="row draggable-portlets">
+
+				<div class="col-md-12">
+
+					<div class="sorted">
+
+						{% for post in posts %}
+							<div class="col-md-8 col-md-offset-2">
+								<div class="panel panel-color panel-info">
+										<!-- panel head -->
+										<div class="panel-heading">
+											<div class="col-md-2 col-sm-2">
+												<img src="/static/images/user.jpg" class="img img-circle btn-green" with="40px" />
+												<span>{{ post.user.profile.display }}</span>
+											</div>
+											<div class="col-md-10 col-sm-10 text-right">
+												<div class="panel-title">
+													<span><b>{{ post.subject.course.school.name|truncatewords:4 }}</b></span>
+													&nbsp;&nbsp;
+													<a href="javascript:;" data-toggle="tooltip" data-placement="top" title="{{ post.subject.course.school.name }}">
+														<i class="fa fa-star text-white"></i>
+													</a> <br />
+													<span><b>{{ post.subject.course }}</b></span><br>
+													<span><h6>{{ post.subject }}</h6></span><br>
+													<span class="badge">{{ post.updated }}</span>
+												</div>
+											</div>
+										</div>
+
+										<!-- panel body -->
+									<div class="panel-body">
+										<div>
+											<p style="font-size:18px;">
+												{{ post.description|safe }}
+											</p>
+										</div>
+										<div id="image_description_{{ post.id }}">
+
+										</div>
+
+										<script>
+											$(document).ready(function(){
+												$("#image_description_"+{{ post.id }}).load("/app/imageAjaxLoaderReader/"+{{ post.id }}+"/");
+											});
+										</script>
+										<hr />
+									</div>
+									<div id="postFeedback">
+
+									</div>
+
+									<div class="">
+										<br /><br />
+										<form role="form" action="/app/publishComment/" method="POST" id="commentForm">
+											{% csrf_token %}
+											<input type="text" name="post_id" class="form-controll hidden" value="{{ post_id }}" />
+											<div class="form-group">
+												<textarea name="comment" id="commentTextArea" class="form-control" placeholder="Place your comment here" required></textarea>
+											</div>
+											<div class="form-group">
+												<button type="submit" data-toggle="tooltip" data-placement="top" title="Publish Your Comment" class="btn btn-icon btn-xs btn-gray pull-right">
+													<i class="fa fa-comments-o"></i>&nbsp;&nbsp;
+													comment
+												</button>
+											</div>
+										</form>
+
+												<script>
+													$("#commentForm").submit(function(e){
+														e.preventDefault();
+														$("#commentForm").hide();
+														var postData = $(this).serializeArray();
+														var formURL = $(this).attr('action');
+
+														alertify.warning('Sending Your Comment');
+														$.ajax({
+															url: formURL,
+															type: 'POST',
+															data: postData,
+															success: function(data, textStatus, jqXHR){
+																$("#postFeedback").html(data);
+																$('textarea').val("");
+															},
+															error: function(jqXHR, textStatus, errorThrown){
+																alert(errorThrown);
+															}
+														});
+													});
+												</script>
+									</div>
+
+									<div id="commentContainer">
+										<div class="row">
+											<div class="col-sm-12">
+												<div class="xe-widget xe-conversations">
+													<div class="xe-header">
+														<div class="xe-icon">
+															<i class="linecons-comment"></i>
+														</div>
+														<div class="xe-label">
+															<h3 class="text">
+																Comments <span class="badge badge-info">{{ post.comments }}</span>
+															</h3>
+														</div>
+													</div>
+													{% if totalComments != 0 %}
+														<div class="xe-body">
+														<ul class="list-unstyled">
+															{% for comment in comments %}
+																<li>
+																	<div class="xe-comment-entry">
+																		<a href="javascript:;" class="xe-user-img">
+																			<img src="/static/images/user.jpg" class="img-circle btn-green" width="40" />
+																		</a>
+																		<div class="xe-comment">
+																			{% if user.id == comment.user.id %}
+																			<a href="javascript:;" data-id="{{ comment.id }}" data-toggle="tooltip" data-placement="top" title="Delete" class="commenttDelete pull-right">
+																				<i class="fa fa-trash"></i>
+																			</a>
+																			{% endif %}
+																			<a href="javascript:;" class="xe-user-name">
+																				<strong>{{ comment.user.profile.display }}</strong>
+																			</a>
+																			<p>{{ comment.comment|safe }}</p>
+																			<span class="pull-right badge badge-gray">
+																				{{ comment.updated }}
+																			</span>
+																		</div>
+																	</div>
+																</li>
+															{% endfor %}
+														</ul>
+													</div>
+													{% else %}
+														<div class="alert alert-info">
+															<center>
+																<span style="font-size:19px;">No Comments Found...</span>
+															</center>
+														</div>
+													{% endif %}
+													<div class="xe-footer">
+														{% if totalComments > 11 %}
+															<a href="javascript:;" onclick="viewMoreComments('{{ post_id }}');" data-toggle="modal" data-target="#viewComments">View All</a>
+														{% endif %}
+													</div>
+												</div>
+
+											</div>
+										</div>
+									</div>
+									</div>
+							</div>
+						{% endfor %}
+					</div>
+
+				</div>
+				<div id="fakeLoader"></div>
+			</div>
+
+			<!-- Main Footer -->
+			<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
+			<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
+			<!-- Or class "fixed" to  always fix the footer to the end of page -->
+			{% include "footer.html" %}
+		</div>
+
+
+		{% include "home/chat_side.html" %}
+
+	</div>
+
+
+
+<div id="viewComments" class="modal animated bounceIn" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+	<!-- dialog -->
+	<div class="modal-dialog">
+		<!-- content -->
+		<div class="modal-content">
+			<!-- body -->
+			<div class="modal-body clearfix" id="allPostComments">
+
+			</div>
+			<!-- body -->
+			<!-- footer -->
+			<div class="modal-footer">
+				<button class="btn btn-green" data-dismiss="modal">
+					<i class="fa fa-remove" style="color:red;"></i>
+					close
+				</button>
+			</div>
+			<!-- footer -->
+		</div>
+		<!-- content -->
+	</div>
+	<!-- dialog -->
+</div>
+<!-- modal -->
+	{% endblock %}
+
+
+	{% block main_scripts %}
+		<!-- Bottom Scripts -->
+		<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+		<script src="{% static 'assets/js/TweenMax.min.js' %}"></script>
+		<script src="{% static 'assets/js/resizeable.js' %}"></script>
+		<script src="{% static 'assets/js/joinable.js' %}"></script>
+		<script src="{% static 'assets/js/xenon-api.js' %}"></script>
+		<script src="{% static 'assets/js/xenon-toggles.js' %}"></script>
+
+
+		<!-- Imported scripts on this page -->
+		<script src="{% static 'assets/js/jquery-ui/jquery-ui.min.js' %}"></script>
+
+		<script src="{% static 'assets/js/dropzone/dropzone.min.js' %}"></script>
+		<!-- JavaScripts initializations and stuff -->
+		<script src="{% static 'assets/js/xenon-custom.js' %}"></script>
+
+		<script>
+			$(document).ready(function(){
+				$("#extraInfoLoader").load("/app/extraInfos/{{ post_id }}/");
+			});
+			$(document).ajaxStart(function(){
+				$("#loader").css("display","block");
+			});
+			$(document).ajaxComplete(function(){
+				$("#loader").css("display", "none");
+				$("#commentForm").show();
+			});
+
+
+
+
+			function viewMoreComments(x){
+				$("#allPostComments").load("/app/loadAllPostComments/"+x+"/");
+			}
+
+
+			function deleteMe(x){
+				var id = x;
+					swal({
+						title: "Are you sure?",
+						text: "Comment Will be deleted Permanently",
+						type: "warning",
+						showCancelButton: true,
+						confirmButtonColor: "#007AFF",
+						confirmButtonText: "Yes, delete it!",
+						closeOnConfirm: true
+					}, function() {
+						$("#commentContainer").load("/app/deleteComment/"+id+"/");
+						$("#allPostComments").load("/app/loadAllPostComments/"+id+"/");
+					});
+			}
+
+
+			function deleteMeFromAll(x,y){
+				var id = x;
+					swal({
+						title: "Are you sure?",
+						text: "Comment Will be deleted Permanently",
+						type: "warning",
+						showCancelButton: true,
+						confirmButtonColor: "#007AFF",
+						confirmButtonText: "Yes, delete it!",
+						closeOnConfirm: true
+					}, function() {
+						$("#commentContainer").load("/app/deleteComment/"+id+"/");
+						$("#allPostComments").load("/app/loadAllPostComments/"+y+"/");
+					});
+			}
+			$(".commenttDelete").on('click',function(){
+				var id = $(this).data("id");
+				swal({
+				  title: "Are you sure?",
+				  text: "Comment will be Deleted",
+				  type: "warning",
+				  showCancelButton: true,
+				  confirmButtonColor: "#DD6B55",
+				  confirmButtonText: "Yes, delete it!",
+				  closeOnConfirm: true
+				},
+				function(){
+					$("#fakeLoader").load('/app/deleteComment/'+id+'/');
+				});
+			});
+		</script>
+	{% endblock %}

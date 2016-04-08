@@ -1,0 +1,77 @@
+{% load endless %}
+<table class="table table-hover members-table middle-align">
+									<thead>
+										<tr>
+											<th>ICON</th>
+											<th>USERNAME</th>
+											<th>PHONE</th>
+											<th>STATUS</th>
+											<th>Settings</th>
+										</tr>
+									</thead>
+									<tbody>
+									{% load endless %}
+									{% paginate members %}
+									{% for member in members %}
+										<tr>
+											<td class="user-image">
+												<a href="javascript:;">
+													<img avatar="{% if member.is_superuser %}{{ member.username }}{% else %}{{ member.profile.display }}{% endif %}" class="img-circle" alt="user-pic" />
+												</a>
+											</td>
+											<td class="user-name">
+												{% if member.is_superuser %}
+													---
+												{% else %}
+													<span>{{ member.profile.display }}</span>
+												{% endif %}
+											</td>
+											<td>
+												<span>{{ member.username }}</span>
+											</td>
+											<td>
+												{% if member.is_active %}
+													<span class="badge badge-success">Active</span>
+												{% else %}
+													<span class="badge badge-danger">InActive</span>
+												{% endif %}
+											</td>
+											<td class="action-links">
+												{% if member.is_active %}
+													<a href="/manager/{{ activatorSwitcher }}/deactivate/{{ member.id }}/" class="delete">
+														<i class="fa fa-lock"></i>
+														Lock
+													</a>
+												{% else %}
+													<a href="/manager/{{ activatorSwitcher }}/activate/{{ member.id }}/" class="edit">
+														<i class="fa fa-unlock"></i>
+														Unlock
+													</a>
+												{% endif %}
+
+												<a href="javascript:;" onclick="deleteMember('{{ memberType }}', '{{ member.id }}');" class="delete">
+													<i class="linecons-trash"></i>
+													Delete
+												</a>
+											</td>
+										</tr>
+									{% endfor %}
+									</tbody>
+								</table>
+
+								<div class="row">
+									<div class="col-md-12">
+										{% get_pages %}
+										<center>
+											<ul class="pagination">
+												<li>{{ pages.previous }}</li>
+												{% for page in pages %}
+												<li class="{% if page.is_current %} active  {% endif %}">
+													<a href="{{ page.path }}">{{ page.number }}</a>
+												</li>
+												{% endfor %}
+												<li>{{ pages.next }}</li>
+											</ul>
+										</center>
+									</div>
+								</div>

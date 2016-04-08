@@ -1,0 +1,61 @@
+<div class="modal fade custom-width" id="publishModal">
+        <div class="modal-dialog" style="width: 60%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Publish Notes</h4>
+                </div>
+                <div class="modal-body clearfix" id="userMinPlatformFollowedListContent">
+					<form role="form" action="/app/postPublish/" method="POST" enctype="multipart/form-data">
+						{% csrf_token %}
+						{% load widget_tweaks %}
+						<div class="row">
+							<div class="col-md-12">
+								<div class="col-md-12">
+									<div class="col-md-12">
+										<div class="form-group">
+											<label>Subject</label>
+											<select name="subject" class="form-control" required>
+												<option value="">Please Select Subject ...</option>
+												{% for subj in subjects %}
+													<option value="{{ subj.id }}">{{ subj.name }}</option>
+												{% endfor %}
+											</select>
+										</div>
+									</div>
+									<div class="col-md-12">
+										<div class="form-group">
+											<textarea name="description" style="min-height: 100px;min-width:100%;max-width:100%;" class="form-control" placeholder="Detailed Description" required></textarea>
+										</div>
+									</div>
+								</div>
+
+								<div class="col-md-12">
+									<div class="form-group" style="max-height:200px;">
+										<label class="label label-info" style="font-size:20px;">Screen Shoots</label>
+										<!--<input name="files" type="file" class="file" id="filesUpload" accept="image/*" multiple/>-->
+										<input id="input-fcount-1" name="files" multiple type="file" class="file-loading" accept="image/*">
+										<script>
+										$("#input-fcount-1").fileinput({
+											maxFileCount: 4,
+											validateInitialCount: true,
+											overwriteInitial: false,
+											showRemove : true,
+											allowedFileExtensions: ["jpg", "jpeg", "png", "gif"]
+										});
+										</script>
+									</div>
+								</div>
+							</div>
+						</div>
+                </div>
+                <div class="modal-footer">
+					<div class="form-group">
+						<button type="submit" id="submit-all" class="btn btn-gray pull-right btn-lg">PUBLISH</button>
+					</div>
+                    <button type="button" class="btn btn-danger pull-left" data-dismiss="modal">Close</button>
+                </div>
+				</form>
+            </div>
+        </div>
+    </div>

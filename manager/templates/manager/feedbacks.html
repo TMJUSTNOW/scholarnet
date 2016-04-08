@@ -1,0 +1,170 @@
+{% extends "manager/common/base.html" %}
+
+
+{% block body %}
+{% include "manager/common/settings.html" %}
+		<div class="page-container"><!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
+
+			<!-- Add "fixed" class to make the sidebar fixed always to the browser viewport. -->
+			<!-- Adding class "toggle-others" will keep only one menu item open at a time. -->
+			<!-- Adding class "collapsed" collapse sidebar root elements and show only icons. -->
+			{% include "manager/common/sideMenu.html" %}
+
+			<div class="main-content">
+
+				{% include "manager/common/topNav.html" %}
+				<div class="page-title">
+
+					<div class="title-env">
+						<h1 class="title">Lis tof Feedbacks, Recommendations and Problems Reported ny Users</h1>
+					</div>
+
+						<div class="breadcrumb-env">
+							<ol class="breadcrumb bc-1" >
+								<li>
+									<a href="/manager/"><i class="fa-home"></i>Dashboard</a>
+								</li>
+								<li class="active">
+									<a href="javascript:;">FeedBack & Recommendations & Problems</a>
+								</li>
+							</ol>
+					</div>
+
+				</div>
+
+				<div class="row">
+                    <div class="col-md-12">
+                        <div class="vertical-top">
+                            <center>
+                                <a href="/manager/feedbacks/ratings/" data-toggle="tooltip" data-placement="top" title="View User Ratings/Satisfactions" class="btn btn-secondary btn-icon btn-icon-standalone">
+                                    <i class="fa-star"></i>
+                                    <span>Satisfactions(Rating)</span>
+                                </a>
+                                <a href="/manager/feedbacks/oldfeatures/" data-toggle="tooltip" data-placement="top" title="View User Suggestion on the Implemented Features" class="btn btn-primary btn-icon btn-icon-standalone">
+                                    <i class="fa-download"></i>
+                                    <span>Old Features</span>
+                                </a>
+                                <a href="/manager/feedbacks/newfeatures/" data-toggle="tooltip" data-placement="top" title="View user Suggested New Features" class="btn btn-purple btn-icon btn-icon-standalone">
+                                    <i class="fa-cog"></i>
+                                    <span>New Features</span>
+                                </a>
+                                <a href="/manager/feedbacks/problems/" data-toggle="tooltip" data-placement="top" title="View Reported Problems" class="btn btn-white btn-icon btn-icon-standalone btn-icon-standalone-right">
+                                    <i class="fa-remove"></i>
+                                    <span>Problems</span>
+                                </a>
+                            </center>
+                        </div>
+                    </div>
+					<div class="col-md-12">
+                        <div class="col-sm-12">
+                            <div class="xe-widget xe-conversations">
+                                <div class="xe-body">
+                                    <ul class="list-unstyled">
+                                        {% load endless %}
+									    {% paginate feedbaks %}
+                                        {% if total != 0 %}
+                                            {% for feedback in feedbaks %}
+                                                <li>
+                                                    <div class="xe-comment-entry">
+                                                        <a href="#" class="xe-user-img">
+                                                            <img avatar="{{ feedback.user.profile.display }}" class="img-circle" width="40" />
+                                                        </a>
+                                                        <div class="xe-comment">
+                                                            <a href="#" class="xe-user-name">
+                                                                <strong>{{ feedback.user.profile.display }}</strong>
+                                                            </a>
+                                                            <p>
+                                                                {% if key == 'all' %}
+                                                                    <p>
+                                                                        {{ feedback.satisfaction }}
+                                                                    </p>
+                                                                    <p>
+                                                                        {{ feedback.features }}
+                                                                    </p>
+                                                                    <p>
+                                                                        {{ feedback.problems }}
+                                                                    </p>
+                                                                    <p>
+                                                                        {{ feedback.addfeatures }}
+                                                                    </p>
+                                                                {% elif key == 'ratings' %}
+                                                                    <p>
+                                                                        {{ feedback.satisfaction }}
+                                                                    </p>
+                                                                {% elif key == 'oldfeatures' %}
+                                                                    <p>
+                                                                        {{ feedback.features }}
+                                                                    </p>
+                                                                {% elif key == 'newfeatures' %}
+                                                                    <p>
+                                                                        {{ feedback.addfeatures }}
+                                                                    </p>
+                                                                {% elif key == 'problems' %}
+                                                                    <p>
+                                                                        {{ feedback.problems }}
+                                                                    </p>
+                                                                {% endif %}
+                                                            <br>
+                                                            <span class="badge badge-info">
+                                                                {{ feedback.updated }}
+                                                            </span>
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                </li>
+                                            {% endfor %}
+                                        {% else %}
+                                            <div class="alert alert-info">
+                                                <center>
+                                                    <h3>There is no {{ title }} Submitted</h3>
+                                                </center>
+                                            </div>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                                <div class="xe-footer">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            {% get_pages %}
+                                            <center>
+                                                <ul class="pagination">
+                                                    <li>{{ pages.previous }}</li>
+                                                    {% for page in pages %}
+                                                    <li class="{% if page.is_current %} active  {% endif %}">
+                                                        <a href="{{ page.path }}">{{ page.number }}</a>
+                                                    </li>
+                                                    {% endfor %}
+                                                    <li>{{ pages.next }}</li>
+                                                </ul>
+                                            </center>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+					</div>
+
+				</div>
+				<!-- Main Footer -->
+				<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
+				<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
+				<!-- Or class "fixed" to  always fix the footer to the end of page -->
+				{% include "manager/common/footer.html" %}
+			</div>
+
+
+			{% include "manager/common/groups.html" %}
+
+		</div>
+
+{% endblock %}
+
+{% block scripts %}
+		{{ block.super }}
+		<script src="/static/endless_pagination/js/endless-pagination.js"></script>
+		<script src="/static/endless_pagination/js/endless_on_scroll.js"></script>
+		<script>
+			$.endlessPaginate();
+		</script>
+
+{% endblock %}

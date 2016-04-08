@@ -1,0 +1,95 @@
+{% load endless %}
+<div class="sorted" id="tiles">
+    {% paginate posts %}
+    {% if totalPost > 0 %}
+    {% for post in posts %}
+    <div class="col-md-8 col-md-offset-2 posts">
+        <div class="panel panel-color panel-info">
+            <!-- panel head -->
+            <div class="panel-heading">
+                <div class="col-md-2 col-sm-2 text-left">
+                    <img src="/static/images/user.jpg" class="img img-circle img-responsive"/>
+                    <span>{{ post.user.profile.display }}</span>
+                </div>
+                <div class="col-md-10 col-sm-10 text-right">
+                    <div class="panel-title">
+                        <span style="font-size:18px;">
+                            <b>{{ post.subject.course.school.name|truncatewords:4 }}&nbsp;&nbsp;
+                                <a href="javascript:;" data-toggle="tooltip" data-placement="top" title="{{ post.subject.course.school.name }}"><i class="fa fa-star text-white"></i></a></b>
+                        </span><br />
+                        <span><b>{{ post.subject.course }}</b></span><br />
+                        <span><h6>{{ post.subject }}</h6></span><br />
+                        <span class="badge">{{ post.updated }}</span>
+                    </div>
+                </div>
+            </div>
+            <!-- panel body -->
+            <a href="/app/reader/{{ post.id }}/">
+                <div class="panel-body">
+                    <div>
+                        <p style="font-size: 18px;">
+                            {{ post.description|safe|truncatewords:30 }}
+                        </p>
+                    </div>
+                    <div id="image_{{ post.id }}"></div>
+                    <!--- Javascript for Loading the images -->
+                    <script>
+					jQuery.ajax({
+                        type: "GET",
+                        url: "/app/imageAjaxLoader/{{ post.id }}/",
+                        dataType: "html",
+                        success: function(data) {
+                            jQuery("#image_"+{{ post.id }}).html(data);
+                        }
+                    });
+					</script>
+                </div>
+            </a>
+            <div class=""><hr />
+                <a href="javascript:;" onclick="recommend('{{ post.id }}');" data-toggle="tooltip" data-placement="top" title="Recommend" class="btn btn-icon btn-xs btn-green">
+                    <i class="fa-thumbs-o-up">&nbsp;&nbsp;
+                        <span id="recomment_{{ post.id }}">{{ post.recommend }}</span>
+                    </i>
+                </a>
+                <a href="javascript:;" data-toggle="tooltip" data-placement="top" title="Comments" class="btn btn-icon btn-green btn-xs">
+                    <i class="fa fa-comments">&nbsp;&nbsp;
+                        <span>{{ post.comments }}</span>
+                    </i>
+                </a>
+                {% if user.id == post.user_id %}
+                <a href="javascript:;" data-id="{{ post.id }}" data-toggle="tooltip" data-placement="top" title="Delete" class="postDelete btn btn-icon btn-xs btn-red pull-right">
+                    <i class="fa fa-trash"></i>
+                </a>
+                {% endif %}
+                <a href="/app/reader/{{ post.id }}/" data-toggle="tooltip" data-placement="top" title="Open" class="btn btn-icon btn-green btn-xs pull-right">
+                    <i class="fa fa-folder-open-o">&nbsp;&nbsp;Open</i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="col-md-8 col-md-offset-2">
+        <div class="alert alert-info">
+            <center>
+                <h3>No Article Posted.....</h3>
+            </center>
+        </div>
+    </div>
+    {% endif %}
+        <div class="col-md-8 col-md-offset-2">
+            {% get_pages %}
+               <center>
+                    <ul class="pagination">
+                        <li>{{ pages.previous }}</li>
+                        {% for page in pages %}
+                        <li class="{% if page.is_current %} active  {% endif %}">
+                            <a href="{{ page.path }}">{{ page.number }}</a>
+                        </li>
+                        {% endfor %}
+                        <li>{{ pages.next }}</li>
+                    </ul>
+               </center>
+        </div>
+</div>
+

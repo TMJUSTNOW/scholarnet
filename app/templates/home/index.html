@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% load endless %}
+{% block css %}
+	<style>
+		#selectedFiles img {
+			max-width: 125px;
+			max-height: 125px;
+			float: left;
+			margin-bottom:10px;
+		}
+	</style>
+{% endblock %}
+
+
+	{% block body %}
+
+		<div class="page-container"><!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
+
+		<!-- Add "fixed" class to make the sidebar fixed always to the browser viewport. -->
+		<!-- Adding class "toggle-others" will keep only one menu item open at a time. -->
+		<!-- Adding class "collapsed" collapse sidebar root elements and show only icons. -->
+	{% include "home/sidemenu.html" %}
+
+		<div class="main-content">
+
+			{% include "home/topnav.html" %}
+			<div>
+				<ol class="breadcrumb bc-1" >
+					<li>
+						<a href="/app/home/"><i class="fa-home"></i>Home</a>
+					</li>
+				</ol>
+			</div>
+			<div class="row draggable-portlets">
+
+				<div class="col-md-12 endless_page_template" id="main" role="main">
+					{% include "home/entry_home_article_page.html" %}
+				</div>
+
+			</div>
+			<div id="fakeLoader"></div>
+
+			<script type="text/javascript">
+				jQuery(document).ready(function($)
+				{
+					var $draggable_portlets = $(".draggable-portlets");
+
+					$(".draggable-portlets .sorted" ).sortable({
+						connectWith: ".draggable-portlets .sorted",
+						handle: '.panel-heading',
+						containment: 'window',
+						start: function()
+						{
+							$draggable_portlets.addClass('dragging');
+						},
+						stop: function()
+						{
+							$draggable_portlets.removeClass('dragging');
+						}
+					});
+
+					$( ".draggable-portlets .sorted .panel-heading" ).disableSelection();
+
+				});
+			</script>
+
+
+			<div class="footer-sticked-chat"><!-- Start: Footer Sticked Chat -->
+
+			<script type="text/javascript">
+		function toggleSampleChatWindow()
+		{
+			var $chat_win = jQuery("#sample-chat-window");
+
+			$chat_win.toggleClass('open');
+
+			if($chat_win.hasClass('open'))
+			{
+				var $messages = $chat_win.find('.ps-scrollbar');
+
+				if($.isFunction($.fn.perfectScrollbar))
+				{
+					$messages.perfectScrollbar('destroy');
+
+					setTimeout(function(){
+						$messages.perfectScrollbar();
+						$chat_win.find('.form-control').focus();
+					}, 300);
+				}
+			}
+
+			jQuery("#sample-chat-window form").on('submit', function(ev)
+			{
+				ev.preventDefault();
+			});
+		}
+
+		jQuery(document).ready(function($)
+		{
+			$(".footer-sticked-chat .chat-user, .other-conversations-list a").on('click', function(ev)
+			{
+				ev.preventDefault();
+				toggleSampleChatWindow();
+			});
+
+			$(".mobile-chat-toggle").on('click', function(ev)
+			{
+				ev.preventDefault();
+
+				$(".footer-sticked-chat").toggleClass('mobile-is-visible');
+			});
+		});
+		</script>
+
+		<ul class="chat-conversations list-unstyled">
+			<li>
+				<!-- User Info Link -->
+				<a href="javascript:;" data-toggle="modal" data-target="#publishModal" class="btn btn-lg btn-gray">
+					<i class="fa fa-upload"></i>
+					Publish
+				</a>
+			</li>
+
+		</ul>
+
+		<a href="#" class="mobile-chat-toggle">
+			<i class="fa fa-plus"></i>
+		</a>
+
+	<!-- End: Footer Sticked Chat -->
+	</div>
+			<!-- Main Footer -->
+			<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
+			<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
+			<!-- Or class "fixed" to  always fix the footer to the end of page -->
+			{% include "footer.html" %}
+		</div>
+
+
+		{% include "home/chat_side.html" %}
+
+	</div>
+
+	{% endblock %}
+	<!-- Bottom Scripts -->
+
+	{% block scripts %}
+		{{ block.super }}
+		<script src="/static/endless_pagination/js/endless.js"></script>
+		<script src="/static/endless_pagination/js/endless_on_scroll.js"></script>
+		<script>
+			$.endlessPaginate({
+				paginateOnScroll: true,
+				paginateOnScrollMargin: 20
+			});
+
+		</script>
+	{% endblock %}

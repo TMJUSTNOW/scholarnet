@@ -1,0 +1,329 @@
+{% load staticfiles %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	{% include "meta.html" %}
+
+	<title>ScholarNet - Home</title>
+	<link rel="icon" href="{% static 'images/favicon.jpg' %}">
+	{% block main_css %}
+		<link href="{% static 'web/css/style.css' %}" rel='stylesheet' type='text/css' />
+		<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Arimo:400,700,400italic">
+		<link rel="stylesheet" href="{% static 'assets/css/fonts/linecons/css/linecons.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/fonts/fontawesome/css/font-awesome.min.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-core.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-forms.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-components.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/xenon-skins.css' %}">
+		<link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	{% endblock %}
+		<link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+		<link rel="stylesheet" href="/static/gallery/css/bootstrap-image-gallery.min.css">
+		<link href="{% static 'sweetalert/sweet-alert.css' %}" rel="stylesheet" media="screen">
+		<link href="{% static 'sweetalert/ie9.css' %}" rel="stylesheet" media="screen">
+		<link href="{% static 'toastr/toastr.min.css' %}" rel="stylesheet" media="screen">
+		<link rel="stylesheet" href="{% static 'alertifyjs/css/alertify.css' %}">
+		<link rel="stylesheet" href="{% static 'alertifyjs/css/themes/semantic.css' %}">
+
+		<script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
+		<script src="{% static 'alertifyjs/alertify.min.js' %}"></script>
+		<link href="{% static 'fileuploader/css/fileinput.css' %}" media="all" rel="stylesheet" type="text/css" />
+        <script src="{% static 'fileuploader/js/fileinput.js' %}" type="text/javascript"></script>
+        <!--<script src="{% static 'fileuploader/js/fileinput_locale_fr.js' %}" type="text/javascript"></script>-->
+        <!--<script src="{% static 'fileuploader/js/fileinput_locale_es.js' %}" type="text/javascript"></script>-->
+
+		<style>
+			.btn-gray{
+				background-color:#EEEEEE;
+			}
+			.label-gray{
+				background-color:#EEEEEE;
+			}
+			.badge-gray{
+				background-color:#40BBEA;
+			}
+			.text{
+				color: #40BBEA;
+			}
+			.btn-red{
+				background-color:#ff0000;
+			}
+		</style>
+
+	<script>
+
+		$(document).on('mouseover',function(){
+			var isVisible = $('#commentModal').is(':visible');
+			if(!isVisible){
+				$("body").css("overflow-y", "scroll");
+			}
+		});
+
+	</script>
+
+    {% block css %}
+    {% endblock %}
+</head>
+<body class="page-body">
+	{% include "home/settings.html" %}
+
+{% block body %}
+{% endblock %}
+
+
+    {% include "home/composer.html" %}
+
+
+	<div id="blueimp-gallery" class="blueimp-gallery" tabindex="-1"  data-use-bootstrap-modal="false">
+		<!-- The container for the modal slides -->
+		<div class="slides"></div>
+		<!-- Controls for the borderless lightbox -->
+		<h3 class="title"></h3>
+		<a class="prev">‹</a>
+		<a class="next">›</a>
+		<a class="close">×</a>
+		<a class="play-pause"></a>
+		<ol class="indicator"></ol>
+		<!-- The modal dialog, which will be used to wrap the lightbox content -->
+		<div class="modal fade">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<button type="button" class="close" aria-hidden="true">&times;</button>
+						<h4 class="modal-title"></h4>
+					</div>
+					<div class="modal-body next"></div>
+					<div class="modal-footer">
+						<button type="button" class="btn btn-default pull-left prev">
+							<i class="glyphicon glyphicon-chevron-left"></i>
+							Previous
+						</button>
+						<button type="button" class="btn btn-primary next">
+							Next
+							<i class="glyphicon glyphicon-chevron-right"></i>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+</div>
+
+	<div class="modal fade" id="aboutUs">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">ABOUT US</h4>
+				</div>
+
+				<div class="modal-body">
+					<center>
+						<span style="color:#40BBEA;">SCHOLARNET</span>
+						<br /><br /><br />
+						<p>
+							facebook: scholarnet<br>
+							copyright@2016scholarnetLabs<br>
+							scholarnetapp@gmail.com
+						</p>
+						<p style="color:#f70e54;">
+							Scholarnet adroid and Web application are all copyrighted work of Scholarnet Lab
+						</p>
+					</center>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-o btn-green" data-dismiss="modal">
+						<i class="fa fa-remove" style="color:red;"></i>&nbsp;&nbsp;
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+
+
+	<div class="modal fade" id="feedbckForm">
+		<div class="modal-dialog">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Send Your Feedback</h4>
+				</div>
+
+				<div class="modal-body clearfix">
+					<form role="form" action="/app/feedbackManager/" method="POST" id="feedbackForm">
+						<div id="feedbackModalContainer">
+							{% csrf_token %}
+							<div class="form-group">
+								<label>Are you generally satisfied with ScholarNet? Ho do you rate the product?</label>
+								<textarea name="satisfaction" class="form-control"></textarea>
+							</div>
+							<div class="form-group">
+								<label>What features Appear to be more Useful?</label>
+								<textarea name="features" class="form-control"></textarea>
+							</div>
+							<div class="form-group">
+								<label>Did you Experience Any Problems?</label>
+								<textarea name="problems" class="form-control"></textarea>
+							</div>
+							<div class="form-group">
+								<label>Are there any feature you like to have but did not find in ScholarNet</label>
+								<textarea name="addfeature" class="form-control"></textarea>
+							</div>
+							<div class="form-group">
+								<center>
+									<button type="submit" class="btn btn-lg btn-green">
+										SEND FEEDBACK
+									</button>
+								</center>
+							</div>
+						</div>
+					</form>
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-o btn-green" data-dismiss="modal">
+						<i class="fa fa-remove" style="color:red;"></i>&nbsp;&nbsp;
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	{% include "home/upgrade_modal.html" %}
+	{% block main_scripts %}
+		<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
+		<script src="{% static 'assets/js/TweenMax.min.js' %}"></script>
+		<script src="{% static 'assets/js/resizeable.js' %}"></script>
+		<script src="{% static 'assets/js/joinable.js' %}"></script>
+		<script src="{% static 'assets/js/xenon-api.js' %}"></script>
+		<script src="{% static 'assets/js/xenon-toggles.js' %}"></script>
+
+
+		<!-- Imported scripts on this page -->
+		<script src="{% static 'assets/js/jquery-ui/jquery-ui.min.js' %}"></script>
+		<!-- JavaScripts initializations and stuff -->
+		<script src="{% static 'assets/js/xenon-custom.js' %}"></script>
+		<script src="{% static 'web/js/jquery.imagesloaded.js' %}"></script>
+		<script src="{% static 'web/js/jquery.wookmark.js' %}"></script>
+	{% endblock %}
+
+
+    {% block scripts %}
+    {% endblock %}
+	<script src="{% static 'assets/js/letterAvatar.js' %}"></script>
+	<script src="{% static 'sweetalert/sweet-alert.min.js' %}"></script>
+	<script src="{% static 'toastr/toastr.min.js' %}"></script>
+	<script src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+	<script src="/static/gallery/js/bootstrap-image-gallery.min.js"></script>
+	<script src="http://malsup.github.com/jquery.form.js"></script>
+	<script type="text/javascript">
+	$(".development").on("click", function(){
+		swal({
+		  title: "Feature On-Development!",
+		  text: "We are sorry, Next Version this feature will be incorporated",
+		});
+	});
+	{% for message in messages %}
+		{% if message.tags == 'error' %}
+				alertify.error("{{ message }}");
+		{% else %}
+				alertify.{{ message.tags }}("{{ message }}");
+		{% endif %}
+    {% endfor %}
+	$('#publishModal').on('show.bs.modal', function () {
+		document.documentElement.style.overflow=document.body.style.overflow='hidden';
+		$('.modal .modal-body').css('overflow-y', 'auto');
+		$('.modal').css('overflow-y', 'hidden');
+		$('.modal .modal-body').css('overflow-x', 'hidden');
+		$('.modal .modal-body').css('max-height', $(window).height() * 0.7);
+	});
+	$(".postDelete").on('click',function(){
+		var id = $(this).data("id");
+		swal({
+			 title: "Are you sure?",
+			 text: "Comment will be Deleted",
+		     type: "warning",
+			 showCancelButton: true,
+			 confirmButtonColor: "#DD6B55",
+			 confirmButtonText: "Yes, delete it!",
+			 closeOnConfirm: false
+		},
+		function(isConfirm){
+			if(isConfirm){
+				window.location ='/app/deletePost/'+id+'/';
+			}else{
+				alertify.success("Cancelled Successfully");
+			}
+		});
+	});
+	$('#feedbckForm').on('hidden.bs.modal', function (e) {
+	  	location.reload();
+	});
+	function recommend(postId){
+		$("#recomment_"+postId).load("/app/recommend/"+postId+"/");
+	}
+
+	$("#feedbackForm").submit(function(e){
+		e.preventDefault();
+		var postData = $(this).serializeArray();
+		var formURL = $(this).attr('action');
+		alertify.warning('Sending Your Feedback');
+		$.ajax({
+			url: formURL,
+			type: 'POST',
+			data: postData,
+			success: function(data, textStatus, jqXHR){
+				$("#feedbackModalContainer").html(data);
+			},
+			error: function(jqXHR, textStatus, errorThrown){
+				alertify.error(textStatus);
+			}
+		});
+	});
+
+	function feedbackForm(){
+		var html = '';
+			html += '<div class="form-group">';
+			html += '<label>Are you generally satisfied with ScholarNet? Ho do you rate the product?</label>';
+			html += '<textarea name="satisfaction" class="form-control"></textarea>';
+			html += '</div>';
+			html += '<div class="form-group">';
+			html += '<label>What features Appear to be more Useful?</label>';
+			html += '<textarea name="features" class="form-control"></textarea>';
+			html += '</div>';
+			html += '<div class="form-group">';
+			html += '<label>Did you Experience Any Problems?</label>';
+			html += '<textarea name="problems" class="form-control"></textarea>';
+			html += '</div>';
+			html += '<div class="form-group">';
+			html += '<label>Are there any feature you like to have but did not find in ScholarNet</label>'
+			html += '<textarea name="addfeature" class="form-control"></textarea>';
+			html += '</div>';
+			html += '<div class="form-group">';
+			html += '<center>';
+			html += '<button type="submit" class="btn btn-lg btn-green">';
+			html += 'SEND FEEDBACK';
+			html += '</button>';
+			html += '</center>';
+			html += '</div>';
+
+			$("#feedbackModalContainer").html(html);
+	}
+	</script>
+
+
+</body>
+</html>

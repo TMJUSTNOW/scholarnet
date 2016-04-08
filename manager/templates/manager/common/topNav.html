@@ -1,0 +1,103 @@
+<nav class="navbar user-info-navbar"  role="navigation"><!-- User Info, Notifications and Menu Bar -->
+
+				<!-- Left links for user info navbar -->
+				<ul class="user-info-menu left-links list-inline list-unstyled">
+
+					<li class="hidden-sm hidden-xs">
+						<a href="#" data-toggle="sidebar">
+							<i class="fa-bars"></i>
+						</a>
+					</li>
+
+					<li class="dropdown hover-line">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<i class="fa-envelope-o"></i>
+							<span class="badge badge-green">0</span>
+						</a>
+
+						<ul class="dropdown-menu messages">
+							<li>
+
+								<ul class="dropdown-menu-list list-unstyled ps-scrollbar">
+
+								</ul>
+
+							</li>
+
+							<li class="external">
+								<a href="mailbox-main.html">
+									<span>All Messages</span>
+									<i class="fa-link-ext"></i>
+								</a>
+							</li>
+						</ul>
+					</li>
+
+					<li class="dropdown hover-line">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<i class="fa-bell-o"></i>
+							<span class="badge badge-purple">0</span>
+						</a>
+
+						<ul class="dropdown-menu notifications">
+							<li class="top">
+								<p class="small">
+									<a href="#" class="pull-right">Mark all Read</a>
+									You have <strong>0</strong> new notifications.
+								</p>
+							</li>
+
+							<li class="external">
+								<a href="#">
+									<span>View all notifications</span>
+									<i class="fa-link-ext"></i>
+								</a>
+							</li>
+						</ul>
+					</li>
+
+				</ul>
+
+
+				<!-- Right links for user info navbar -->
+				<ul class="user-info-menu right-links list-inline list-unstyled">
+							<li class="search-form"><!-- You can add "always-visible" to show make the search input visible -->
+
+						<form name="userinfo_search_form" method="get" action="extra-search.html">
+							<input type="text" name="s" class="form-control search-field" placeholder="Type to search..." />
+
+							<button type="submit" class="btn btn-link">
+								<i class="linecons-search"></i>
+							</button>
+						</form>
+
+					</li>
+
+					<li class="dropdown user-profile topNav">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<img avatar="{{ user.username }}" class="img-circle img-inline userpic-32" width="28" />
+							<span>
+								{{ user.username }}
+								<i class="fa-angle-down"></i>
+							</span>
+						</a>
+
+						<ul class="dropdown-menu user-profile-menu list-unstyled">
+							<li class="last">
+								<a href="/logout/">
+									<i class="fa-lock"></i>
+									Logout
+								</a>
+							</li>
+						</ul>
+					</li>
+
+					<li>
+						<a href="#" data-toggle="chat">
+							<i class="fa-comments-o"></i>
+						</a>
+					</li>
+
+				</ul>
+
+			</nav>

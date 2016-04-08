@@ -1,0 +1,106 @@
+<nav class="navbar user-info-navbar"  role="navigation"><!-- User Info, Notifications and Menu Bar -->
+
+				<!-- Left links for user info navbar -->
+				<ul class="user-info-menu left-links list-inline list-unstyled">
+
+					<li class="hidden-sm hidden-xs">
+						<a href="#" data-toggle="sidebar">
+							<i class="fa-bars"></i>
+						</a>
+					</li>
+					{% for group in user.groups.all %}
+						{% if group.name == 'School Adminstrator' %}
+							<li class="hover-line topNav">
+								<a href="/app/manageSchool/">
+									<span class="title">Manage School</span>
+								</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+					<li class="hover-line topNav">
+						<a href="/app/linker/" data-toggle="tooltip" data-placement="bottom" title="Connect With Other Universities/Colleges/Schools">
+							<span class="title">Linker</span>
+						</a>
+					</li>
+					<li class="dropdown hover-line">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<i class="fa-bell-o"></i>
+							<span class="badge badge-info">0</span>
+						</a>
+
+						<ul class="dropdown-menu notifications">
+							<li class="top">
+								<p class="small">
+									<a href="#" class="pull-right">Mark all Read</a>
+									You have <strong>3</strong> new notifications.
+								</p>
+							</li>
+
+							<li>
+								<ul class="dropdown-menu-list list-unstyled ps-scrollbar">
+									<li class="active notification-success">
+										<a href="#">
+											<i class="fa-user"></i>
+
+											<span class="line">
+												<strong>New user registered</strong>
+											</span>
+
+											<span class="line small time">
+												30 seconds ago
+											</span>
+										</a>
+									</li>
+								</ul>
+							</li>
+
+							<li class="external">
+								<a href="#">
+									<span>View all notifications</span>
+									<i class="fa-link-ext"></i>
+								</a>
+							</li>
+						</ul>
+					</li>
+
+				</ul>
+
+
+				<!-- Right links for user info navbar -->
+				<ul class="user-info-menu right-links list-inline list-unstyled">
+					<li class="search-form"><!-- You can add "always-visible" to show make the search input visible -->
+						<form name="userinfo_search_form" method="get" action="extra-search.html">
+							<input type="text" name="s" class="form-control search-field" placeholder="Type to search..." />
+							<button type="submit" class="btn btn-link">
+								<i class="linecons-search"></i>
+							</button>
+						</form>
+					</li>
+					<li class="dropdown user-profile hover-line topNav">
+						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+							<img src="/static/images/user.jpg" class="img-circle img-inline userpic-32" width="28" />
+							<span>
+								{{ user.profile.display }}
+								<i class="fa-angle-down"></i>
+							</span>
+						</a>
+
+						<ul class="dropdown-menu user-profile-menu list-unstyled">
+							<li class="last">
+								<a href="/logout/">
+									<i class="fa-lock"></i>
+									Logout
+								</a>
+							</li>
+						</ul>
+					</li>
+
+					<li>
+						<a href="#" data-toggle="chat" title="Groups">
+							<i class="fa fa-users"></i>
+						</a>
+					</li>
+
+				</ul>
+
+			</nav>

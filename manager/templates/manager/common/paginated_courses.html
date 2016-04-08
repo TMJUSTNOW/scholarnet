@@ -1,0 +1,96 @@
+<div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a href="javascript:;" data-toggle="modal" data-target="#addMewCourse" class="btn btn-success btn-lg pull-left">
+                                <i class="fa fa-plus"></i>
+                                Add New Course
+                            </a>
+                        </div>
+                    </div>
+					<div class="tab-content">
+						<div class="tab-pane active" id="all">
+
+							<table class="table table-hover members-table middle-align">
+								<thead>
+									<tr>
+										<th>ICON</th>
+										<th>COURSE NAME</th>
+										<th>COURSES</th>
+										<th>STATUS</th>
+										<th>Settings</th>
+									</tr>
+								</thead>
+								<tbody>
+                                {% load endless %}
+								{% paginate courses %}
+                                {% for course in courses %}
+									<tr>
+										<td class="user-image">
+											<a href="javascript:;">
+												<img avatar="{{ course.name }}" class="img-circle" />
+											</a>
+										</td>
+										<td class="user-name">
+                                            <span>{{ course.name }}</span>
+										</td>
+										<td>
+											<a href="/manager/courseSubjects/{{ course.id }}/" data-toggle="tooltip" data-placement="top" title="Click to View School Courses" class="btn btn-primary">
+												Subjects
+											</a>
+										</td>
+										<td>
+                                            {% if course.is_active %}
+                                                <span class="badge badge-success">Active</span>
+                                            {% else %}
+                                                <span class="badge badge-danger">InActive</span>
+                                            {% endif %}
+										</td>
+										<td class="">
+                                            {% if course.is_active %}
+                                                <a href="/manager/courseActivator/deactivate/{{ course.id }}/" class="delete">
+                                                    <i class="fa fa-lock"></i>
+                                                    Lock
+                                                </a>
+                                            {% else %}
+                                                <a href="/manager/courseActivator/activate/{{ course.id }}" class="edit">
+                                                    <i class="fa fa-unlock"></i>
+                                                    Unlock
+                                                </a>
+                                            {% endif %}
+											&nbsp;&nbsp;
+											<a href="/manager/deleteCourse/{{ course.id }}/" class="delete">
+												<i class="linecons-trash"></i>
+												Delete
+											</a>
+											&nbsp;&nbsp;
+											<a href="javascript:;" class="edit">
+												<i class="fa fa-edit"></i>
+												Edit
+											</a>
+										</td>
+									</tr>
+                                {% endfor %}
+								</tbody>
+							</table>
+
+							<div class="row">
+									<div class="col-md-12">
+										{% get_pages %}
+										<center>
+											<ul class="pagination">
+												<li>{{ pages.previous }}</li>
+												{% for page in pages %}
+												<li class="{% if page.is_current %} active  {% endif %}">
+													<a href="{{ page.path }}">{{ page.number }}</a>
+												</li>
+												{% endfor %}
+												<li>{{ pages.next }}</li>
+											</ul>
+										</center>
+									</div>
+								</div>
+
+						</div>
+					</div>
+
+				</div>
