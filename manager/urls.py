@@ -37,4 +37,5 @@ urlpatterns = [
     url(r'^courseActivator/([a-z]+)/([0-9]+)/$',
         views.courseActivator, name='courseActivator'),
     url(r'^feedbacks/([a-z]+)/$', views.feedbacks, name='feedbacks'),
+    url(r'^editSubject/([0-9]+)/$', views.editSubject, name='editSubject'),
         ]

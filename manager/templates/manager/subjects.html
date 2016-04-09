@@ -116,22 +116,27 @@
                                                 <span class="badge badge-danger">InActive</span>
                                             {% endif %}
 										</td>
-										<td class="action-links">
+										<td style="width:185px;">
                                             {% if subject.is_active %}
                                                 <a href="/manager/courseSubjectsActivator/deactivate/{{ subject.id }}/" class="delete">
                                                     <i class="fa fa-lock"></i>
                                                     Lock
-                                                </a>
+                                                </a>&nbsp;
                                             {% else %}
                                                 <a href="/manager/courseSubjectsActivator/activate/{{ subject.id }}/" class="edit">
                                                     <i class="fa fa-unlock"></i>
                                                     Unlock
-                                                </a>
+                                                </a>&nbsp;
                                             {% endif %}
 
 											<a href="javascript:;" data-id="{{ subject.id }}" class="delete deleteSubject">
 												<i class="linecons-trash"></i>
 												Delete
+											</a>&nbsp;
+
+											<a href="javascript:;" data-id="{{ subject.id }}" data-toggle="modal" data-target="#editSubject" class="edit editSubjectLink">
+												<i class="fa fa-edit"></i>
+												Edit
 											</a>
 										</td>
 									</tr>
@@ -229,6 +234,27 @@
 			</div>
 		</div>
 	</div>
+
+
+	<div class="modal fade custom-width" id="editSubject">
+		<div class="modal-dialog" style="width: 60%;">
+			<div class="modal-content">
+
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<h4 class="modal-title">Edit Subject Details</h4>
+				</div>
+
+				<div class="modal-body" id="editSubjectFormContainer">
+
+				</div>
+
+				<div class="modal-footer">
+					<button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 {% endblock %}
 
 
@@ -243,6 +269,11 @@
 		{% endif %}
     {% endfor %}
 
+
+    $(".editSubjectLink").on('click', function(){
+    	var id = $(this).data('id');
+    	$("#editSubjectFormContainer").load("/manager/editSubject/"+id+"/");
+    });
 	$(".deleteSubject").on('click', function(){
            var id = $(this).data("id");
             swal({

@@ -352,3 +352,55 @@ def feedbacks(request, key):
         "total": total,
     }
     return render(request, "manager/feedbacks.html", context)
+
+
+
+@csrf_exempt
+def editSubject(request, subjectId):
+    if request.method == 'POST':
+        if Subjects.objects.filter(id=subjectId).count() > 0:
+            subjectObject = Subjects.objects.get(id=subjectId)
+            subjectObject.name = request.POST.get('subject')
+            subjectObject.code = request.POST.get('code')
+            subjectObject.year_id = request.POST.get('year')
+            subjectObject.save()
+
+            newUpdatedSubject = Subjects.objects.get(id=subjectId)
+            messages.success(request, str(newUpdatedSubject.name) + ' Successfully Updated')
+            return HttpResponseRedirect("/manager/courseSubjects/" +str(newUpdatedSubject.course.id)+"/")
+    else:
+        subjectObj = Subjects.objects.get(id=subjectId)
+        context = ''
+        context += '<form role="form" action="/manager/editSubject/'+str(subjectId)+'/" ' \
+                   'method="POST" id="editSubjectForm">'
+        context += '<div class="form-group">'
+        # context += '<input type="text" name="course" class="form-control hidden" ' \
+        #            'id="course" value="'++'" required />'
+        # context += '</div>'
+        context += '<div class="form-group">'
+        context += '<label>Subject Name</label>'
+        context += '<input type="text" name="subject" class="form-control" value="'+str(subjectObj.name)+'" required />'
+        context += '</div>'
+        context += '<div class="form-group">'
+        context += '<label>Subject Code</label>'
+        context += '<input type="text" name="code" class="form-control" value="'+str(subjectObj.code)+'" required />'
+        context += '</div>'
+        context += '<div class="form-group">'
+        context += '<label>Year</label>'
+        context += '<select name="year" class="form-control" required>'
+        if subjectObj.year_id != None:
+            context += '<option value="'+str(subjectObj.year_id)+'">'+str(subjectObj.year.name)+'('+str(subjectObj.year.code)+')</option>'
+        else:
+            context += '<option value="">Please Select ...</option>'
+        yearsObj = Year.objects.all().exclude(id=subjectObj.year.id)
+        for year in yearsObj:
+            context += '<option value="'+str(year.id)+'">'+str(year.name)+'('+str(year.code)+')</option>'
+        context += '</select>'
+        context += '</div>'
+        context += '<div class="form-group">'
+        context += '<center>'
+        context += '<button type="submit" class="btn btn-success btn-lg">ADD</button>'
+        context += '</center>'
+        context += '</div>'
+        context += '</form>'
+        return HttpResponse(context)
