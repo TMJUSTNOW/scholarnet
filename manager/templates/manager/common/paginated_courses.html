@@ -31,7 +31,7 @@
 											</a>
 										</td>
 										<td class="user-name">
-                                            <span>{{ course.name }}</span>
+                                            <span>{{ course.name }} ({{ course.code }})</span>
 										</td>
 										<td>
 											<a href="/manager/courseSubjects/{{ course.id }}/" data-toggle="tooltip" data-placement="top" title="Click to View School Courses" class="btn btn-primary">
@@ -58,12 +58,12 @@
                                                 </a>
                                             {% endif %}
 											&nbsp;&nbsp;
-											<a href="/manager/deleteCourse/{{ course.id }}/" class="delete">
+											<a href="javascript:;" data-id="{{ course.id }}" class="delete deleteCourse">
 												<i class="linecons-trash"></i>
 												Delete
 											</a>
 											&nbsp;&nbsp;
-											<a href="javascript:;" class="edit">
+											<a href="javascript:;" data-id="{{ course.id }}" data-toggle="modal" data-target="#editCourse" class="edit courseEditLink">
 												<i class="fa fa-edit"></i>
 												Edit
 											</a>

@@ -13,6 +13,8 @@
 	<link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
     <link rel="stylesheet" href="{% static 'alertifyjs/css/alertify.css' %}">
     <link rel="stylesheet" href="{% static 'alertifyjs/css/themes/semantic.css' %}">
+	<link href="{% static 'sweetalert/sweet-alert.css' %}" rel="stylesheet" media="screen">
+	<link href="{% static 'sweetalert/ie9.css' %}" rel="stylesheet" media="screen">
 
 	<script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
 	<script src="{% static 'alertifyjs/alertify.min.js' %}"></script>
@@ -82,6 +84,7 @@
 									<tr>
 										<th>ICON</th>
 										<th>SUBJECT NAME</th>
+										<th>YEAR</th>
 										<th>COURSES</th>
 										<th>STATUS</th>
 										<th>Settings</th>
@@ -98,7 +101,10 @@
 											</a>
 										</td>
 										<td class="user-name">
-                                            <span>{{ subject.name }}</span>
+                                            <span>{{ subject.name }} ({{ subject.code }})</span>
+										</td>
+										<td>
+											<span>{{ subject.year.name }}</span>
 										</td>
 										<td>
                                             {{ subject.course.name }}
@@ -123,7 +129,7 @@
                                                 </a>
                                             {% endif %}
 
-											<a href="/manager/deleteCourseSubjects/{{ subject.id }}/" class="delete">
+											<a href="javascript:;" data-id="{{ subject.id }}" class="delete deleteSubject">
 												<i class="linecons-trash"></i>
 												Delete
 											</a>
@@ -223,4 +229,38 @@
 			</div>
 		</div>
 	</div>
+{% endblock %}
+
+
+{% block scripts %}
+<script>
+
+	{% for message in messages %}
+		{% if message.tags == 'error' %}
+				alertify.error("{{ message }}");
+		{% else %}
+				alertify.{{ message.tags }}("{{ message }}");
+		{% endif %}
+    {% endfor %}
+
+	$(".deleteSubject").on('click', function(){
+           var id = $(this).data("id");
+            swal({
+                 title: "Are you sure?",
+                 text: "Subject will be Deleted",
+                 type: "warning",
+                 showCancelButton: true,
+                 confirmButtonColor: "#DD6B55",
+                 confirmButtonText: "Yes, delete it!",
+                 closeOnConfirm: true
+            },
+            function(isConfirm){
+            	if(isConfirm){
+                	window.location ='/manager/deleteCourseSubjects/'+id+'/';
+                }else{
+                	alertify.success("Successfully Cancelled");
+                }
+            });
+        });
+</script>
 {% endblock %}

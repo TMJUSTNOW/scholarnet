@@ -3,6 +3,7 @@ from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from endless_pagination.decorators import page_template
 from django.template import RequestContext
+from django.contrib import messages
 from django.contrib.auth.models import *
 from django.views.decorators.csrf import csrf_exempt
 from app.models import *
@@ -127,8 +128,13 @@ def schools(request):
         newSchool.code = request.POST.get('code')
         if School.objects.filter(name=request.POST.get('school'), code=request.POST.get('code')).count() == 0:
             newSchool.save()
+            if School.objects.filter(name=request.POST.get('school'), code=request.POST.get('code')).count() > 0:
+                messages.success(request, str(request.POST.get('school')) + 'Successfully Registered')
+            else:
+                messages.error(request, str(request.POST.get('school')) + 'Failed to Register')
             return HttpResponseRedirect("/manager/schools/")
         else:
+            messages.warning(request, str(request.POST.get('school')) + 'Allready Registered')
             return HttpResponseRedirect("/manager/schools/")
     context = {
         "schools": School.objects.all(),
@@ -143,9 +149,21 @@ def schoolsActivator(request, key, schoolId):
     if key == 'activate':
         schoolObj.is_active = True
         schoolObj.save()
+
+        activatedSchool = School.objects.get(id=schoolId)
+        if activatedSchool.is_active:
+            messages.success(request, str(activatedSchool.name) + 'Successfully Activated')
+        else:
+            messages.error(request, str(activatedSchool.name) + 'Failed to Activate')
     elif key == 'deactivate':
         schoolObj.is_active = False
         schoolObj.save()
+
+        deactivatedSchool = Schoool.objects.get(id=schoolId)
+        if deactivatedSchool.is_active:
+            messages.error(request, str(deactivatedSchool.name) + ' Failed to Deactivated')
+        else:
+            messages.success(request, str(deactivatedSchool.name) + ' Successfully Activated')
     return HttpResponseRedirect("/manager/schools/")
 
 
@@ -182,6 +200,7 @@ def schoolCourses(request, schoolId):
         newCourse.school_id = schoolId
         newCourse.name = request.POST.get('course')
         newCourse.code = request.POST.get('code')
+        newCourse.level_id = request.POST.get('level')
         newCourse.course_category_id = request.POST.get('category')
         if Courses.objects.filter(name=request.POST.get('course'), code=request.POST.get('code'), school_id=schoolId).count() == 0:
             newCourse.save()
@@ -192,6 +211,7 @@ def schoolCourses(request, schoolId):
         "courses": Courses.objects.filter(school_id=schoolId).order_by('-name'),
         "schoolId": schoolId,
         "categories": CourseCategory.objects.all().exclude(is_active=False),
+        "levels": CourseLevel.objects.all().exclude(is_active=False),
         "title": 'Courses',
     }
     return render(request, "manager/courses.html", context)
@@ -208,7 +228,8 @@ def courseSubjects(request, courseId):
         newSubject.code = request.POST.get('code')
         newSubject.year_id = request.POST.get('year')
         yearObj = Year.objects.get(code=request.POST.get('year'))
-        if Subjects.objects.filter(name=request.POST.get('subject'), code=request.POST.get('code'), year_id=yearObj.id).count() == 0:
+        if Subjects.objects.filter(name=request.POST.get('subject'), code=request.POST.get('code'),
+                                   year_id=yearObj.id, course_id=courseId).count() == 0:
             newSubject.save()
         else:
             pass
@@ -226,6 +247,11 @@ def courseSubjects(request, courseId):
 def deleteCourse(request, courseId):
     courseObj = Courses.objects.get(id=courseId)
     schoolId = courseObj.school_id
+    course_name = courseObj.name
+    if Courses.objects.filter(id=courseId).count() == 0:
+        messages.success(request, str(course_name)+' Successfully Deleted')
+    else:
+        messages.error(request, str(course_name)+' Failed To Delete, Please Try again')
     courseObj.delete()
     return HttpResponseRedirect("/manager/schoolCourses/"+str(schoolId)+"/")
 
@@ -234,7 +260,12 @@ def deleteCourse(request, courseId):
 def deleteCourseSubjects(request, subjectId):
     subjectObj = Subjects.objects.get(id=subjectId)
     courseId = subjectObj.course_id
+    subject_name = subjectObj.name
     subjectObj.delete()
+    if Subjects.objects.filter(id=subjectId).count() == 0:
+        messages.success(request, str(subject_name)+' Successfully Deleted')
+    else:
+        messages.error(request, str(subject_name)+' Failed to Deleted, Please Try again')
     return HttpResponseRedirect("/manager/courseSubjects/"+str(courseId)+"/")
 
 
@@ -245,9 +276,21 @@ def courseSubjectsActivator(request, key, subjectId):
     if key == 'activate':
         subjectObj.is_active = True
         subjectObj.save()
+
+        activateSubject = Subjects.objects.get(id=subjectId)
+        if activateSubject.is_active:
+            messages.success(request, str(activateSubject.name)+' Successfully Activated')
+        else:
+            messages.error(request, str(activateSubject.name)+' Failed to Activate, Please Try again')
     elif key == 'deactivate':
         subjectObj.is_active = False
         subjectObj.save()
+
+        deactivatedSubject = Subjects.objects.get(id=subjectId)
+        if deactivatedSubject.is_active:
+            messages.error(request, str(deactivatedSubject.name)+' Failed to Deactivated Please Try again')
+        else:
+            messages.success(request, str(deactivatedSubject.name)+ ' Successfully Deactivated')
 
     return HttpResponseRedirect("/manager/courseSubjects/"+str(subjectObj.course_id)+"/")
 
@@ -258,9 +301,21 @@ def courseActivator(request, key, courseId):
     if key == 'activate':
         courseObj.is_active = True
         courseObj.save()
+
+        activatedCourse = Courses.objects.get(id=courseId)
+        if activatedCourse.is_active:
+            messages.success(request, str(activatedCourse.name) + ' Successfully Activated')
+        else:
+            messages.error(request, str(activatedCourse.name) + ' Failed to Activate, Please Try again')
     elif key == 'deactivate':
         courseObj.is_active = False
         courseObj.save()
+
+        deactivatedCourse = Courses.objects.get(id=courseId)
+        if deactivatedCourse.is_active:
+            messages.error(request, str(deactivatedCourse.name) + ' Failed to Deactivate, please Try again')
+        else:
+            messages.success(request, str(deactivatedCourse.name) + ' Successfully Deactivated')
 
     return HttpResponseRedirect("/manager/schoolCourses/"+str(courseObj.school_id)+"/")
 

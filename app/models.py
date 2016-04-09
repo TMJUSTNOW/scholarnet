@@ -61,6 +61,20 @@ class CourseCategory(models.Model):
         return self.name
 
 
+#######################################################################################
+# A class for creating the courses Levels
+#######################################################################################
+class CourseLevel(models.Model):
+    name = models.CharField(max_length=200, null=False, blank=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = u'Course Level'
+        verbose_name_plural = u'Courses Levels'
+
+    def __str__(self):
+        return self.name
+
 #####################################################################################
 # A Class for Creating Courses Table for Storing Instiutes Courses
 ######################################################################################
@@ -69,6 +83,7 @@ class Courses(models.Model):
     code = models.CharField(max_length=50, null=True, blank=True)
     school = models.ForeignKey(School)
     course_category = models.ForeignKey(CourseCategory, null=True, blank=True)
+    level = models.ForeignKey(CourseLevel, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:

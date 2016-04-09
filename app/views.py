@@ -157,7 +157,8 @@ def home(request, template='home/index.html', extra_context=None):
         return HttpResponseRedirect("/manager/")
     else:
         user_course_id.append(request.user.profile.course_id)
-        userRelatedCourses = Courses.objects.filter(course_category_id=request.user.profile.course.course_category_id)
+        userRelatedCourses = Courses.objects.filter(course_category_id=request.user.profile.course.course_category_id,
+                                                    level_id=request.user.profile.course.level_id)
         for userRel in userRelatedCourses:
             user_course_id.append(userRel.id)
     subject_ids = []
@@ -682,6 +683,11 @@ def register(request):
                 new_profile.year_id = request.POST.get('year')
                 new_profile.save()
 
+
+                role = request.GET.get('role')
+                group = Group.objects.get(id=role)
+                newUser.groups.add(group)
+
                 """
                     registering the registration confirmation request
                     For the ScholarNet Message Service Responder to Process the requests
@@ -706,6 +712,10 @@ def register(request):
                 new_profile.year_id = request.POST.get('year')
                 new_profile.save()
 
+                role = request.GET.get('role')
+                group = Group.objects.get(id=role)
+                newUser.groups.add(group)
+
             if user:
                 registeredUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 if registeredUser.is_active == False:
@@ -725,6 +735,7 @@ def register(request):
             "title": "Registration",
             "form": registration(),
             "years": Year.objects.all(),
+            "groups": Group.objects.all().exclude(name='Adminstrators').exclude(name='School Adminstrator'),
             "courses": Courses.objects.all().exclude(is_active=False),
             "institutes": School.objects.all().exclude(is_active=False),
         }
@@ -1266,6 +1277,7 @@ def manageSchool(request):
         "members": getFellowMembers(request),
         "courses": Courses.objects.filter(school_id=request.user.profile.school_id),
         "categories": CourseCategory.objects.all().exclude(is_active=False),
+        "levels": CourseLevel.objects.all().exclude(is_active=False),
         "title": "Manage",
     }
     return render(request, "home/manage_schools.html", context)
@@ -1319,12 +1331,14 @@ def addNewCourseManager(request):
         course = request.POST.get('course')
         code = request.POST.get('code')
         category = request.POST.get('category')
+        level = request.POST.get('level')
         newCourse = Courses()
         if Courses.objects.filter(name=course, code=code, school_id=request.user.profile.school_id).count() == 0:
             newCourse.name = course
             newCourse.code = code
             newCourse.course_category_id = category
             newCourse.school_id = request.user.profile.school_id
+            newCourse.level_id = level
             newCourse.save()
             if Courses.objects.filter(name=course, code=code, school_id=request.user.profile.school_id).count() > 0:
                 response = '<script>alertify.success("Successfully Published");'
@@ -1370,15 +1384,18 @@ def editCourseManageForm(request, courseId):
         name = request.POST.get('course')
         code = request.POST.get('code')
         category = request.POST.get('category')
+        level = request.POST.get('level')
         courseObj = Courses.objects.get(id=courseId)
         courseObj.name = name
         courseObj.code = code
+        courseObj.level_id = level
         courseObj.course_category_id = category
         courseObj.save()
         response = ''
         response = '<script>alertify.success("Successfully Updated");setTimeout(reloader, 2000);'
         response += '$("#courseEditForm").'
-        response += 'html("<center><img src=\'/static/images/ok.png\' class=\'img img-responsive\' width=\'125\' />");</script>'
+        response += 'html("<center><img src=\'/static/images/ok.png\' class=\'' \
+                    'img img-responsive\' width=\'125\' />");</script>'
     else:
         courseObj = Courses.objects.get(id=courseId)
         response = ''
@@ -1404,6 +1421,19 @@ def editCourseManageForm(request, courseId):
         categories = CourseCategory.objects.all().exclude(id=courseObj.course_category_id)
         for category in categories:
             response += '<option value="'+str(category.id)+'">'+str(category.name)+'</option>'
+        response += '</select>'
+        response += '</div>'
+
+        response += '<div class="form-group">'
+        response += '<label>Level</label>'
+        response += '<select name="level" class="form-control" required>'
+        if courseObj.level_id == None:
+            response += '<option value="">Please Select ...</option>'
+        else:
+            response += '<option value="'+str(courseObj.level_id)+'">'+str(courseObj.level.name)+'</option>'
+        levels = CourseLevel.objects.all().exclude(id=courseObj.level_id)
+        for level in levels:
+            response += '<option value="'+str(level.id)+'">'+str(level.name)+'</option>'
         response += '</select>'
         response += '</div>'
         response += '<div class="form-group">'
@@ -1583,7 +1613,7 @@ def linker(request):
     if request.user.profile.course.course_category_id != None:
         userCourseCategoryId = request.user.profile.course.course_category_id
 
-    linkers = Courses.objects.filter(course_category_id=userCourseCategoryId)
+    linkers = Courses.objects.filter(course_category_id=userCourseCategoryId, level_id=request.user.profile.course.level_id)
     context = {
         "upgrop": get_usergroup(request),
         "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id,

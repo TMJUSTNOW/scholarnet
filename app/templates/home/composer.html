@@ -25,7 +25,7 @@
 									</div>
 									<div class="col-md-12">
 										<div class="form-group">
-											<textarea name="description" style="min-height: 100px;min-width:100%;max-width:100%;" class="form-control" placeholder="Detailed Description" required></textarea>
+											<textarea name="description" style="min-height: 100px;min-width:100%;max-width:100%;" class="form-control" id="word_count" placeholder="Detailed Description" required></textarea>
 										</div>
 									</div>
 								</div>
@@ -59,3 +59,15 @@
             </div>
         </div>
     </div>
+
+<script>
+	$("#word_count").on('keydown', function(e) {
+				var words = $.trim(this.value).length ? this.value.match(/\S+/g).length : 0;
+				if (words <= 200) {
+					$("#submit-all").show();
+				}else{
+					alertify.error("Only 200 Words are allowed");
+					if (e.which !== 8) e.preventDefault();
+				}
+			});
+</script>

@@ -49,9 +49,9 @@
 					</li>
 					{% for subject in subjects %}
 						<li>
-							<a href="/app/subjectReader/{{ subject.id }}/">
+							<a href="/app/subjectReader/{{ subject.id }}/" data-toggle="tooltip" data-placement="top" title="{{ subject.name }}">
 								<img avatar="{{ subject.name|truncatewords:1 }}" class="img img-circle" width="28" />
-								<span class="title">{{ subject.name }}</span>
+								<span class="title">{{ subject.name|truncatewords:3 }}</span>
 							</a>
 						</li>
 					{% endfor %}

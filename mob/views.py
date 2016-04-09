@@ -9,6 +9,7 @@ from django.core import serializers
 from app.views import *
 from django.contrib import auth
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.cache import never_cache
 import json
 
 
@@ -39,6 +40,7 @@ def login(request):
 #######################################################################################
 # function returnign institue as a json
 ######################################################################################
+@never_cache
 def instituteList(request):
     institutes = School.objects.values('id','name','code')
     response = json.dumps([i for i in institutes])
@@ -49,6 +51,8 @@ def instituteList(request):
 
 ######################################################################################
 #function for returning the institute Course List
+#######################################################################################
+@never_cache
 def courseList(request):
     school_data = request.GET.get('college')
     courses = Courses.objects.filter(school_id=school_data).values('id','name','code')
@@ -59,6 +63,7 @@ def courseList(request):
 #########################################################################################
 #   function returning list of Subjects for a particular User
 ########################################################################################
+@never_cache
 def userSubjectList(request):
     if request.method == 'GET':
         course = request.GET.get('course')
@@ -67,7 +72,8 @@ def userSubjectList(request):
         userObj = User.objects.get(username=user)
 
         if course != None:
-            subjects = Subjects.objects.filter(course_id=int(course), year_id=userObj.profile.year_id).values('id', 'name', 'code')
+            subjects = Subjects.objects.filter(course_id=int(course),
+                                               year_id=userObj.profile.year_id).values('id', 'name', 'code')
         else:
             subjects = ''
         response = json.dumps([i for i in subjects])
@@ -79,9 +85,10 @@ def userSubjectList(request):
 ############################################################################################
 #function returning the list of subjects post content
 ############################################################################################
+@never_cache
 def postSubjectList(request):
     subjectId = request.GET.get('id')
-    posts = Descriptions.objects.filter(subject_id=subjectId).values().order_by('-updated')[:300]
+    posts = Descriptions.objects.filter(subject_id=subjectId).values().order_by('-updated')[:100]
     total = Descriptions.objects.filter(subject_id=subjectId).count()
     context = ''
     content = []
@@ -111,6 +118,7 @@ def postSubjectList(request):
 ###########################################################################################
 # fucntion for getting all the post comments
 ###########################################################################################
+@never_cache
 def getPostComments(request):
     postId = request.GET.get('post')
     comments = DescriptionsComments.objects.filter(description_id=postId).order_by('-updated')
@@ -153,6 +161,7 @@ def setPostComment(request):
 #################################################################################################################
 # fucntion for getting all the post images
 #################################################################################################################
+@never_cache
 def getPostImages(request):
     postId = request.GET.get('post')
     images = Images.objects.filter(description_id=postId)
@@ -171,6 +180,7 @@ def getPostImages(request):
 ###################################################################################################################
 # function for getting the Display Name of the user
 ###################################################################################################################
+@never_cache
 def getDisplayName(request):
     user = internationalizePhone(request.GET.get('user'))
     userObj = User.objects.get(username=user)
@@ -209,7 +219,7 @@ def setPost(request):
         for article in savedArticle:
             articleObj = article
 
-        for filename, file in request.FILES.iteritems():
+        for filename, file in request.FILES.items():
             newImage = Images()
             newImage.description_id=articleObj.id
             newImage.url = request.FILES[filename]
@@ -221,25 +231,27 @@ def setPost(request):
 
     return HttpResponse(response)
 
-@csrf_exempt
+
 def deletePost(request):
     post = request.GET.get('post')
-    postObj = Descriptions.objects.get(id=post)
-    postCommentObj = DescriptionsComments.objects.filter(description_id=post)
-    postImagesObj = Images.objects.filter(description_id=post)
-    postLikesObj = Likes.objects.filter(description_id=post)
+    if Descriptions.objects.filter(id=post).count() > 0:
+        postObj = Descriptions.objects.get(id=post)
+        postCommentObj = DescriptionsComments.objects.filter(description_id=post)
+        postImagesObj = Images.objects.filter(description_id=post)
+        postLikesObj = Likes.objects.filter(description_id=post)
 
-    postObj.delete()
-    for postCommentO in postCommentObj:
-         postCommentO.delete()
-    for postImagesO in postImagesObj:
-        postImagesO.delete()
-    for postLikesO in postLikesObj:
-        postLikesO.delete()
-    response = '1'
+        postObj.delete()
+        for postCommentO in postCommentObj:
+             postCommentO.delete()
+        for postImagesO in postImagesObj:
+            postImagesO.delete()
+        for postLikesO in postLikesObj:
+            postLikesO.delete()
+        response = '1'
+    else:
+        response = '0'
     return HttpResponse(response)
 
-@csrf_exempt
 def updatePost(request):
     response = '1'
     content = request.GET.get('article')
@@ -266,6 +278,7 @@ def setImage(request):
 #####################################################################################################################
 # function for getting total number of comments given PostId
 #####################################################################################################################
+@never_cache
 def getTotalComRecCount(request):
     postId = request.GET.get('post')
     postObj = Descriptions.objects.get(id=postId)
@@ -305,6 +318,7 @@ def setRecommendation(request):
 #############################################################################################
 # A function returning the User lsit As a Json
 ############################################################################################
+@never_cache
 def usersList(request):
     response = json.dumps([i for i in User.objects.values('id','username')])
     return HttpResponse(response)
@@ -390,21 +404,23 @@ def register(request):
 ####################################################################################################
 # A function for returning a list of of recovery confirmation
 ####################################################################################################
+@never_cache
 def getRequestConfirmationList(request):
     content = []
     info = {}
-    requestList = Recovery.objects.all().exclude(waiting=True)[:10]
-    for rl in requestList:
-        sentRequest = Recovery.objects.get(id=rl.id)
-        sentRequest.waiting = True
-        sentRequest.save()
-        info = {}
-        info = {
-            'id': rl.id,
-            'phone': rl.phone,
-            'code': rl.code,
-        }
-        content.append(info)
+    requestList = Recovery.objects.filter(waiting=False)[:10]
+    if Recovery.objects.filter(waiting=False).count() > 0:
+        for rl in requestList:
+            sentRequest = Recovery.objects.get(id=rl.id)
+            sentRequest.waiting = True
+            sentRequest.save()
+            info = {}
+            info = {
+                'id': rl.id,
+                'phone': rl.phone,
+                'code': rl.code,
+            }
+            content.append(info)
     return HttpResponse(json.dumps(content))
 
 
