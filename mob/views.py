@@ -199,6 +199,7 @@ def getDisplayName(request):
 ####################################################################################################################
 # function for registering a post
 ####################################################################################################################
+@never_cache
 @csrf_exempt
 def setPost(request):
     if request.method == 'POST':
@@ -223,7 +224,7 @@ def setPost(request):
             newImage = Images()
             newImage.description_id=articleObj.id
             newImage.url = request.FILES[filename]
-            if Images.objects.filter(description_id=articleObj.id,name=request.FILES[filename].name).count() == 0:
+            if Images.objects.filter(description_id=articleObj.id, name=request.FILES[filename].name).count() == 0:
                 newImage.save()
         response = 'Done'
     else:
