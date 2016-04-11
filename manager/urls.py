@@ -20,6 +20,11 @@ urlpatterns = [
     url(r'^deleteMember/([a-z]+)/([0-9]+)/$',
         views.deleteMember, name='deleteMember'),
     url(r'^schools/$', views.schools, name='schools'),
+    url(r'^deleteSchool/([0-9]+)/$', views.deleteSchool, name='deleteSchool'),
+    url(r'^editSchool/([0-9]+)/$', views.editSchool, name='editSchool'),
+
+
+
     url(r'^schoolsActivator/([a-z]+)/([0-9]+)/$',
         views.schoolsActivator, name='schoolsActivator'),
     url(r'^groups/$', views.groups, name='groups'),
@@ -38,4 +43,7 @@ urlpatterns = [
         views.courseActivator, name='courseActivator'),
     url(r'^feedbacks/([a-z]+)/$', views.feedbacks, name='feedbacks'),
     url(r'^editSubject/([0-9]+)/$', views.editSubject, name='editSubject'),
+
+    url(r'^searchRelatedSubject/$', views.searchRelatedSubject, name='searchRelatedSubject'),
+    url(r'^loadRelatedSubjectContent/([0-9]+)/$', views.loadRelatedSubjectContent, name='loadRelatedSubjectContent'),
         ]

@@ -663,18 +663,20 @@ def register(request):
     if request.method == 'POST':
         user_form = registration(data=request.POST)
         if user_form.is_valid():
-            user = user_form.save()
+            user = User()
+            user.username = internationalizePhone(request.POST.get('username'))
+            user.set_password(request.POST.get('password'))
+            user.is_active = False
+            user.save()
 
             username = user_form.cleaned_data['username']
             if validatePhone(username):
-                email = internationalizePhone(username)
                 # updating the username if not registered
-                userName = User.objects.get(email=email)
+                userName = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 userName.username = internationalizePhone(request.POST.get('username'))
-                userName.email = internationalizePhone(request.POST.get('username'))
                 userName.save()
                 # Create and save user profile
-                new_user = User.objects.get(username=internationalizePhone(username))
+                new_user = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 new_profile = UserProfile()
                 new_profile.user_id = new_user.id
                 new_profile.display = request.POST.get('display')
@@ -684,8 +686,9 @@ def register(request):
                 new_profile.save()
 
 
-                role = request.GET.get('role')
+                role = request.POST.get('role')
                 group = Group.objects.get(id=role)
+                newUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 newUser.groups.add(group)
 
                 """
@@ -742,6 +745,34 @@ def register(request):
         return render(request, 'registration/register.html', context)
 
 
+
+#####################################################################################################
+# A function for confirming the registration Process
+#####################################################################################################
+def registrationConfirm(request):
+    if request.method == 'POST':
+        phone = internationalizePhone(request.POST.get('phone'))
+        code = request.POST.get('code')
+        if Recovery.objects.filter(phone=phone, code=code, waiting=True).count() > 0:
+            user = User.objects.get(username=phone)
+            user.is_active = True
+            user.save()
+            activatedUser = User.objects.get(username=phone)
+            if activatedUser.is_active:
+                recoveryObjects = Recovery.objects.filter(phone=phone, code=code, waiting=True)
+                for recoveryObject in recoveryObjects:
+                    recoveryObject.delete()
+                messages.success(request, str(activatedUser.username) + ' Successfully Activated')
+                messages.success(request, 'You can now Login')
+            else:
+                messages.error(request, str(activatedUser.username) + ' Failed to Be activated')
+                messages.info(request, 'Please Attempt to Register again')
+        else:
+            pass
+    else:
+        messages.error(request, 'Bad Request')
+    return HttpResponseRedirect("/login/")
+
 ####################################################################################################
 # A function for confirmining user registration process requiring to enter the received code in sms
 ####################################################################################################
@@ -764,7 +795,7 @@ def registrationConfiratiom(request, phone):
             """
             confirmedUser = User.objects.get(username=recoveryObj.phone)
             if confirmedUser.is_active:
-                return HttpResponseRedirect("/app/registerSucess/")
+                return HttpResponseRedirect("/app/registerSuccess/")
             else:
                 confirmationRequest = Recovery()
                 confirmationRequest.phone = phone
@@ -1159,10 +1190,9 @@ def upgradeYearLoadForm(request):
 ###################################################################################
 # A function for returning the Success page for Successfully registration process
 ###################################################################################
-@login_required
 def registerSuccess(request):
     context = {
-        "message": "Your successfully registered, Please Go to your E-mail Account for Activation",
+        "message": "Your successfully registered",
     }
     return render(request, 'registration/success.html', context)
 
@@ -1170,7 +1200,6 @@ def registerSuccess(request):
 ##################################################################################
 # A function for returning the Fail page for Un-Successfully Registration Process
 ##################################################################################
-@login_required
 def registerFail(request):
     context = {
         "message": "We are Sorry, Registration Failed",
@@ -1181,7 +1210,6 @@ def registerFail(request):
 ######################################################################################################
 # A function for confiruming the registered User
 ######################################################################################################
-@login_required
 def register_confirm(request, activation_key):
     # check if user is already logged in and if he is redirect him to some other url, e.g. home
     if request.user.is_authenticated():

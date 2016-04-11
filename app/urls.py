@@ -170,6 +170,11 @@ urlpatterns = [
     url(r'^registerFail/$', views.registerFail, name='registerFail'),
 
 
+    ################################################################################################
+    # url for Confirming the Registration by entering the sms code that was delivered
+    ################################################################################################
+    url(r'^registrationConfirm/$', views.registrationConfirm, name='registrationConfirm'),
+
     ###############################################################################################################
     # Url for resetting the password
     ###############################################################################################################

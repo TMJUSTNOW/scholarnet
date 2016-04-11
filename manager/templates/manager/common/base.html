@@ -55,6 +55,15 @@
 
         <!-- JavaScripts initializations and stuff -->
         <script src="{% static 'assets/js/xenon-custom.js' %}"></script>
+        <script>
+            {% for message in messages %}
+                {% if message.tags == 'error' %}
+                        alertify.error("{{ message }}");
+                {% else %}
+                        alertify.{{ message.tags }}("{{ message }}");
+                {% endif %}
+            {% endfor %}
+        </script>
     {% endblock %}
 
 	{% block scripts %}

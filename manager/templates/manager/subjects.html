@@ -85,6 +85,7 @@
 										<th>ICON</th>
 										<th>SUBJECT NAME</th>
 										<th>YEAR</th>
+										<th>ACADEMIC YEAR</th>
 										<th>COURSES</th>
 										<th>STATUS</th>
 										<th>Settings</th>
@@ -105,6 +106,9 @@
 										</td>
 										<td>
 											<span>{{ subject.year.name }}</span>
+										</td>
+										<td>
+											<span>{{ subject.academic.name }}</span>
 										</td>
 										<td>
                                             {{ subject.course.name }}
@@ -183,7 +187,7 @@
 
 
     <div class="modal fade custom-width" id="addNewSubject">
-		<div class="modal-dialog" style="width: 60%;">
+		<div class="modal-dialog" style="width: 95%;">
 			<div class="modal-content">
 
 				<div class="modal-header">
@@ -191,41 +195,60 @@
 					<h4 class="modal-title">New Subject Registration</h4>
 				</div>
 
-				<div class="modal-body">
-                    <form role="form" action="/manager/courseSubjects/{{ courseId }}/" method="POST" id="addNewSubject">
-                        <div class="form-group">
-                            <input type="text" name="course" class="form-control hidden" id="course" value="{{ courseId }}" required />
-                        </div>
+				<div class="modal-body clearfix">
+                    <div class="col-md-6">
+						<form role="form" action="/manager/courseSubjects/{{ courseId }}/" method="POST" id="addNewSubject">
+							<div class="form-group">
+								<input type="text" name="course" class="form-control hidden" id="course" value="{{ courseId }}" required />
+							</div>
+							<div id="formContainer">
+								<div class="form-group">
+									<label>Subject Name</label>
+									<input type="text" name="subject" class="form-control" required />
+								</div>
 
-                        <div class="form-group">
-                            <label>Subject Name</label>
-                            <input type="text" name="subject" class="form-control" required />
-                        </div>
+								<div class="form-group">
+									<label>Subject Code</label>
+									<input type="text" name="code" class="form-control" required />
+								</div>
+							</div>
 
-                        <div class="form-group">
-                            <label>Subject Code</label>
-                            <input type="text" name="code" class="form-control" required />
-                        </div>
-
-                        <div class="form-group">
-                            <label>Year</label>
-                            <select name="year" class="form-control" required>
-                                <option value="">Please Select ...</option>
-                                <option value="1">First Year</option>
-                                <option value="2">Second Year</option>
-                                <option value="3">Third Year</option>
-                                <option value="4">Fourth Year</option>
-                                <option value="5">Fifth Year</option>
-                                <option value="6">Sixth Year</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <center>
-                                <button type="submit" class="btn btn-success btn-lg">ADD</button>
-                            </center>
-                        </div>
-                    </form>
+								<div class="form-group">
+									<label>Year</label>
+									<select name="year" class="form-control" required>
+										<option value="">Please Select ...</option>
+										{% for year in years %}
+											<option value="{{ year.id }}">{{ year.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="form-group">
+									<label>Academic Year</label>
+									<select name="academic" class="form-control" required>
+										<option value="">Please Select ...</option>
+										{% for academic in academics %}
+											<option value="{{ academic.id }}">{{ academic.name }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="form-group">
+									<center>
+										<button type="submit" class="btn btn-success btn-lg">ADD</button>
+									</center>
+								</div>
+						</form>
+					</div>
+					<div class="col-md-6">
+						<center>
+							<h3>Check similar Subject</h3>
+							<form role="form" action="/manager/searchRelatedSubject/" method="POST" id="searchRelatedForm">
+								<div class="form-group">
+									<input type="text" class="form-control" name="search" placeholder="Code or Name of Subject..." required />
+								</div>
+							</form>
+						</center>
+						<div id="searchContent" class="clearfix" style="max-height:300px;overflow-x:auto;"></div>
+					</div>
 				</div>
 
 				<div class="modal-footer">
@@ -260,16 +283,26 @@
 
 {% block scripts %}
 <script>
-
-	{% for message in messages %}
-		{% if message.tags == 'error' %}
-				alertify.error("{{ message }}");
-		{% else %}
-				alertify.{{ message.tags }}("{{ message }}");
-		{% endif %}
-    {% endfor %}
-
-
+       $("#searchRelatedForm").submit(function(e)
+        {
+            var postData = $(this).serializeArray();
+            var formURL = $(this).attr("action");
+            $.ajax(
+            {
+                url : formURL,
+                type: "POST",
+                data : postData,
+                success:function(data, textStatus, jqXHR)
+                {
+                    $("#searchContent").html(data);
+                },
+                error: function(jqXHR, textStatus, errorThrown)
+                {
+                    alertify.error('Something Went Wrong Try agian....');
+                }
+            });
+            e.preventDefault(); //STOP default action
+        });
     $(".editSubjectLink").on('click', function(){
     	var id = $(this).data('id');
     	$("#editSubjectFormContainer").load("/manager/editSubject/"+id+"/");
@@ -293,5 +326,9 @@
                 }
             });
         });
+
+        function loadSubjectForm(subjectId){
+        	$("#formContainer").load("/manager/loadRelatedSubjectContent/"+subjectId+"/");
+        }
 </script>
 {% endblock %}

@@ -94,6 +94,20 @@ class Courses(models.Model):
         return self.name
 
 
+#######################################################################################################
+# A class for Creating the table for storing the Academic Year that are supported
+#######################################################################################################
+class AcademicYear(models.Model):
+    name = models.CharField(max_length=300, null=False, blank=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = u'Academic Year'
+        verbose_name_plural = u'Academic Years'
+
+    def __str__(self):
+        return self.name
+
 #######################################################################################
 # A class For Creating Subjects Table for Storing Institute Course Sujects
 #######################################################################################
@@ -102,6 +116,7 @@ class Subjects(models.Model):
     code = models.CharField(max_length=50, null=True, blank=True)
     course = models.ForeignKey(Courses)
     year = models.ForeignKey(Year, null=False, blank=False)
+    academic = models.ForeignKey(AcademicYear, null=True, blank=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -204,6 +219,7 @@ class UserProfile(models.Model):
     display = models.CharField(max_length=50, null=False, blank=False)
     school = models.ForeignKey(School)
     year = models.ForeignKey(Year)
+    academic = models.ForeignKey(AcademicYear, null=True, blank=True)
     course = models.ForeignKey(Courses)
 
 

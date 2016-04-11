@@ -142,6 +142,22 @@ def schools(request):
     }
     return render(request, "manager/schools.html", context)
 
+@login_required
+def deleteSchool(request, schoolId):
+    schoolObj = School.objects.get(id=schoolId)
+    school_name = schoolObj.name
+    courses = Courses.objects.filter(school_id=schoolId)
+    for course in courses:
+        subjects = Subjects.objects.filter(course_id=course.id)
+        for subject in subjects:
+            subject.delete()
+        course.delete()
+    schoolObj.delete()
+    if School.objects.filter(id=shoolId).count() > 0:
+        messages.success(request, str(school_name) + ' Successfully Deleted')
+    else:
+        messages.error(request, str(school_name) + ' Failed to be Deleted')
+    return HttpResponseRedirect("/manager/schools/")
 
 @login_required
 def schoolsActivator(request, key, schoolId):
@@ -152,20 +168,57 @@ def schoolsActivator(request, key, schoolId):
 
         activatedSchool = School.objects.get(id=schoolId)
         if activatedSchool.is_active:
-            messages.success(request, str(activatedSchool.name) + 'Successfully Activated')
+            messages.success(request, str(activatedSchool.name) + ' Successfully Activated')
         else:
-            messages.error(request, str(activatedSchool.name) + 'Failed to Activate')
+            messages.error(request, str(activatedSchool.name) + ' Failed to Activate')
     elif key == 'deactivate':
         schoolObj.is_active = False
         schoolObj.save()
 
-        deactivatedSchool = Schoool.objects.get(id=schoolId)
+        deactivatedSchool = School.objects.get(id=schoolId)
         if deactivatedSchool.is_active:
             messages.error(request, str(deactivatedSchool.name) + ' Failed to Deactivated')
         else:
             messages.success(request, str(deactivatedSchool.name) + ' Successfully Activated')
     return HttpResponseRedirect("/manager/schools/")
 
+@csrf_exempt
+@login_required
+def editSchool(request, schoolId):
+    if request.method == 'POST':
+        school = School.objects.get(id=schoolId)
+        school.name = request.POST.get('school')
+        school.code = request.POST.get('code')
+        school.save()
+        if School.objects.filter(name=request.POST.get('school'), code=request.POST.get('code')).count() > 0:
+            messages.success(request, str(request.POST.get('school')) + ' Successfully Updated')
+        else:
+            messages.error(request, str(request.POST.get('school')) + ' Failed to be Updated')
+        return HttpResponseRedirect("/manager/schools/")
+    else:
+        schoolObj = School.objects.get(id=schoolId)
+        context = ''
+        context += '<form action="/manager/editSchool/'+str(schoolObj.id)+'/" method="POST" id="">'
+
+        context += '<div class="form-group">'
+        context += '<label>School Name</label>'
+        context += '<input type="text" name="school" value="'+str(schoolObj.name)+'" class="form-control" required />'
+        context += '</div>'
+
+        context += '<div class="form-group">'
+        context += '<label>School Code</label>'
+        context += '<input type="text" name="code" value="'+str(schoolObj.code)+'" class="form-control" required />'
+        context += '</div>'
+
+        context += '<div class="form-group">'
+        context += '<center>'
+        context += '<button type="submit" class="btn btn-success btn-lg">'
+        context += 'UPDATE'
+        context += '</button>'
+        context += '</center>'
+        context += '</div>'
+        context += '</form>'
+    return HttpResponse(context)
 
 @login_required
 @csrf_exempt
@@ -227,6 +280,7 @@ def courseSubjects(request, courseId):
         newSubject.name = request.POST.get('subject')
         newSubject.code = request.POST.get('code')
         newSubject.year_id = request.POST.get('year')
+        newSubject.academic_id = request.POST.get('academic')
         yearObj = Year.objects.get(code=request.POST.get('year'))
         if Subjects.objects.filter(name=request.POST.get('subject'), code=request.POST.get('code'),
                                    year_id=yearObj.id, course_id=courseId).count() == 0:
@@ -238,6 +292,8 @@ def courseSubjects(request, courseId):
         "courseId": courseId,
         "schoolId": courseObj.school_id,
         "subjects": Subjects.objects.filter(course_id=courseId).order_by('-name'),
+        "years": Year.objects.all(),
+        "academics": AcademicYear.objects.all().exclude(is_active=False),
         "title": 'Subjects',
     }
     return render(request, "manager/subjects.html", context)
@@ -363,6 +419,7 @@ def editSubject(request, subjectId):
             subjectObject.name = request.POST.get('subject')
             subjectObject.code = request.POST.get('code')
             subjectObject.year_id = request.POST.get('year')
+            subjectObject.academic_id = request.POST.get('academic')
             subjectObject.save()
 
             newUpdatedSubject = Subjects.objects.get(id=subjectId)
@@ -397,6 +454,19 @@ def editSubject(request, subjectId):
             context += '<option value="'+str(year.id)+'">'+str(year.name)+'('+str(year.code)+')</option>'
         context += '</select>'
         context += '</div>'
+
+        context += '<div class="form-group">'
+        context += '<label>Academic Year</label>'
+        context += '<select name="academic" class="form-control" required >'
+        if subjectObj.academic_id != None:
+            context += '<option value="'+str(subjectObj.academic_id)+'">'+str(subjectObj.academic.name)+'</option>'
+        else:
+            context += '<option value="">Please Select ...<option>'
+        academicYearsObj = AcademicYear.objects.all().exclude(id=subjectObj.academic_id)
+        for academicYear in academicYearsObj:
+            context += '<option value="'+str(academicYear.id)+'">'+str(academicYear.name)+'</option>'
+        context += '</select>'
+        context += '</div>'
         context += '<div class="form-group">'
         context += '<center>'
         context += '<button type="submit" class="btn btn-success btn-lg">ADD</button>'
@@ -404,3 +474,42 @@ def editSubject(request, subjectId):
         context += '</div>'
         context += '</form>'
         return HttpResponse(context)
+
+
+
+@login_required
+@csrf_exempt
+def searchRelatedSubject(request):
+    context = ''
+    if request.method == 'POST':
+        key = request.POST.get('search')
+        context += '<table class="table table-striped">'
+        subjects = Subjects.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+        if Subjects.objects.filter(Q(name__icontains=key) | Q(code__icontains=key)).count() > 0:
+            for subject in subjects:
+                context += '<tr>'
+                context += '<td>'+subject.name+'</td>'
+                context += '<td>'+subject.code+'</td>'
+                context += '<td><a href="javascript:;" ' \
+                           'onclick="loadSubjectForm('+str(subject.id)+');" data-toggle="tooltip" ' \
+                           'data-placement="top" title="Use this Subject"><i class="fa fa-plus"></i></a></td>'
+                context += '</tr>'
+        else:
+            context += '<div class="alert alert-warning"><center>No Related Subject(s)</center></div>'
+        context += '</table>'
+    return HttpResponse(context)
+
+@login_required
+def loadRelatedSubjectContent(request, subjectId):
+    context = ''
+    subjectObj = Subjects.objects.get(id=subjectId)
+    context += '<div class="form-group">'
+    context += '<label>Subject Name</label>'
+    context += '<input type="text" class="form-control" name="subject" value="'+str(subjectObj.name)+'" required />'
+    context += '</div>'
+
+    context += '<div class="form-group">'
+    context += '<label>Subject Code</label>'
+    context += '<input type="text" class="form-control" name="code" value="'+str(subjectObj.code)+'" required />'
+    context += '</div>'
+    return HttpResponse(context)
