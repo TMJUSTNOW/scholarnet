@@ -43,11 +43,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'widget_tweaks',
     'endless_pagination',
-    #'djangobosssearch',
     'app',
     'mob',
     'manager',
     'storages',
+    'corsheaders',
 )
 TEMPLATES = [
     {
@@ -71,6 +71,7 @@ TEMPLATES = [
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -180,6 +181,14 @@ ENDLESS_PAGINATION_LAST_LABEL = '>>'
 ENDLESS_PAGINATION_DEFAULT_CALLABLE_EXTREMES = 15
 ENDLESS_PAGINATION_DEFAULT_CALLABLE_AROUNDS = 15
 
-#API CREDENTIAL
-BOSS_API_KEY = '    dj0yJmk9UTJDYkVEZDdERWJIJmQ9WVdrOWRYRmtNbnBJTjJzbWNHbzlNQS0tJnM9Y29uc3VtZXJzZWNyZXQmeD04Nw--'
-BOSS_API_SECRET = '    6a7d462a359d4e24356b6ef09bc73ecf16a26433'
+
+CORS_URLS_REGEX = r'^/mob/.*$'
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+)
