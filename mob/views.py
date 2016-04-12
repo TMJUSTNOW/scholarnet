@@ -227,8 +227,10 @@ def setPost(request):
             if Images.objects.filter(description_id=articleObj.id, name=request.FILES[filename].name).count() == 0:
                 newImage.save()
         response = 'Done'
+        response['Access-Control-Allow-Origin'] = "*"
     else:
         response = '0'
+        response['Access-Control-Allow-Origin'] = "*"
 
     return HttpResponse(response)
 
