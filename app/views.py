@@ -4,7 +4,7 @@
 ######################################################################################################
 from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
-from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse
+from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from endless_pagination.decorators import page_template
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -17,6 +17,30 @@ from django.contrib import messages
 import json
 import urllib
 import random
+import requests
+
+
+
+def proxy(request):
+    """
+    Proxy to use cross domain Ajax GET and POST requests
+    request: Django request object
+    """
+    if request.method == 'GET':
+        request = request.GET
+        r = requests.get
+    elif request.method == 'POST':
+        request = request.POST
+        r = requests.post
+    else:
+        return HttpResponseNotAllowed("Permitted methods are POST and GET")
+    params = request.dict()
+    try:
+        url = params.pop('url')
+    except KeyError:
+        return HttpResponseBadRequest("URL must be defined")
+    response = r(url, params=params)
+    return HttpResponse(response.text, status=int(response.status_code), mimetype=response.headers['content-type'])
 
 
 #######################################################################
@@ -738,12 +762,101 @@ def register(request):
             "title": "Registration",
             "form": registration(),
             "years": Year.objects.all(),
-            "groups": Group.objects.all().exclude(name='Adminstrators').exclude(name='School Adminstrator'),
+            "groups": Group.objects.filter(name='Student'),
             "courses": Courses.objects.all().exclude(is_active=False),
             "institutes": School.objects.all().exclude(is_active=False),
         }
         return render(request, 'registration/register.html', context)
 
+
+
+###################################################################################
+# A function Handling User(Teachers) Registration
+##################################################################################
+def registerTeacher(request):
+    if request.method == 'POST':
+        user_form = registration(data=request.POST)
+        if user_form.is_valid():
+            user = User()
+            user.username = internationalizePhone(request.POST.get('username'))
+            user.set_password(request.POST.get('password'))
+            user.is_active = False
+            user.save()
+
+            username = user_form.cleaned_data['username']
+            if validatePhone(username):
+                # updating the username if not registered
+                userName = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                userName.username = internationalizePhone(request.POST.get('username'))
+                userName.save()
+                # Create and save user profile
+                new_user = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                new_profile = UserProfile()
+                new_profile.user_id = new_user.id
+                new_profile.display = request.POST.get('display')
+                new_profile.school_id = request.POST.get('institute')
+                new_profile.course_id = request.POST.get('course')
+                new_profile.year_id = request.POST.get('year')
+                new_profile.save()
+
+
+                role = request.POST.get('role')
+                group = Group.objects.get(id=role)
+                newUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                newUser.groups.add(group)
+
+                """
+                    registering the registration confirmation request
+                    For the ScholarNet Message Service Responder to Process the requests
+                """
+
+                confirmationRequest = Recovery()
+                confirmationRequest.phone = internationalizePhone(username)
+                confirmationRequest.code = random.randint(1000, 10000)
+                if Recovery.objects.filter(phone=internationalizePhone(username)).count() > 0:
+                    oldRequest = Recovery.objects.get(phone=internationalizePhone(username))
+                    oldRequest.delete()
+                else:
+                    pass
+                confirmationRequest.save()
+
+            else:
+                new_user = User.objects.get(username=internationalizePhone(username))
+                new_profile = UserProfile()
+                new_profile.user_id = new_user.id
+                new_profile.school_id = request.POST.get('institute')
+                new_profile.course_id = request.POST.get('course')
+                new_profile.year_id = request.POST.get('year')
+                new_profile.save()
+
+                role = request.GET.get('role')
+                group = Group.objects.get(id=role)
+                newUser.groups.add(group)
+
+            if user:
+                registeredUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                if registeredUser.is_active == False:
+                    return HttpResponseRedirect("/app/registrationConfiratiom/"+str(internationalizePhone(request.POST.get('username')))+"/")
+                else:
+                    return HttpResponseRedirect("/app/registerSuccess/")
+            else:
+                return HttpResponseRedirect("/app/registerFail/")
+        else:
+            context = {
+                "title": "Registration",
+                "form": user_form,
+            }
+            return render(request, 'registration/register.html', context)
+    else:
+        context = {
+            "title": "Registration",
+            "form": registration(),
+            "years": Year.objects.all(),
+            "groups": Group.objects.filter(name='Teacher'),
+            "courses": Courses.objects.all().exclude(is_active=False),
+            "institutes": School.objects.all().exclude(is_active=False),
+        }
+        return render(request, 'registration/register_teacher.html', context)
 
 
 #####################################################################################################

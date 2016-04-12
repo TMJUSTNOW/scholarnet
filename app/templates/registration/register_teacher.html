@@ -62,72 +62,9 @@
                         </center>
                     </div>
                     <!-- Add class "fade-in-effect" for login form effect -->
-                    <form method="post" role="form" action="/app/register/"  class="fade-in-effect">
+                    <form method="post" role="form" action="/app/registerTeacher/"  class="fade-in-effect">
                         {% csrf_token %}
                         {% load widget_tweaks %}
-                        <div class="form-group">
-                            <label>Institute</label>
-                            <!--suppress ProblematicWhitespace -->
-                            <script>
-                            $(document).ready(function($)
-							{
-							    $("#institute").select2({
-									placeholder: 'Select your Institute...',
-									allowClear: true,
-									containerCssClass: 'tpx-select2-container select2-grey'
-								}).on('select2-open', function()
-								{
-									// Adding Custom Scrollbar
-									$(this).data('select2').results.addClass('overflow-hidden').perfectScrollbar();
-								});
-							});
-							</script>
-                            <select name="institute" onchange="loadCourses();" id="institute" class="form-control select2" required>
-                                <option value="">Please Select .....</option>
-                                <optgroup label="Institutes">
-                                    {% for institute in institutes %}
-                                    <option value="{{ institute.id }}">{{ institute.name }} ({{ institute.code }})</option>
-                                    {% endfor %}
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Course</label>
-                            <script>
-                            $(document).ready(function($)
-							{
-								$("#courses").select2({
-									placeholder: 'Select your Course...',
-									allowClear: true
-								}).on('select2-open', function()
-								{
-									// Adding Custom Scrollbar
-									$(this).data('select2').results.addClass('overflow-hidden').perfectScrollbar();
-								});
-							});
-							</script>
-                            <select name="course" class="form-control" id="courses" required>
-                                <option vlaue="">Please Select ....</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Year</label>
-                            <script type="text/javascript">
-							jQuery(document).ready(function($)
-							{
-								$("#year").selectBoxIt({
-									showFirstOption: false,
-									"native": true
-								});
-							});
-							</script>
-                            <select name="year" class="form-control" id="year" required>
-                                <option value="">Please Select ...</option>
-                                {% for year in years %}
-                                <option value="{{ year.id }}">{{ year.name }} ({{ year.code }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
                         <div class="form-group">
                             <label>Role</label>
                             <script type="text/javascript">
@@ -139,7 +76,7 @@
 							    });
 							});
 							</script>
-                            <select name="role" class="form-control" id="role" required>
+                            <select name="role" class="form-control" id="role" disabled required>
                                 {% for group in groups %}
                                 <option value="{{ group.id }}">{{ group.name }}</option>
                                 {% endfor %}
@@ -218,11 +155,6 @@
 <!-- JavaScripts initializations and stuff -->
 <script src="{% static 'assets/js/xenon-custom.js' %}"></script>
 <script>
-    function loadCourses(){
-        var value = $("#institute").val();
-        $("#courses").load("/app/loadCourses/"+value+"/");
-    }
-
 
     jQuery(document).ready(function($)
 					{

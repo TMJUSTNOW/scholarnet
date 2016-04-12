@@ -2,8 +2,9 @@
 # Author: Daniel Kindimba
 # Project: ScholarNet
 ######################################################################################
-from django.conf.urls import include, url
+from django.conf.urls import patterns, include, url
 from django.contrib import admin, auth
+admin.autodiscover()
 from . import views
 
 urlpatterns = [
@@ -11,6 +12,8 @@ urlpatterns = [
     # Base Url Loading the Login View Template
     #################################################################
     url(r'^$', views.login, name='login'),
+
+    url(r'^proxy/$', 'app.views.proxy', name='proxy'),
 
     ###################################################################################
     # Url for loading the home page After User has been loged in
@@ -153,6 +156,13 @@ urlpatterns = [
     # url for User registration, this is for the web users
     ###################################################################################################################
     url(r'^register/$', views.register, name='register'),
+
+
+
+    ##########################################################################################################
+    # Url for Teacher Registration, this if  for th web users
+    ###########################################################################################################
+    url(r'^registerTeacher/$', views.registerTeacher, name='registerTeacher'),
 
     ###################################################################################################################
     # Url for Successfully registration feedback, loading the success page
