@@ -23,7 +23,7 @@ TEMPLATE_PATH = os.path.join(PROJECT_ROOT, 'app/templates')
 SECRET_KEY = 'ymr!=&e-wd2z*-^@zxpu6#3s!e7^0kheq)j$cdd!b^8$y08c^p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -74,10 +74,12 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
+    'middleware.crossdomainxhr.XsSharing',
 )
 
 ROOT_URLCONF = 'scholarnet.urls'
@@ -181,9 +183,8 @@ ENDLESS_PAGINATION_LAST_LABEL = '>>'
 ENDLESS_PAGINATION_DEFAULT_CALLABLE_EXTREMES = 15
 ENDLESS_PAGINATION_DEFAULT_CALLABLE_AROUNDS = 15
 
-
-CORS_URLS_REGEX = r'^/mob/.*$'
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_REPLACE_HTTPS_REFERER = False
 CORS_ALLOW_METHODS = (
     'GET',
     'POST',
@@ -192,3 +193,12 @@ CORS_ALLOW_METHODS = (
     'DELETE',
     'OPTIONS'
 )
+
+CORS_ORIGIN_WHITELIST = (
+'www.scholarnetapp.com'
+)
+
+
+XS_SHARING_ALLOWED_ORIGINS = "www.scholarnetapp.com"
+
+XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
