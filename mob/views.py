@@ -17,13 +17,14 @@ import logging
 
 def set_access_control_headers(response):
     response['Access-Control-Allow-Origin'] = '*'
+    response['Access-Control-Allow-Credentials'] = 'false'
     response['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
     response['Access-Control-Max-Age'] = 1000
     response['Access-Control-Allow-Headers'] = '*'
 
 class HttpOptionsDecorator(object):
     def __init__(self, f):
-        self.f = f;
+        self.f = f
 
     def __call__(self, *args):
         logging.info("Call decorator")
@@ -226,7 +227,7 @@ def getDisplayName(request):
 # function for registering a post
 ####################################################################################################################
 @csrf_exempt
-# @HttpOptionsDecorator
+@HttpOptionsDecorator
 def setPost(request):
     if request.method == 'POST':
         user = internationalizePhone(request.POST.get('user'))
