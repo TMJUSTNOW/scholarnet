@@ -11,34 +11,6 @@ from django.contrib import auth
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
 import json
-import logging
-
-
-
-def set_access_control_headers(response):
-    response['Access-Control-Allow-Origin'] = '*'
-    response['Access-Control-Allow-Credentials'] = 'false'
-    response['Access-Control-Allow-Methods'] = 'POST, GET, OPTIONS'
-    response['Access-Control-Max-Age'] = 1000
-    response['Access-Control-Allow-Headers'] = '*'
-
-class HttpOptionsDecorator(object):
-    def __init__(self, f):
-        self.f = f
-
-    def __call__(self, *args):
-        logging.info("Call decorator")
-        request = args[0]
-        if request.method == "OPTIONS":
-            response = HttpResponse()
-            set_access_control_headers(response)
-            return response
-        else:
-            response = self.f(*args)
-            set_access_control_headers(response)
-            return response
-
-
 
 ###########################################################################################
 # function to mobile users to login
@@ -227,7 +199,6 @@ def getDisplayName(request):
 # function for registering a post
 ####################################################################################################################
 @csrf_exempt
-@HttpOptionsDecorator
 def setPost(request):
     if request.method == 'POST':
         user = internationalizePhone(request.POST.get('user'))
