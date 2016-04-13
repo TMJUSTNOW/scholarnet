@@ -13,7 +13,7 @@ urlpatterns = [
     #################################################################
     url(r'^$', views.login, name='login'),
 
-    url(r'^proxy/$', 'app.views.proxy', name='proxy'),
+    url(r'^proxy/$', '.views.proxy', name='proxy'),
 
     ###################################################################################
     # Url for loading the home page After User has been loged in

@@ -17,31 +17,6 @@ from django.contrib import messages
 import json
 import urllib
 import random
-import requests
-
-
-
-def proxy(request):
-    """
-    Proxy to use cross domain Ajax GET and POST requests
-    request: Django request object
-    """
-    if request.method == 'GET':
-        request = request.GET
-        r = requests.get
-    elif request.method == 'POST':
-        request = request.POST
-        r = requests.post
-    else:
-        return HttpResponseNotAllowed("Permitted methods are POST and GET")
-    params = request.dict()
-    try:
-        url = params.pop('url')
-    except KeyError:
-        return HttpResponseBadRequest("URL must be defined")
-    response = r(url, params=params)
-    return HttpResponse(response.text, status=int(response.status_code), mimetype=response.headers['content-type'])
-
 
 #######################################################################
 # A function for striping all the html tags from the passed text
