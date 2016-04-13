@@ -96,29 +96,7 @@ def getFellowMembers(request):
 # A function which return the login View
 ###########################################################################################
 def login(request):
-    if request.method == 'POST':
-        if User.objects.filter(username=request.POST.get('username')).count() > 0:
-            username = request.POST.get('username')
-        else:
-            username = internationalizePhone(request.POST.get('username'))
-        password = request.POST.get('password')
-
-        user = auth.authenticate(username=username, password=password)
-        if user is not None:
-            if user.is_active:
-                auth.login(request, user)
-                # messages.success(request, "Welcome: " + str(user.profile.display))
-                return HttpResponseRedirect("/app/home/")
-            else:
-                messages.info(request, "Your Account is Deativated")
-                return HttpResponseRedirect("/login/")
-        else:
-            messages.error(request, "Wrong Password or Phone Number")
-            return HttpResponseRedirect("/login/")
-    else:
-        context = {
-        }
-        return render(request, "registration/login.html", context)
+    return render(request, "index.html", context)
 
 #######################################################################
 # A function which allow user to recommend on different Posts

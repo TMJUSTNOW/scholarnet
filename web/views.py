@@ -66,6 +66,15 @@ def login(request):
 
 
 
+#################################################################################################################
+# fucntion for getting all the post images
+#################################################################################################################
+
+def getOneImage(request, postId):
+    images = Images.objects.filter(description_id=postId)
+    for image in images:
+        imageLink = str(image.url)
+    return imageLink
 ############################################################################################
 #function returning the list of subjects post content
 ############################################################################################
@@ -97,6 +106,7 @@ def postList(request):
             'comments': postObj.comments,
             'images': images,
             'user': str(postObj.user.username),
+            'imageLink': getOneImage(request, post['id']),
         }
         content.append(info)
 

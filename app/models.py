@@ -198,19 +198,6 @@ class Images(models.Model):
         verbose_name_plural = u'Images'
 
 
-########################################################################################################
-# A class for Creating ImageComments Table for Storing Institute Course Subjects Images Comments
-########################################################################################################
-class ImageComments(models.Model):
-    image = models.ForeignKey(Images)
-    comment = models.TextField()
-    user = models.ForeignKey(User)
-    registered = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
-
-Images.comments = property(lambda u: ImageComments.objects.filter(image=u).count())
-
-
 ##########################################################################################################
 # A class for creating UserProfile Table for Registered user, to Store basic Information of users
 ###########################################################################################################
@@ -249,7 +236,6 @@ class Notifications(models.Model):
     description = models.TextField()
     school = models.ForeignKey(School)
     course = models.ForeignKey(Courses)
-    year = models.ForeignKey(Year)
 
 
 #####################################################################################################

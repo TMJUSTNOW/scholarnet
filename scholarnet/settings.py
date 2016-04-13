@@ -48,6 +48,7 @@ INSTALLED_APPS = (
     'manager',
     'storages',
     'corsheaders',
+    'tastypie',
 )
 TEMPLATES = [
     {
@@ -172,7 +173,7 @@ LOGGING = {
     }
 }
 
-APPEND_SLASH = True
+APPEND_SLASH = False
 
 
 ENDLESS_PAGINATION_PAGE_LIST_CALLABLE = True
@@ -198,6 +199,6 @@ CORS_ORIGIN_WHITELIST = (
 )
 
 
-# XS_SHARING_ALLOWED_ORIGINS = "www.scholarnetapp.com"
-
-# XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+API_LIMIT_PER_PAGE = 50
+TASTYPIE_FULL_DEBUG = True
+TASTYPIE_CANNED_ERROR = "Oops, we broke it!"

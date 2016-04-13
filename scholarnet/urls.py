@@ -2,14 +2,43 @@ from django.conf.urls import patterns, include, url
 from . import settings
 from django.contrib import admin
 from app.forms import *
+from tastypie.api import Api
+from web.api.resources import *
 admin.autodiscover()
+
+v1_api = Api(api_name='v1')
+v1_api.register(UserResource())              # resource_name: user
+v1_api.register(SchoolResource())            # resource_name : school
+v1_api.register(YearResource())              # resource_name : year
+v1_api.register(CourseCategoryResource())    # resource_name: courseCategory
+v1_api.register(CourseLevelResource())       # resource_name: courseLevel
+v1_api.register(AcademicYearResource())      # resource_name: academic
+v1_api.register(CourseResource())            # resource_name: course
+v1_api.register(SubjectResource())           # resource_name: subject
+v1_api.register(SchoolLinkerResource())      # resource_name: linker
+v1_api.register(DescriptionResource())       # resource_name: article
+v1_api.register(DescriptionCommentResource())   # resource_name: comment
+v1_api.register(LikeResource())                 # resource_name: like
+v1_api.register(ImageResource())                # resource_name: image
+v1_api.register(UserProfileResource())          # resource_name: profile
+v1_api.register(NotificationResource())         # resource_name: notification
+v1_api.register(RecoveryResource())             # resource_name: recovery
+
+
+
 admin.site.site_header = settings.ADMIN_SITE_HEADER
 admin.site.site_title = settings.ADMIN_SITE_TITLE
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'scholarnet.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
+    url(r'^api/', include(v1_api.urls)),
+
+
+
+
+
+
+
+
     url(r'', include('app.urls')),
     url(r'^app/', include('app.urls')),
     url(r'^mob/', include('mob.urls')),
