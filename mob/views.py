@@ -4,6 +4,7 @@
 #################################################################################
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import *
 from django.core import serializers
 from app.views import *
@@ -199,6 +200,7 @@ def getDisplayName(request):
 # function for registering a post
 ####################################################################################################################
 @csrf_exempt
+@login_required
 def setPost(request):
     if request.method == 'POST':
         user = internationalizePhone(request.POST.get('user'))
