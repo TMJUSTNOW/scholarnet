@@ -225,9 +225,8 @@ def getDisplayName(request):
 ####################################################################################################################
 # function for registering a post
 ####################################################################################################################
-@never_cache
 @csrf_exempt
-@HttpOptionsDecorator
+# @HttpOptionsDecorator
 def setPost(request):
     if request.method == 'POST':
         user = internationalizePhone(request.POST.get('user'))
