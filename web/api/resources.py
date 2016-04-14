@@ -113,12 +113,12 @@ class CourseResource(ModelResource):
 
 
 class SubjectResource(ModelResource):
-    course = fields.ForeignKey(CourseResource, 'course', null=True, blank=True, full=True)
+    course = fields.ForeignKey(CourseResource, 'course', null=True, blank=True, full=False)
     year = fields.ForeignKey(YearResource, 'year', null=True, blank=True, full=True)
     academic = fields.ForeignKey(AcademicYearResource, 'academic', null=True, blank=True, full=True)
     class Meta:
         queryset = Subjects.objects.all()
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
         resource_name = 'subject'
         fields = ['id', 'name', 'code', 'is_active']
         authorization = Authorization()
@@ -153,7 +153,7 @@ class DescriptionResource(ModelResource):
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
     class Meta:
         queryset = Descriptions.objects.all()
-        allowed_methods = ['get']
+        allowed_methods = ['get', 'post']
         resource_name = 'article'
         fields = ['id', 'description', 'updated']
         authorization = Authorization()
