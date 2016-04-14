@@ -1,9 +1,42 @@
 from tastypie.authorization import Authorization
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
+from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS, Resource
 from django.contrib.auth.models import *
 from app.models import *
+
+
+
+class BaseCorsResource(Resource):
+    """
+    Class implementing CORS
+    """
+    def create_response(self, *args, **kwargs):
+        response = super(BaseCorsResource, self).create_response(*args, **kwargs)
+        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Headers'] = 'Content-Type'
+        return response
+
+    def method_check(self, request, allowed=None):
+        if allowed is None:
+            allowed = []
+
+        request_method = request.method.lower()
+        allows = ','.join(map(str.upper, allowed))
+
+        if request_method == 'options':
+            response = HttpResponse(allows)
+            response['Access-Control-Allow-Origin'] = '*'
+            response['Access-Control-Allow-Headers'] = 'Content-Type'
+            response['Allow'] = allows
+            raise ImmediateHttpResponse(response=response)
+
+        if not request_method in allowed:
+            response = http.HttpMethodNotAllowed(allows)
+            response['Allow'] = allows
+            raise ImmediateHttpResponse(response=response)
+
+        return request_method
 
 
 class UserResource(ModelResource):
@@ -148,7 +181,7 @@ class SchoolLinkerResource(ModelResource):
 
 
 
-class DescriptionResource(ModelResource):
+class DescriptionResource(BaseCorsResource, ModelResource):
     subject = fields.ForeignKey(SubjectResource, 'subject', null=True, blank=True, full=True)
     user = fields.ForeignKey(UserResource, 'user', null=True, blank=True, full=True)
     class Meta:
