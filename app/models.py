@@ -204,10 +204,10 @@ class Images(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
     display = models.CharField(max_length=50, null=False, blank=False)
-    school = models.ForeignKey(School)
-    year = models.ForeignKey(Year)
+    school = models.ForeignKey(School, null=True, blank=True)
+    year = models.ForeignKey(Year, null=True, blank=True)
     academic = models.ForeignKey(AcademicYear, null=True, blank=True)
-    course = models.ForeignKey(Courses)
+    course = models.ForeignKey(Courses, null=True, blank=True)
 
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
