@@ -83,6 +83,8 @@ MIDDLEWARE_CLASSES = (
     'middleware.crossdomainxhr.XsSharing',
 )
 
+X_FRAME_OPTIONS = 'DENY'
+
 ROOT_URLCONF = 'scholarnet.urls'
 
 WSGI_APPLICATION = 'scholarnet.wsgi.application'
