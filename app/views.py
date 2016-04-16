@@ -158,42 +158,45 @@ def home(request, template='home/index.html', extra_context=None):
     """
     Checking if the Userhas configured His/her Account
     """
-    if request.user.profile.course_id != None and \
-                    request.user.profile.year_id != None and \
-            request.user.profile.school_id != None and \
-                    request.user.profile.academic_id != None:
-        # getting all the subject ids of the current user
-        user_course_id = []
-        if request.user.is_superuser:
-            return HttpResponseRedirect("/manager/")
-        else:
-            user_course_id.append(request.user.profile.course_id)
-            userRelatedCourses = Courses.objects.filter(
-                course_category_id=request.user.profile.course.course_category_id,
-                level_id=request.user.profile.course.level_id)
-            for userRel in userRelatedCourses:
-                user_course_id.append(userRel.id)
-        subject_ids = []
-        subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
-        for sub in subs:
-            subject_ids.append(sub.id)
-
-        ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
-        context = {
-            'ugroup': get_usergroup(request),
-            "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id,
-                                                year_id=request.user.profile.year_id),
-            "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
-            "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
-            "formset": ImageFormSet(queryset=Images.objects.none()),
-            "members": getFellowMembers(request),
-            "title": 'Home',
-        }
-        if extra_context is not None:
-            context.update(extra_context)
-        return render_to_response(template, context, context_instance=RequestContext(request))
+    if request.user.is_superuser:
+        return HttpResponseRedirect("/manager/")
     else:
-        return HttpResponseRedirect("/app/setup/")
+        if request.user.profile.course_id != None and \
+                        request.user.profile.year_id != None and \
+                request.user.profile.school_id != None and \
+                        request.user.profile.academic_id != None:
+            # getting all the subject ids of the current user
+            user_course_id = []
+            if request.user.is_superuser:
+                return HttpResponseRedirect("/manager/")
+            else:
+                user_course_id.append(request.user.profile.course_id)
+                userRelatedCourses = Courses.objects.filter(
+                    course_category_id=request.user.profile.course.course_category_id,
+                    level_id=request.user.profile.course.level_id)
+                for userRel in userRelatedCourses:
+                    user_course_id.append(userRel.id)
+            subject_ids = []
+            subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
+            for sub in subs:
+                subject_ids.append(sub.id)
+
+            ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+            context = {
+                'ugroup': get_usergroup(request),
+                "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id,
+                                                    year_id=request.user.profile.year_id),
+                "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
+                "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
+                "formset": ImageFormSet(queryset=Images.objects.none()),
+                "members": getFellowMembers(request),
+                "title": 'Home',
+            }
+            if extra_context is not None:
+                context.update(extra_context)
+            return render_to_response(template, context, context_instance=RequestContext(request))
+        else:
+            return HttpResponseRedirect("/app/setup/")
 
 ##########################################################################################################
 # A function for handling the Profile Setup
