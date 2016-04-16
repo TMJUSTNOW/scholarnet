@@ -16,7 +16,7 @@ from app.models import *
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.all()
-        allowed_methods = ['get', 'post']
+        allowed_methods = ['get', 'post', 'put']
         resource_name = 'user'
         fields = ['id', 'first_name', 'last_name', 'username', 'is_active']
         authorization = Authorization()
@@ -80,7 +80,7 @@ class UserResource(ModelResource):
     The function will handle the Login Process
     """
     def login(self, request, **kwargs):
-        self.method_check(request, allowed=['get'])
+        self.method_check(request, allowed=['post', 'get', 'put'])
 
         data = self.deserialize(request, request.body,
                                 format=request.META.get('CONTENT_TYPE', 'application/json'))
@@ -95,7 +95,6 @@ class UserResource(ModelResource):
                 login(request, user)
                 return self.create_response(request, {
                     'success': True,
-                    'course': user.profile.course.id,
                 })
             else:
                 return self.create_response(request, {
@@ -228,9 +227,7 @@ class SubjectResource(ModelResource):
         allowed_methods = ['get']
         resource_name = 'subject'
         fields = ['id', 'name', 'code', 'is_active']
-        # authorization = Authorization()
-        authentication = BasicAuthentication()
-        authorization = DjangoAuthorization()
+        authorization = Authorization()
         filtering = {
             'id': ALL,
             'name': ALL,
@@ -266,7 +263,6 @@ class DescriptionResource(ModelResource):
         allowed_methods = ['get', 'post']
         resource_name = 'article'
         fields = ['id', 'description', 'updated']
-        # authentication = ApiKeyAuthentication()
         authorization = Authorization()
         filtering = {
             'id': ALL,
