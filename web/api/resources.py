@@ -9,6 +9,7 @@ from tastypie.utils import trailing_slash
 from django.contrib.auth import authenticate, login, logout
 from tastypie.http import HttpUnauthorized, HttpForbidden, HttpNotFound
 from django.http import HttpRequest, Http404, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.views.decorators.clickjacking import xframe_options_exempt
 from django.contrib.auth.models import *
 from app.models import *
 
@@ -79,8 +80,9 @@ class UserResource(ModelResource):
     """
     The function will handle the Login Process
     """
+    @xframe_options_exempt
     def login(self, request, **kwargs):
-        self.method_check(request, allowed=['post', 'get', 'put'])
+        self.method_check(request, allowed=['post'])
 
         data = self.deserialize(request, request.body,
                                 format=request.META.get('CONTENT_TYPE', 'application/json'))
