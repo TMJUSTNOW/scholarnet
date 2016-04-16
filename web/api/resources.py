@@ -20,7 +20,6 @@ class UserResource(ModelResource):
         resource_name = 'user'
         fields = ['id', 'first_name', 'last_name', 'username', 'is_active']
         authorization = Authorization()
-        authentication = ApiKeyAuthentication()
         filtering = {
             'id': ALL,
             'username': ALL,
