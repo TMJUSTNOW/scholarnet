@@ -82,7 +82,7 @@ class UserResource(ModelResource):
     """
     @xframe_options_exempt
     def login(self, request, **kwargs):
-        self.method_check(request, allowed=['post'])
+        self.method_check(request, allowed=['post','get'])
 
         data = self.deserialize(request, request.body,
                                 format=request.META.get('CONTENT_TYPE', 'application/json'))
