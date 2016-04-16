@@ -81,7 +81,7 @@ class UserResource(ModelResource):
     The function will handle the Login Process
     """
     def login(self, request, **kwargs):
-        self.method_check(request, allowed=['post'])
+        self.method_check(request, allowed=['get'])
 
         data = self.deserialize(request, request.body,
                                 format=request.META.get('CONTENT_TYPE', 'application/json'))
