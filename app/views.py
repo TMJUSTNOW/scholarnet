@@ -99,6 +99,7 @@ def getFellowMembers(request):
 #######################################################################
 # A function which return the login View
 ###########################################################################################
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         if User.objects.filter(username=request.POST.get('username')).count() > 0:
