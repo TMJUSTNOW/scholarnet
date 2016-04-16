@@ -133,6 +133,7 @@
 					 </center>
 				 </div>
 					<form method="post" role="form" action="/login/" id="login" class="login-form fade-in-effect1">
+						{% csrf_token %}
 						<center><h3>Login to ScholarNet</h3></center>
 						<div>
 							{% if messages %}
