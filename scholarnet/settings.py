@@ -23,11 +23,15 @@ TEMPLATE_PATH = os.path.join(PROJECT_ROOT, 'app/templates')
 SECRET_KEY = 'ymr!=&e-wd2z*-^@zxpu6#3s!e7^0kheq)j$cdd!b^8$y08c^p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = DEBUG
-
-ALLOWED_HOSTS = ['www.scholarnetapp.com']
+ADMINS = (
+ ('Daniel Kindimba', 'daniellykindimba@gmail.com'),
+ ('Emmanuel Meena', 'mcamocci@gmail.com'),
+ ('Walter Kimaro', 'waky07@gmail.com'),
+)
+ALLOWED_HOSTS = ['www.scholarnetapp.com','scholarnetapp.com']
 
 SITE_ID = 1
 # Application definition
@@ -81,6 +85,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
     'middleware.crossdomainxhr.XsSharing',
+    'django.middleware.security.SecurityMiddleware',
 )
 
 X_FRAME_OPTIONS = 'DENY'
@@ -200,6 +205,12 @@ CORS_ORIGIN_WHITELIST = (
 'scholarnetapp.com'
 )
 
+CSRF_COOKIE_HTTPONLY = True
+SECURE_SSL_REDIRECT = False
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 API_LIMIT_PER_PAGE = 50
 TASTYPIE_FULL_DEBUG = True

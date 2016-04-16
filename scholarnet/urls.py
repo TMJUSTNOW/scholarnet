@@ -31,14 +31,6 @@ admin.site.site_title = settings.ADMIN_SITE_TITLE
 
 urlpatterns = patterns('',
     url(r'^api/', include(v1_api.urls)),
-
-
-
-
-
-
-
-
     url(r'', include('app.urls')),
     url(r'^app/', include('app.urls')),
     url(r'^mob/', include('mob.urls')),
