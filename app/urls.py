@@ -13,6 +13,37 @@ urlpatterns = [
     #################################################################
     url(r'^$', views.login, name='login'),
 
+    #################################################################
+    # Url for Setting up the Profile
+    #################################################################
+    url(r'^setup/$', views.setup, name='login'),
+
+    ##################################################################
+    # Url for Getting the Search School for Setup Page
+    ##################################################################
+    url(r'^setupGetSchool/$', views.setupGetSchool, name='setupGetSchool'),
+
+    #########################################################################
+    # Url for Adding the School from the Setup page
+    ##########################################################################
+    url(r'^setupAddSchool/([0-9]+)/$', views.setupAddSchool, name='setupAddSchool'),
+
+    ###########################################################################################
+    # url for aDding the Study Year for Setup Page
+    ############################################################################################
+    url(r'^setupAddStudyYear/([0-9]+)/$', views.setupAddStudyYear, name='setupAddStudyYear'),
+
+    ############################################################################################
+    # url for Adding the Study Course for setup page
+    #############################################################################################
+    url(r'^setupAddCourse/([0-9]+)/$', views.setupAddCourse, name='setupAddCourse'),
+
+
+    #############################################################################################
+    # Url for Adding the Academic Year for the setup page
+    #############################################################################################
+    url(r'^setupAddAcademicYear/([0-9]+)/$', views.setupAddAcademicYear, name='setupAddAcademicYear'),
+
     ###################################################################################
     # Url for loading the home page After User has been loged in
     ####################################################################################

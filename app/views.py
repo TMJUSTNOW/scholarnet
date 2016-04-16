@@ -155,34 +155,168 @@ def recommend(request, post_id):
 @login_required
 @page_template('home/entry_home_article_page.html')
 def home(request, template='home/index.html', extra_context=None):
-    # getting all the subject ids of the current user
-    user_course_id = []
-    if request.user.is_superuser:
-        return HttpResponseRedirect("/manager/")
-    else:
-        user_course_id.append(request.user.profile.course_id)
-        userRelatedCourses = Courses.objects.filter(course_category_id=request.user.profile.course.course_category_id,
-                                                    level_id=request.user.profile.course.level_id)
-        for userRel in userRelatedCourses:
-            user_course_id.append(userRel.id)
-    subject_ids = []
-    subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
-    for sub in subs:
-        subject_ids.append(sub.id)
+    """
+    Checking if the Userhas configured His/her Account
+    """
+    if request.user.profile.course_id != None and \
+                    request.user.profile.year_id != None and \
+            request.user.profile.school_id != None and \
+                    request.user.profile.academic_id != None:
+        # getting all the subject ids of the current user
+        user_course_id = []
+        if request.user.is_superuser:
+            return HttpResponseRedirect("/manager/")
+        else:
+            user_course_id.append(request.user.profile.course_id)
+            userRelatedCourses = Courses.objects.filter(
+                course_category_id=request.user.profile.course.course_category_id,
+                level_id=request.user.profile.course.level_id)
+            for userRel in userRelatedCourses:
+                user_course_id.append(userRel.id)
+        subject_ids = []
+        subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
+        for sub in subs:
+            subject_ids.append(sub.id)
 
-    ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+        ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+        context = {
+            'ugroup': get_usergroup(request),
+            "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id,
+                                                year_id=request.user.profile.year_id),
+            "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
+            "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
+            "formset": ImageFormSet(queryset=Images.objects.none()),
+            "members": getFellowMembers(request),
+            "title": 'Home',
+        }
+        if extra_context is not None:
+            context.update(extra_context)
+        return render_to_response(template, context, context_instance=RequestContext(request))
+    else:
+        return HttpResponseRedirect("/app/setup/")
+
+##########################################################################################################
+# A function for handling the Profile Setup
+##########################################################################################################
+@login_required
+def setup(request):
+    if request.user.profile.school_id != None:
+        courses = Courses.objects.filter(school_id=request.user.profile.school_id)
+    else:
+        courses = ''
     context = {
         'ugroup': get_usergroup(request),
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id, year_id=request.user.profile.year_id),
-        "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
-        "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
-        "formset": ImageFormSet(queryset=Images.objects.none()),
-        "members": getFellowMembers(request),
-        "title": 'Home',
+        'courses': courses,
+        'years': Year.objects.all(),
+        'academics': AcademicYear.objects.filter()[:10],
+        "title": 'Account Setup',
     }
-    if extra_context is not None:
-        context.update(extra_context)
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    return render(request, "home/setup.html", context)
+
+###############################################################################################
+# A fucntion for Getting the List  of School Search for Setup
+###############################################################################################
+@csrf_exempt
+@login_required
+def setupGetSchool(request):
+    if request.method == 'POST':
+        context = ''
+        context += '<table class="table table-model-2 table-hover">'
+        context += '<thead>'
+        context += '<tr>'
+        context += '<th>School Name</th>'
+        context += '<th>Action</th>'
+        context += '</tr>'
+        context += '</thead>'
+
+        context += '<tbody>'
+        key = request.POST.get('search')
+        schools = School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+        if School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key)).count() > 0:
+            for school in schools:
+                context += '<tr>'
+                context += '<td>'+str(school.name)+' ('+str(school.code)+')</td>'
+                context += '<td><a href="javascript:;" onclick="addSchool('+str(school.id)+');" class="btn btn-green btn-sm pull-right">Add</a></td>'
+                context += '</tr>'
+        else:
+            context += '<script>'
+            context += 'alertify.warning("We can not Find it, Please Try again with another search keyword");'
+            context += '</script>'
+
+        context += '</tbody>'
+        context += '</table>'
+    else:
+        context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
+    return HttpResponse(context)
+
+####################################################################################################
+# A fucntion for Adding a School To user from the Setup page
+####################################################################################################
+@login_required
+def setupAddSchool(request, schoolId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.school_id=schoolId
+    userObject.save()
+
+    schoolObject = School.objects.get(id=schoolId)
+    if UserProfile.objects.filter(user_id=request.user.id, school_id=schoolId).exists():
+        messages.success(request, str(schoolObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(schoolObject.name) + ' Failed to Add, please Try again')
+    return HttpResponseRedirect("/app/setup/")
+
+
+####################################################################################################
+# A function for Adding the Study Year
+####################################################################################################
+@login_required
+def setupAddStudyYear(request, yearId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.year_id = yearId
+    userObject.save()
+
+    yearObject = Year.objects.get(id=yearId)
+    if UserProfile.objects.filter(user_id=request.user.id, year_id=yearId).exists():
+        messages.success(request, str(yearObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(yearObject.name) + ' Failed to Add, Please Try again')
+    return HttpResponseRedirect("/app/setup/")
+
+
+#######################################################################################################
+# A function for adding the Study Course for the setup page user configuration
+#######################################################################################################
+@login_required
+def setupAddCourse(request, courseId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.course_id=courseId
+    userObject.save()
+
+    courseObject = Courses.objects.get(id=courseId)
+    if UserProfile.objects.filter(user_id=request.user.id, course_id=courseId).exists():
+        messages.success(request, str(courseObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(courseObject.name) + ' Failed to Add')
+    return HttpResponseRedirect("/app/setup/")
+
+
+
+#######################################################################################################
+# A function for adding the Academic Year for the setup page user configuration
+#######################################################################################################
+@login_required
+def setupAddAcademicYear(request, academicId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.academic_id = academicId
+    userObject.save()
+
+    academicObject = AcademicYear.objects.get(id=academicId)
+    if UserProfile.objects.filter(user_id=request.user.id, academic_id=academicId).exists():
+        messages.success(request, str(academicObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(academicObject.name) + ' Faield to Add')
+
+    return HttpResponseRedirect("/app/setup/")
 
 
 ######################################################################################
@@ -671,62 +805,32 @@ def register(request):
             user.username = internationalizePhone(request.POST.get('username'))
             user.set_password(request.POST.get('password'))
             user.is_active = False
-            user.save()
-
-            username = user_form.cleaned_data['username']
-            if validatePhone(username):
-                # updating the username if not registered
-                userName = User.objects.get(username=internationalizePhone(request.POST.get('username')))
-                userName.username = internationalizePhone(request.POST.get('username'))
-                userName.save()
-                # Create and save user profile
-                new_user = User.objects.get(username=internationalizePhone(request.POST.get('username')))
-                new_profile = UserProfile()
-                new_profile.user_id = new_user.id
-                new_profile.display = request.POST.get('display')
-                new_profile.school_id = request.POST.get('institute')
-                new_profile.course_id = request.POST.get('course')
-                new_profile.year_id = request.POST.get('year')
-                new_profile.save()
-
-
+            if User.objects.filter(username=internationalizePhone(request.POST.get('username'))).exists():
+                messages.error(request, str(request.POST.get('username')) + ' Already Registered')
+                messages.info(request, 'Please Login or Register with Another Phone Number')
+                return HttpResponseRedirect("/register/")
+            else:
+                user.save()
                 role = request.POST.get('role')
-                group = Group.objects.get(id=role)
+                group = Group.objects.get(name=role)
                 newUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 newUser.groups.add(group)
 
-                """
-                    registering the registration confirmation request
-                    For the ScholarNet Message Service Responder to Process the requests
-                """
-
                 confirmationRequest = Recovery()
-                confirmationRequest.phone = internationalizePhone(username)
+                confirmationRequest.phone = internationalizePhone(request.POST.get('username'))
                 confirmationRequest.code = random.randint(1000, 10000)
-                if Recovery.objects.filter(phone=internationalizePhone(username)).count() > 0:
-                    oldRequest = Recovery.objects.get(phone=internationalizePhone(username))
+                if Recovery.objects.filter(phone=internationalizePhone(request.POST.get('username'))).count() > 0:
+                    oldRequest = Recovery.objects.get(phone=internationalizePhone(request.POST.get('username')))
                     oldRequest.delete()
                 else:
                     pass
                 confirmationRequest.save()
 
-            else:
-                new_user = User.objects.get(username=internationalizePhone(username))
-                new_profile = UserProfile()
-                new_profile.user_id = new_user.id
-                new_profile.school_id = request.POST.get('institute')
-                new_profile.course_id = request.POST.get('course')
-                new_profile.year_id = request.POST.get('year')
-                new_profile.save()
-
-                role = request.GET.get('role')
-                group = Group.objects.get(id=role)
-                newUser.groups.add(group)
-
             if user:
                 registeredUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 if registeredUser.is_active == False:
-                    return HttpResponseRedirect("/app/registrationConfiratiom/"+str(internationalizePhone(request.POST.get('username')))+"/")
+                    return HttpResponseRedirect("/app/registrationConfiratiom/" +
+                                                str(internationalizePhone(request.POST.get('username')))+"/")
                 else:
                     return HttpResponseRedirect("/app/registerSuccess/")
             else:

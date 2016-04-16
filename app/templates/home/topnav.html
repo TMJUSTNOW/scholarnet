@@ -17,11 +17,14 @@
 							</li>
 						{% endif %}
 					{% endfor %}
-					<li class="hover-line topNav">
-						<a href="/app/linker/" data-toggle="tooltip" data-placement="bottom" title="Connect With Other Universities/Colleges/Schools">
-							<span class="title">Linker</span>
-						</a>
-					</li>
+
+					{% if user.profile.school_id != None and user.profile.course_id != None and user.profile.year_id != None %}
+						<li class="hover-line topNav">
+							<a href="/app/linker/" data-toggle="tooltip" data-placement="bottom" title="Connect With Other Universities/Colleges/Schools">
+								<span class="title">Linker</span>
+							</a>
+						</li>
+					{% endif %}
 					<!--<li class="dropdown hover-line">-->
 						<!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">-->
 							<!--<i class="fa-bell-o"></i>-->

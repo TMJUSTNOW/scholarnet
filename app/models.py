@@ -93,6 +93,7 @@ class Courses(models.Model):
     def __str__(self):
         return self.name
 
+Courses.subjects = property(lambda u: Subjects.objects.filter(course=u).count())
 
 #######################################################################################################
 # A class for Creating the table for storing the Academic Year that are supported
