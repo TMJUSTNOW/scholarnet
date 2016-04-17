@@ -184,6 +184,52 @@
                                 {% endif %}
                             </div>
                         {% endif %}
+                    {% elif group.name == 'Teacher' %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel-group" id="accordion-test-2">
+                                {% for school in teacherSchools %}
+                                    <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion-test-2" href="#collapseOne-2">
+                                                {{ school.name }}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne-2" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            <div>
+                                                <button class="btn btn-green btn-lg">Add Subject</button>
+                                            </div>
+                                            <table class="table responsive">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Subject Name</th>
+                                                        <th>Course Name</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                {% for subject in techerSSubjects %}
+                                                    <tr>
+                                                        <td><i class="fa fa-arrow-right" style="color:green;"></i></td>
+                                                        <td>{{ subject.name }}</td>
+                                                        <td>{{ subject.course.name }}</td>
+                                                        <td><a href="javascript:;" class="btn btn-o"><i class="fa fa-trash"></i></a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
                     {% endif %}
                 {% endfor %}
 
@@ -192,7 +238,53 @@
 			</div>
 			<div id="fakeLoader"></div>
 
+
+            <div class="modal fade custom-width" id="addSchoolTeacher">
+                <div class="modal-dialog" style="width: 60%;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Configurations</h4>
+                        </div>
+                        <div class="modal-body" id="TeacherConfigurationModalContent">
+                            <div>
+                                <form role="form" action="/app/setupGetSchoolTeacher/" method="POST" id="schoolSearchFormTeachear">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="searchTeachearSchool" placeholder="Search School/College/Institute/University" autocomplete="off" autofocus required />
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="schoolSearchFormTeachearContent">
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 			<script type="text/javascript">
+
+
+                 $("#schoolSearchFormTeachear").submit(function(e){
+                    e.preventDefault();
+                    var postData = $(this).serializeArray();
+                    var formURL = $(this).attr('action');
+                    $.ajax({
+                        url: formURL,
+                        type: 'POST',
+                        data: postData,
+                        success: function(data, textStatus, jqXHR){
+                            $("#schoolSearchFormTeachearContent").html(data);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alertify.error(textStatus);
+                        }
+                    });
+                });
+
 
 			    $("#schoolSearchForm").submit(function(e){
                     e.preventDefault();
@@ -243,6 +335,26 @@
                         function(isConfirm){
                             if(isConfirm){
                                 window.location ='/app/setupAddSchool/'+schoolId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+
+                function addSchoolTeacher(schoolId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This School/College/University",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: true
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location = '/app/setupAddSchoolTeacher/'+schoolId+'/';
                             }else{
                                 alertify.success("Cancelled Successfully");
                             }

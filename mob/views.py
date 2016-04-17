@@ -10,8 +10,9 @@ from django.contrib.auth.models import *
 from django.core import serializers
 from app.views import *
 from django.contrib import auth
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.cache import never_cache
+from django.views.decorators.csrf import csrf_exempt
+from functools import wraps
 import json
 
 ###########################################################################################

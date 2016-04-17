@@ -249,3 +249,11 @@ class Recovery(models.Model):
 
     def __str__(self):
         return self.phone
+
+########################################################################################################
+# A class for Creating a Table for storing the Teacher Teaching Stubjects
+########################################################################################################
+class TeacherSubject(models.Model):
+    user = models.ForeignKey(User)
+    subject = models.ForeignKey(Subjects)
+    is_active = models.BooleanField(default=True)

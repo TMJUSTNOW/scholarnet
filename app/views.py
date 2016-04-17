@@ -207,11 +207,23 @@ def setup(request):
         courses = Courses.objects.filter(school_id=request.user.profile.school_id)
     else:
         courses = ''
+
+    teacherSchools = ''
+    techerSSubjects = ''
+    for group in request.user.groups.all():
+        if group.name == 'Teacher':
+            teacherSchools = School.objects.all()
+            techerSSubjects = Subjects.objects.all()
+        else:
+            pass
+
     context = {
         'ugroup': get_usergroup(request),
         'courses': courses,
         'years': Year.objects.all(),
         'academics': AcademicYear.objects.filter()[:10],
+        'teacherSchools': teacherSchools,
+        'techerSSubjects': techerSSubjects,
         "title": 'Account Setup',
     }
     return render(request, "home/setup.html", context)
@@ -252,6 +264,44 @@ def setupGetSchool(request):
         context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
     return HttpResponse(context)
 
+
+
+#######################################################################################################
+# A function for getting all the school for teacher Configuration page
+#######################################################################################################
+@csrf_exempt
+@login_required
+def setupGetSchoolTeacher(request):
+    if request.method == 'POST':
+        context = ''
+        context += '<table class="table table-model-2 table-hover">'
+        context += '<thead>'
+        context += '<tr>'
+        context += '<th>School Name</th>'
+        context += '<th>Action</th>'
+        context += '</tr>'
+        context += '</thead>'
+
+        context += '<tbody>'
+        key = request.POST.get('searchTeachearSchool')
+        schools = School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+        if School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key)).count() > 0:
+            for school in schools:
+                context += '<tr>'
+                context += '<td>'+str(school.name)+' ('+str(school.code)+')</td>'
+                context += '<td><a href="javascript:;" onclick="addSchoolTeacher('+str(school.id)+');" class="btn btn-green btn-sm pull-right">Add</a></td>'
+                context += '</tr>'
+        else:
+            context += '<script>'
+            context += 'alertify.warning("We can not Find it, Please Try again with another search keyword");'
+            context += '</script>'
+
+        context += '</tbody>'
+        context += '</table>'
+    else:
+        context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
+    return HttpResponse(context)
+
 ####################################################################################################
 # A fucntion for Adding a School To user from the Setup page
 ####################################################################################################
@@ -266,6 +316,17 @@ def setupAddSchool(request, schoolId):
         messages.success(request, str(schoolObject.name) + ' Successfully Added')
     else:
         messages.error(request, str(schoolObject.name) + ' Failed to Add, please Try again')
+    return HttpResponseRedirect("/app/setup/")
+
+
+#####################################################################################################
+# A function for Adding a school to User for the Teacher in sthe setup page (Configurations)
+#####################################################################################################
+@login_required
+def setupAddSchoolTeacher(request, schoolId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.school_id = schoolId
+    userObject.save()
     return HttpResponseRedirect("/app/setup/")
 
 

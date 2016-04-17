@@ -77,14 +77,11 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'middleware.crossdomainxhr.XsSharing',
 )
-
 X_FRAME_OPTIONS = 'DENY'
 
 ROOT_URLCONF = 'scholarnet.urls'
@@ -114,6 +111,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = False
+
+USE_ETAGS = True
 
 
 
@@ -178,6 +177,16 @@ LOGGING = {
 }
 
 APPEND_SLASH = True
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = (
+    'GET',
+    'POST',
+    'PUT',
+    'PATCH',
+    'DELETE',
+    'OPTIONS'
+)
 
 
 ENDLESS_PAGINATION_PAGE_LIST_CALLABLE = True

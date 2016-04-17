@@ -23,10 +23,20 @@ urlpatterns = [
     ##################################################################
     url(r'^setupGetSchool/$', views.setupGetSchool, name='setupGetSchool'),
 
+    ################################################################################################
+    # Url for getting  the school for Teacher configuration page
+    #################################################################################################
+    url(r'^setupGetSchoolTeacher/$', views.setupGetSchoolTeacher, name='setupGetSchoolTeacher'),
+
     #########################################################################
     # Url for Adding the School from the Setup page
     ##########################################################################
     url(r'^setupAddSchool/([0-9]+)/$', views.setupAddSchool, name='setupAddSchool'),
+
+    ######################################################################################
+    # Url for Adding the School from the setup page for the Teacher
+    ######################################################################################
+    url(r'^setupAddSchoolTeacher/([0-9]+)/$', views.setupAddSchoolTeacher, name='setupAddSchoolTeacher'),
 
     ###########################################################################################
     # url for aDding the Study Year for Setup Page

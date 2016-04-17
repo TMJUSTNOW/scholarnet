@@ -47,19 +47,16 @@
 							<span class="title">Home</span>
 						</a>
 					</li>
-					<li>
-						<a href="javascript:;">
-							<img avatar="Add School" class="img img-circle" width="28" />
-							<span class="title">Add School</span>
-						</a>
-					</li>
-
-					<li>
-						<a href="javascript:;">
-							<img avatar="Add Course" class="Img img-circle" width="28" />
-							<span class="title">Add Course</span>
-						</a>
-					</li>
+					{% for group in user.groups.all %}
+						{% if group.name == 'Teacher' %}
+							<li>
+								<a href="javascript:;" data-toggle="modal" data-target="#addSchoolTeacher">
+									<img avatar="Add School" class="img img-circle" width="28" />
+									<span class="title">Add School</span>
+								</a>
+							</li>
+						{% endif %}
+					{% endfor %}
 				</ul>
 
 			</div>
