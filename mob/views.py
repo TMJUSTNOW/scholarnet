@@ -8,7 +8,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from functools import wraps
 from django.middleware.csrf import CsrfViewMiddleware, get_token
 from django.utils.decorators import available_attrs, decorator_from_middleware
-
 from django.contrib.auth.models import *
 from django.core import serializers
 from app.views import *
@@ -287,9 +286,17 @@ def setPost(request):
             newImage.url = request.FILES[filename]
             if Images.objects.filter(description_id=articleObj.id, name=request.FILES[filename].name).count() == 0:
                 newImage.save()
-        response = 'Done'
+        response = HttpResponse(json.dumps({"message": "Successfully Post"}))
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+        response["Access-Control-Max-Age"] = "1000"
+        response["Access-Control-Allow-Headers"] = "*"
     else:
-        response = '0'
+        response = HttpResponse(json.dumps({"message": "Failed Post"}))
+        response["Access-Control-Allow-Origin"] = "*"
+        response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+        response["Access-Control-Max-Age"] = "1000"
+        response["Access-Control-Allow-Headers"] = "*"
 
     return HttpResponse(response)
 
