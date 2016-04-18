@@ -29,7 +29,7 @@ TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     ('Daniel Kindimba', 'daniellykindimba@gmail.com'),
 )
-ALLOWED_HOSTS = ['www.scholarnetapp.com']
+ALLOWED_HOSTS = ['*']
 
 SITE_ID = 1
 # Application definition
