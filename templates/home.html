@@ -1,0 +1,67 @@
+<md-toolbar class="md-whiteframe-3dp" style="position: fixed;">
+	<div class="md-toolbar-tools">
+		<md-button class="md-icon-button" aria-label="Toggle Menu" ng-click="showingMenu = !showingMenu">
+          <md-icon class="zmdi zmdi-menu"></md-icon>
+        </md-button>
+	  	<h2 class="md-flex">Scholarnet</h2>
+	</div>
+</md-toolbar>
+<md-content layout layout-xs="column" layout-fill style="background: #f9f9f9;padding-top: 30px;">
+	<div ng-include="'templates/sidemenu.html'"></div>
+	<span flex="20" class="la-car" ng-hide="!showingMenu"></span>
+	<span flex="5"></span>
+	<div flex style="padding-top:30px;padding-bottom:0px;position: relative;-webkit-transition: all 0.4s ease-in-out; transition: all 0.4s ease-in-out" layout layout-fill ng-include="'templates/maincontent.html'"></div>
+	<span flex="5"></span>
+	<!-- <span flex="20"></span> -->
+	<md-content layout="column" ng-hide="!showingMenu" layout-fill flex="20" class="md-whiteframe-1d" style="backgroun: #fdfdfd;border-lef: 1px solid #ddd;padding-to:30px;position:fixe;top:0;right:0">
+		<md-list style="margin-top: 0">
+			<md-subheader style="background: transparent;">
+				Discussions
+				<a href="disccusions" style="float:right;text-decoration: none;">MORE</a>
+			</md-subheader>
+			<md-list-item class="md-2-line">
+				<div class="md-list-item-text">
+					<h3>Group name</h3>
+					<p>Discussion topic will be this.</p>
+				</div>
+			</md-list-item>
+			<md-list-item class="md-2-line">
+				<div class="md-list-item-text">
+					<h3>Mabankers wa kesho</h3>
+					<p>
+						Advanced balance sheets manipulations.
+					</p>
+				</div>
+			</md-list-item>
+		</md-list>
+		<br>
+		<md-divider></md-divider>
+		<br>
+		<md-list style="margin-top: 0">
+			<md-subheader style="background: transparent;">
+				Timetable
+				<a href="disccusions" style="float:right;text-decoration: none;">MORE</a>
+			</md-subheader>
+			<md-list-item class="md-3-line">
+				<div class="md-list-item-text">
+					<h3>Insurance and tiers</h3>
+					<h4>Room 334</h4>
+					<p>12:00 PM</p>
+				</div>
+			</md-list-item>
+			<md-list-item class="md-2-line">
+				<div class="md-list-item-text">
+					<h3>University Mathematics</h3>
+					<h4>Theater A</h4>
+					<p>03:50 PM</p>
+				</div>
+			</md-list-item>
+		</md-list>
+	</md-content>
+
+	<div class="locke-size" ng-if="articles">
+        <md-button class="md-fab">
+            <md-icon class="zmdi zmdi-edit"></md-icon>
+        </md-button>
+    </div>
+</md-content>

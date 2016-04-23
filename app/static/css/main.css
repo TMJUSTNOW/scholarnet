@@ -1,0 +1,58 @@
+body{
+	color:#333;
+}
+.zmdi{
+	font-size: 24px
+}
+.title-area{
+	-webkit-app-region: drag;
+}
+.md-toolbar-tools .zmdi{
+	-webkit-app-region: no-drag;
+	line-height: inherit;
+	font-size: 25px;
+}
+md-list-item.active{
+	/*background-color: rgba(158,158,158,0.1);*/
+}
+md-list-item .zmdi{
+	margin-top:-15px;
+	font-size: 25px;
+}
+.locke-size {
+	position: fixed;
+	bottom: 30px;
+	right:295px !important;
+}
+
+.la-card.ng-hide-remove {
+   -webkit-animation: slideInLeft 0.35s;
+    -moz-animation: slideInLeft 0.35s;
+    -ms-animation: slideInLeft 0.35s;
+    animation: slideInLeft 0.35s;
+}
+
+.la-card.ng-hide {
+     -webkit-animation: slideOutLeft 0.35s;
+    -moz-animation: slideOutLeft 0.35s;
+    -ms-animation: slideOutLeft 0.35s;
+    animation: slideOutLeft 0.35s;
+}
+
+.commentingBox.ng-hide {
+     -webkit-animation: fadeOutUp 0.35s;
+    -moz-animation: fadeOutUp 0.35s;
+    -ms-animation: fadeOutUp 0.35s;
+    animation: fadeOutUp 0.35s;
+}
+
+.commentingBox.ng-hide-remove {
+     -webkit-animation: fadeInDown 0.35s;
+    -moz-animation: fadeInDown 0.35s;
+    -ms-animation: fadeInDown 0.35s;
+    animation: fadeInDown 0.35s;
+}
+
+button:focus {
+    outline: none !important;
+}

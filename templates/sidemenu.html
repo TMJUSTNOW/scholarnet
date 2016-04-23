@@ -1,0 +1,35 @@
+<div flex="20" class="md-whiteframe-1dp la-card" style="background: #fff;position:fixed;" layout-fill layout="column" ng-hide="!showingMenu">
+	<md-content ng-nicescrol nice-option="{cursorcolor: '#aaa'}">
+		<div hide-sm hide-xs hide-sm-md style="height: 35px"></div>
+		<div hide show-sm show-xs show-sm-md style="height: 20px"></div>
+		<md-list flex>
+			<md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-home"></md-icon>
+	          <p>Home</p>
+	        </md-list-item>
+	        <md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-book-image"></md-icon>
+	          <p>Subjects</p>
+	        </md-list-item>
+	        <md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-accounts"></md-icon>
+	          <p>Groups</p>
+	        </md-list-item>
+	        <md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-collection-item"></md-icon>
+	          <p>Articles</p>
+	        </md-list-item>
+	        <br>
+	        <md-divider></md-divider>
+	        <br>
+	        <md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-comment-alert"></md-icon>
+	          <p>Send Feedback</p>
+	        </md-list-item>
+	        <md-list-item ng-click="dosmn()" ng-class="{'active' : $index === activeTeamIndex}">
+	          <md-icon class="zmdi zmdi-settings"></md-icon>
+	          <p>Settings</p>
+	        </md-list-item>
+		</md-list>
+	</md-content>
+</div>

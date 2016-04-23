@@ -1,0 +1,17 @@
+body{
+	color:#333;
+}
+.zmdi{
+	font-size: 24px
+}
+
+#searchbar{
+    width: 330px;
+    padding: 2px;
+    background: red;
+}
+
+#searchbar input{
+    width: 304px;
+}
+

@@ -112,14 +112,14 @@ def login(request):
                 return HttpResponseRedirect("/app/home/")
             else:
                 messages.info(request, "Your Account is Deativated")
-                return HttpResponseRedirect("/login/")
+                return HttpResponseRedirect("/register/")
         else:
             messages.error(request, "Wrong Password or Phone Number")
-            return HttpResponseRedirect("/login/")
+            return HttpResponseRedirect("/register/")
     else:
         context = {
         }
-        return render(request, "registration/login.html", context)
+        return render(request, "registration/register.html", context)
 
 #######################################################################
 # A function which allow user to recommend on different Posts

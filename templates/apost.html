@@ -1,0 +1,45 @@
+<md-card>
+	<md-card-header>
+      <md-card-avatar>
+        <img class="md-user-avatar" ng-src="{{article.sender.dp}}"/>
+      </md-card-avatar>
+      <md-card-header-text>
+        <span class="md-title">{{article.sender.name}}</span>
+        <span class="md-subhead">{{article.sentAt | date : medium}}</span>
+      </md-card-header-text>
+      <md-menu md-position-mode="target-right target" style="margin-top: -10px; margin-right:-5px">
+	      <md-button aria-label="More options" class="md-icon-button" ng-click="openMenu($mdOpenMenu, $event)">
+	        <md-icon md-menu-origin class="zmdi zmdi-more-vert"></md-icon>
+	      </md-button>
+	      <md-menu-content width="2">
+	        <md-menu-item>
+	          <md-button ng-click="deleteArticle(article.id)">
+	            Delete article
+	          </md-button>
+	        </md-menu-item>
+	      </md-menu-content>
+	    </md-menu>
+    </md-card-header>
+    <md-card-content>
+      <p>{{article.text}}</p>
+    </md-card-content>
+	<img ng-src="{{article.images[0]}}" class="md-card-image" alt="Washed Out" ng-if="article.images.length > 0">
+    <md-card-actions layout="row" layout-align="start center">
+    	<md-card-icon-actions>
+            <md-button class="md-icon-button" ng-class="{'md-accent' : article.isLiked}" aria-label="Favorite">
+              <md-icon class="zmdi" ng-class="{'zmdi-favorite-outline' : !article.isLiked, 'zmdi-favorite' : article.isLiked }" ng-click="article.isLiked = !article.isLiked"></md-icon>
+            </md-button>
+            <md-button class="md-icon-button" aria-label="Share">
+              <md-icon class="zmdi zmdi-share"></md-icon>
+            </md-button>
+        </md-card-icon-actions>
+    	<md-button aria-label="Comment" ng-click="commenting = !commenting">Comment</md-button>
+    </md-card-actions>
+    <md-list-item class="commentingBox" ng-show="commenting" style="padding-left: 10px">
+      <img src="img/dps/men_10.jpg" alt="" class="md-avatar">
+      <input type="text" flex style="height: inherit !important;" placeholder="Type comment">
+      <md-button class="md-icon-button" aria-label="Share">
+          <md-icon class="zmdi zmdi-mail-send" style="margin-top:0px"></md-icon>
+      </md-button>
+    </md-list-item>
+</md-card>

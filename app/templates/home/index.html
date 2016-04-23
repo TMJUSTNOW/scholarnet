@@ -11,148 +11,126 @@
 	</style>
 {% endblock %}
 
-
 	{% block body %}
+		{% include "home/topnav.html" %}
 
-		<div class="page-container"><!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
-
-		<!-- Add "fixed" class to make the sidebar fixed always to the browser viewport. -->
-		<!-- Adding class "toggle-others" will keep only one menu item open at a time. -->
-		<!-- Adding class "collapsed" collapse sidebar root elements and show only icons. -->
-	{% include "home/sidemenu.html" %}
-
-		<div class="main-content">
-
-			{% include "home/topnav.html" %}
-			<div>
-				<ol class="breadcrumb bc-1" >
-					<li>
-						<a href="/app/home/"><i class="fa-home"></i>Home</a>
-					</li>
-				</ol>
-			</div>
-			<div class="row draggable-portlets">
-
-				<div class="col-md-12 endless_page_template" id="main" role="main">
-					{% include "home/entry_home_article_page.html" %}
+		<div hidde>
+			{% include "home/leftmenu.html" %}
+		</div>
+		<div class="grid-sizer" style="width:60%"></div>
+		<div class="row">
+			<div class="col" style="width: 21%">&nbsp;</div>
+			<div class="col m7 offset-m" style="margin-top: 75px">
+				<!-- {% include "home/entry_home_article_page.html" %} -->
+				<div class="row" id="posts">
+					<div class="card col m6">
+						<div style="height: 60px;padding: 15px" class="gre">
+							<div class="left item-avatar one-line">
+								<img src="/static/images/dp.jpg" class="circle" width="35" />
+								<p>James Wolpert</p>
+							</div>
+						</div>
+						<div class="card-content">
+							This is a beautiful ea.
+						</div>
+						<div class="card-image">
+							<img src="/static/images/beautifulsea.jpg" class="" style="height: 220px">
+						</div>
+						<div class="card-action" style="paddin: 0;padding-right:0">
+							<div class="right" style="margin-bottom: 10px">
+								<a class="btn-flat grey-text btn-fav" style="padding: 0 5px;overflow: visible;position: relative;" href="#"><i class="zmdi zmdi-favorite-outline true {{faved}}" style="font-size:39px"></i>
+								<span class="a-badge blue" style="top:5px;right:-8px">12</span></a>
+								<a class="btn-flat grey-text" style="padding: 0 5px;overflow: visible;position: relative;" href="#"><i class="zmdi zmdi-comment-alt-text" style="font-size:39px"></i>
+									<span class="a-badge blue">5</span>
+								</a>
+							</div>
+						</div>
+					</div>
 				</div>
-
 			</div>
-			<div id="fakeLoader"></div>
+			<div class="col" style="width: 3%">&nbsp;</div>
 
-			<script type="text/javascript">
-				jQuery(document).ready(function($)
-				{
-					var $draggable_portlets = $(".draggable-portlets");
-
-					$(".draggable-portlets .sorted" ).sortable({
-						connectWith: ".draggable-portlets .sorted",
-						handle: '.panel-heading',
-						containment: 'window',
-						start: function()
-						{
-							$draggable_portlets.addClass('dragging');
-						},
-						stop: function()
-						{
-							$draggable_portlets.removeClass('dragging');
-						}
-					});
-
-					$( ".draggable-portlets .sorted .panel-heading" ).disableSelection();
-
-				});
-			</script>
-
-
-			<div class="footer-sticked-chat"><!-- Start: Footer Sticked Chat -->
-
-			<script type="text/javascript">
-		function toggleSampleChatWindow()
-		{
-			var $chat_win = jQuery("#sample-chat-window");
-
-			$chat_win.toggleClass('open');
-
-			if($chat_win.hasClass('open'))
-			{
-				var $messages = $chat_win.find('.ps-scrollbar');
-
-				if($.isFunction($.fn.perfectScrollbar))
-				{
-					$messages.perfectScrollbar('destroy');
-
-					setTimeout(function(){
-						$messages.perfectScrollbar();
-						$chat_win.find('.form-control').focus();
-					}, 300);
-				}
-			}
-
-			jQuery("#sample-chat-window form").on('submit', function(ev)
-			{
-				ev.preventDefault();
-			});
-		}
-
-		jQuery(document).ready(function($)
-		{
-			$(".footer-sticked-chat .chat-user, .other-conversations-list a").on('click', function(ev)
-			{
-				ev.preventDefault();
-				toggleSampleChatWindow();
-			});
-
-			$(".mobile-chat-toggle").on('click', function(ev)
-			{
-				ev.preventDefault();
-
-				$(".footer-sticked-chat").toggleClass('mobile-is-visible');
-			});
-		});
-		</script>
-
-		<ul class="chat-conversations list-unstyled">
-			<li>
-				<!-- User Info Link -->
-				<a href="javascript:;" data-toggle="modal" data-target="#publishModal" class="btn btn-lg btn-gray">
-					<i class="fa fa-upload"></i>
-					Publish
-				</a>
-			</li>
-
-		</ul>
-
-		<a href="#" class="mobile-chat-toggle">
-			<i class="fa fa-plus"></i>
-		</a>
-
-	<!-- End: Footer Sticked Chat -->
-	</div>
-			<!-- Main Footer -->
-			<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
-			<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
-			<!-- Or class "fixed" to  always fix the footer to the end of page -->
-			{% include "footer.html" %}
+			<button onclick="newArticle()" style="position: fixed;bottom: 20px;right:22%" class="btn-floating btn-large pink"><i class="zmdi zmdi-edit"></i></button>
 		</div>
 
+		<div hidde>{% include "home/rightmenu.html" %}</div>
 
-		{% include "home/chat_side.html" %}
 
-	</div>
+		<div id="new-post" class="modal">
+			<div style="height: 60px;padding: 15px" class="gre">
+				<div class="left item-avatar one-line">
+					<img src="/static/images/dp.jpg" class="circle" width="35" />
+					<p>James Wolpert</p>
+				</div>
 
-	{% endblock %}
-	<!-- Bottom Scripts -->
+				<div class="right">
+					<a class="grey lighten-5 grey-text dropdown-button btn-flat" href="javascript:void:0;" data-activates="dropdown1" style="text-transform: none; box-shadow: 0 1px 3px 0 rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 2px 1px -1px rgba(0,0,0,.12);">Choose subject</a>
 
-	{% block scripts %}
-		{{ block.super }}
-		<script src="/static/endless_pagination/js/endless.js"></script>
-		<script src="/static/endless_pagination/js/endless_on_scroll.js"></script>
-		<script>
-			$.endlessPaginate({
-				paginateOnScroll: true,
-				paginateOnScrollMargin: 20
-			});
+					<!-- Dropdown Structure -->
+					<ul id='dropdown1' class='dropdown-content grey lighten-5' style="max-height: 70%;overflow-x: hidden;">
+						{% for subject in subjects %}
+							<li>
+								<a href="javascript:void(0);" style="font-size: 15px">
+									<span class="title grey-text">{{ subject.name|truncatewords:3 }}</span>
+								</a>
+							</li>
+						{% endfor %}
+					</ul>
+				</div>
+			</div>
+	        <div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
+	        	<textarea placeholder="Type article" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
+	        </div>
+	        <div id="attachments">
+	        	<span class="grey-text text-darken-1" style="font-size: 17px; padding-left: 5px">Attachments</span>
 
-		</script>
-	{% endblock %}
+	        	<div class="gre lighten-1 attachment-container">
+	        		<a href="javascript:void(0);" class="grey lighten-3 grey-text center-align attachment" style="line-height: 100px">
+						ADD
+					</a>
+				</div>
+	        </div>
+	        <div style="height: 70px;width:100%;position: fixed;bottom: 0;left: 0">
+	        	<hr class="separator">
+		        <div class="right" style="padding-top: 8px">
+		        	<a class="btn-flat waves-effect waves-blue">Cancel</a>
+		    		<a class="btn-flat waves-effect waves-blue">Save</a>
+		        </div>
+	        </div>
+	    </div>
+
+	    <div id="contact-modal" class="modal">
+	    	<div style="height: 60px;padding: 15px" class="gre">
+		    	<div class="left item-avatar one-line">
+					<img src="/static/images/dp.jpg" class="circle" width="35" />
+					<p>James Wolpert</p>
+				</div>
+			</div>
+			<div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
+	        	<textarea placeholder="Type your message" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
+	        </div>
+		    <div class="modal-footer">
+		      <a href="#!" class=" modal-action modal-close waves-effect waves-gree btn-flat">Send</a>
+		    </div>
+		</div>
+
+	    <script>
+	    	$(document).ready(function(){
+	    		var $grid = $('#posts').masonry({
+				  itemSelector: '.col',
+				  percentPosition: true,
+				});
+
+	    		$('.collapsible').collapsible({
+			      accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+			    });
+	    	});
+	    	function newArticle(){
+		        $('#new-post').openModal();
+        	}
+
+        	function sendFeedback(){
+		        $('#contact-modal').openModal();
+        	}
+	    </script>
+{% endblock %}

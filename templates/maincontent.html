@@ -1,0 +1,8 @@
+<div class="md-padding" layout-xs="column" layout="row" layout-wrap>
+	<div layout layout-fill layout-align="center center" style="background: #f9f9f9;margin-top: -50px;" ng-if="!articles">
+		<h2 style="color: #aaa;font-weight: 300">{{emptyMessage}}</h2>
+	</div>
+	<div flex-xs flex-gt-xs="50" layout="column" ng-repeat="article in articles" ng-if="articles">
+		<a-post post="{{article}}"></a-post>
+	</div>
+</div>

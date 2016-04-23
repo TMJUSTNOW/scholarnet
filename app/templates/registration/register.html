@@ -1,261 +1,128 @@
+{% extends 'base.html' %}
 {% load staticfiles %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     {% include "meta.html" %}
-    <title>ScholarNet - Registration</title>
-    <link rel="icon" href="{% static 'images/favicon.jpg' %}">    <!-- Favicon -->
-	<link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Arimo:400,700,400italic">
-	<link rel="stylesheet" href="{% static 'assets/css/fonts/linecons/css/linecons.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/fonts/fontawesome/css/font-awesome.min.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/bootstrap.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/xenon-core.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/xenon-forms.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/xenon-components.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/xenon-skins.css' %}">
-	<link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
-
-	<script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
-
-    <style>
-        #register .error {
-            color: red;
-        }
-
-        #s2id_institute > .select2-choice{
-             background-color:blue;
-        }
-    </style>
-
-	<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
-	<!--[if lt IE 9]>
-		<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-		<script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-	<![endif]-->
-	<script src='https://www.google.com/recaptcha/api.js'></script>
-
-
 </head>
-<body class="page-body login-light">
-<div class="page-container">
-    <div class="main-content">
-        <div class="login-container">
-            <div class="row">
-                <div class="col-sm-6 col-sm-offset-3 well">
-                    <div class="row">
-                        <center>
-                            <a href="javascript:;">
-                                <img src="/static/images/snet.jpg" class="img img-circle img-responsive" />
-                            </a>
-                        </center>
+{% block body %}
+    <body style="background: #f9f9f9">
+        <div class="container">
+            <div class="card" style="background:url({% static 'images/beautifulsea.jpg' %}); background-repeat: no-repeat; background-size: cover; margin: 60px auto;">
+                <div class="card-content" style="padding: 0;margin:0;">
+                    <div class="row" style="padding: 0;margin:0;background: rgba(0,0,0, 0.2);">
+                        <div class="col m6 re" style="padding-top:3px;">
+                            <div class="valign-wrapper" style="height: 500px">
+                                <div class="valign grey-text text-lighten-3" style="padding: 20px; margin: auto">
+                                    <img style="display: block; margin:auto" src="{% static 'images/snet.png' %}" alt="">
+                                    <h3 class="center-align">
+                                        Scholarnet
+                                    </h3>
+                                    <hr>
+                                    <br><br>
+                                    <p class="flow-text center">
+                                        <em><q>Share your knowledge. It is a way to achieve Immortality.</q></em><br>
+                                        <strong class="right">- Dalai Lama</strong>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <style>
+                            .a-form{
+                                box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+                                position: absolute;top:0; left: 0;
+                                margin: 15px;padding: 20px;
+                                background: #fefefe;
+                                /*display: none;*/
+                            }
+                        </style>
+                        <div class="col m6 whit" style="padding:30px; position: relative;height: 503px;">
+                            <div hidde class="a-form" style="display: block;padding-top:55px;padding-bottom:55px;margin: 30px 30px;z-index: 99">
+                                <form method="post" role="form" action="/login/" id="login" class="center-align">
+                                    <span class="card-title" style="color:#444; padding-left: 10px;">
+                                        LOGIN
+                                    </span>
+                                    {% csrf_token %}
+                                    <div class="col m12 input-field">
+                                        <input type="text" name="username" id="username" autocomplete="off" required />
+                                        <label for="username">Phone-Number</label>
+                                    </div>
+                                    <div class="col m12 input-field">
+                                        <input type="password" class="form-control" name="password" id="passwd" autocomplete="off" required />
+                                        <label for="passwd">Password</label>
+                                    </div>
+                                    <div class="col m12" style="margin: 15px 0; text-align: left;">
+                                        <a href="/user/password/reset/">Forgot password?</a>
+                                    </div>
+                                    <div class="col m12">
+                                        <button type="submit" class="btn blue waves-effect waves-light right">
+                                            Log In
+                                        </button>
+                                    </div>
+                                    <div class="col m12">
+                                        <div class="input-field left-align">
+                                            No account yet? <a onclick="switchForm('register')" href="javascript:void(0);" class="btn-flat blue-text waves-effect waves-blue" style="padding: 0 5px">Register.</a>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="a-form" hidde>
+                                <form method="post" role="form" action="/app/register/"  class="center-align">
+                                    {% csrf_token %}
+                                    {% load widget_tweaks %}
+                                    <span class="card-title" style="color:#444">
+                                        REGISTER
+                                    </span>
+                                    <div class="col m12 input-field">
+                                        <input type="text" name="username" required />
+                                        <label>Phone Number</label>
+                                    </div>
+                                    <div class="col m12 input-field">
+                                        <input type="password" name="password" required />
+                                        <label>Password</label>
+                                    </div>
+                                    <div class="col m12 input-field">
+                                        <input type="password" name="password1" class="form-control" required />
+                                        <label>Confirm Password</label>
+                                    </div>
+                                    <div class="col m12 input-field" style="height: 65px">
+                                        <span class="left-align" style="position: relative;left:-45px;top:10px;line-height: 25px; text-align: left;">Register as: </span>
+                                        <span>
+                                          <input class="with-gap" name="role" type="radio" id="student" />
+                                          <label for="student">Student</label>
+                                          &emsp;&emsp;
+                                          <input class="with-gap" name="role" type="radio" id="lecturer" />
+                                          <label for="lecturer">Lecturer</label>
+                                        </span>
+                                    </div>
+                                    <div class="form-group">
+                                        <center>
+                                            <div class="g-recaptcha" data-sitekey="6LdNwRwTAAAAABHKqJPjv1jDQbw8psVaBCvciiN1"></div>
+                                        </center>
+                                    </div>
+                                    <div class="col m12" style="margin-top: 12px;margin-bottom: 10px;text-align: left;">
+                                        <input id="termsAndConditions" type="checkbox" required>
+                                        <label for="termsAndConditions">Terms and Conditions</label>
+                                    </div>
+                                    <div class="col m12">
+                                        <!-- <a href="/login/" class="btn-flat">Back to Login</a> -->
+                                        <button type="submit" class="btn blue right">Register</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
                     </div>
-                    <script type="text/javascript">
-					jQuery(document).ready(function($)
-					{
-						// Reveal Login form
-						setTimeout(function(){ $(".fade-in-effect").addClass('in'); }, 1);
-					});
-					</script>
-                    <div>
-                        <center>
-                            <h2>ScholarNet Registration</h2>
-                        </center>
-                    </div>
-                    <!-- Add class "fade-in-effect" for login form effect -->
-                    <form method="post" role="form" action="/app/register/"  class="fade-in-effect">
-                        {% csrf_token %}
-                        {% load widget_tweaks %}
-                        <div class="form-group">
-                            <label>Institute</label>
-                            <!--suppress ProblematicWhitespace -->
-                            <script>
-                            $(document).ready(function($)
-							{
-							    $("#institute").select2({
-									placeholder: 'Select your Institute...',
-									allowClear: true,
-									containerCssClass: 'tpx-select2-container select2-grey'
-								}).on('select2-open', function()
-								{
-									// Adding Custom Scrollbar
-									$(this).data('select2').results.addClass('overflow-hidden').perfectScrollbar();
-								});
-							});
-							</script>
-                            <select name="institute" onchange="loadCourses();" id="institute" class="form-control select2" required>
-                                <option value="">Please Select .....</option>
-                                <optgroup label="Institutes">
-                                    {% for institute in institutes %}
-                                    <option value="{{ institute.id }}">{{ institute.name }} ({{ institute.code }})</option>
-                                    {% endfor %}
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Course</label>
-                            <script>
-                            $(document).ready(function($)
-							{
-								$("#courses").select2({
-									placeholder: 'Select your Course...',
-									allowClear: true
-								}).on('select2-open', function()
-								{
-									// Adding Custom Scrollbar
-									$(this).data('select2').results.addClass('overflow-hidden').perfectScrollbar();
-								});
-							});
-							</script>
-                            <select name="course" class="form-control" id="courses" required>
-                                <option vlaue="">Please Select ....</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Year</label>
-                            <script type="text/javascript">
-							jQuery(document).ready(function($)
-							{
-								$("#year").selectBoxIt({
-									showFirstOption: false,
-									"native": true
-								});
-							});
-							</script>
-                            <select name="year" class="form-control" id="year" required>
-                                <option value="">Please Select ...</option>
-                                {% for year in years %}
-                                <option value="{{ year.id }}">{{ year.name }} ({{ year.code }})</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Role</label>
-                            <script type="text/javascript">
-							jQuery(document).ready(function($)
-							{
-								$("#role").selectBoxIt({
-								    showFirstOption: false,
-								    "native": true
-							    });
-							});
-							</script>
-                            <select name="role" class="form-control" id="role" required>
-                                <option value="">Please Select ...</option>
-                                {% for group in groups %}
-                                <option value="{{ group.id }}">{{ group.name }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Display Name</label>
-                            <input type="text" name="display" placeholder="Display Name" class="form-control" required />
-                        </div>
-                        <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="text" name="username" placeholder="Phone-Number" class="form-control" required />
-                            <span style="color:red;">{{ form.username.errors }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm Phone Number</label>
-                            <input type="text" name="username1" placeholder="Confirm Phone-Number" class="form-control" required />
-                            <span style="color:red;">{{ form.username1.errors }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" name="password" class="form-control" required />
-                            <span style="color:red;">{{ form.password.errors }}</span>
-                        </div>
-                        <div class="form-group">
-                            <label>Confirm Password</label>
-                            <input type="password" name="password1" class="form-control" required />
-                            <span style="color:red;">{{ form.password1.errors }}</span>
-                        </div>
-                        <div class="form-group">
-                            <center>
-                                <div class="g-recaptcha" data-sitekey="6LdNwRwTAAAAABHKqJPjv1jDQbw8psVaBCvciiN1"></div>
-                            </center>
-                        </div><br>
-                        <div class="form-group">
-                            <label>
-                                <input tabindex="6" type="checkbox" class="icheck-10" id="minimal-checkbox-2-10" required>
-                                <a href="">Terms and Conditions</a>
-                            </label>
-                        </div>
-                        <div class="form-group">
-                            <button type="submit" class="btn btn-primary  btn-block text-left">
-                                <i class="fa-lock"></i>
-                                Register
-                            </button>
-                        </div>
-                        <div class="login-footer">
-                            <a href="/login/" class="btn btn-danger">Back to Login</a>
-                        </div>
-                    </form>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-<link rel="stylesheet" href="/static/assets/js/select2/select2.css">
-<link rel="stylesheet" href="/static/assets/js/select2/select2-bootstrap.css">
-<!-- Bottom Scripts -->
-<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
-<script src="{% static 'assets/js/TweenMax.min.js' %}"></script>
-<script src="{% static 'assets/js/resizeable.js' %}"></script>
-<script src="{% static 'assets/js/joinable.js' %}"></script>
-<script src="{% static 'assets/js/xenon-api.js' %}"></script>
-<script src="{% static 'assets/js/xenon-toggles.js' %}"></script>
-<script src="{% static 'assets/js/toastr/toastr.min.js' %}"></script>
-<script src="/static/assets/js/select2/select2.min.js"></script>
-<script src="/static/assets/js/jquery-ui/jquery-ui.min.js"></script>
-<script src="/static/assets/js/selectboxit/jquery.selectBoxIt.min.js"></script>
-<script src="/static/assets/js/tagsinput/bootstrap-tagsinput.min.js"></script>
-<script src="/static/assets/js/handlebars.min.js"></script>
-<script src="/static/assets/js/icheck/icheck.min.js"></script>
-<!-- JavaScripts initializations and stuff -->
-<script src="{% static 'assets/js/xenon-custom.js' %}"></script>
-<script>
-    function loadCourses(){
-        var value = $("#institute").val();
-        $("#courses").load("/app/loadCourses/"+value+"/");
-    }
-
-
-    jQuery(document).ready(function($)
-					{
-						// Reveal Login form
-						setTimeout(function(){ $(".fade-in-effect").addClass('in'); }, 1);
-
-
-						// Validation and Ajax action
-						$("form#login").validate({
-							rules: {
-								username: {
-									required: true
-								},
-
-								password: {
-									required: true
-								}
-							},
-
-							messages: {
-								username: {
-									required: 'Please enter your username or E-mail.'
-								},
-
-								password: {
-									required: 'Please enter your password.'
-								}
-							},
-
-						});
-
-						// Set Form focus
-						$("form#login .form-group:has(.form-control):first .form-control").focus();
-					});
-</script>
-
-</body>
+        <center class="blue-text" style="margin-top:-30px; font-size: 20px;">
+            Copyright &copy; 2016 Scholarnet
+        </center>
+        <script>
+            function switchForm(to){
+                $('.a-form:first').fadeOut(400);
+            }
+        </script>
+    </body>
+{% endblock %}
 </html>

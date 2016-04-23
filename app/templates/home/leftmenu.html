@@ -1,0 +1,39 @@
+<div id="left-menu"  class="sidemenu" style="overflow-y:scroll">
+	<ul class="collection no-borders">
+		<li class="collection-item grey-text text-darken-1">
+			<a href="/app/home/">
+				<i class="zmdi zmdi-home"></i>
+				<span class="title">Home</span>
+			</a>
+		</li>
+
+		<!-- <a href="/app/home/" class="collection-item grey-text text-darken-1">
+			<i class="zmdi zmdi-collection-item"></i>
+			<span class="title">Subjects</span>
+		</a>
+
+		<hr class="separator">
+
+		<a href="/app/home/" class="collection-item grey-text text-darken-1">
+			<i class="zmdi zmdi-settings"></i>
+			<span class="title">Settings</span>
+		</a>
+
+		<a class="collection-item grey-text text-darken-1" href="javascript:void(0);" onclick="sendFeedback()">
+			<i class="zmdi zmdi-comment-alert"></i>
+			<span class="title">Send Feedback</span>
+		</a> -->
+
+		<a href="/app/home/" class="collection-item grey-text text-darken-1">
+			<i class="zmdi zmdi-collection-item"></i>
+			<span class="title">Subjects</span>
+		</a>
+		<hr class="separator">
+		{% for subject in subjects %}
+			<a href="/app/subjectReader/{{ subject.id }}/" style="margin-left: 50px" class="collection-item grey-text text-darken-1 left-align">
+				{{ subject.name|truncatewords:3 }}
+			</a>
+			<hr class="separator" style="margin: 1px">
+		{% endfor %}
+	</ul>
+</div>
