@@ -1,0 +1,508 @@
+{% extends "base.html" %}
+{% load endless %}
+{% block css %}
+	<style>
+		#selectedFiles img {
+			max-width: 125px;
+			max-height: 125px;
+			float: left;
+			margin-bottom:10px;
+		}
+	</style>
+{% endblock %}
+
+
+	{% block body %}
+
+		<div class="page-container"><!-- add class "sidebar-collapsed" to close sidebar by default, "chat-visible" to make chat appear always -->
+
+		<!-- Add "fixed" class to make the sidebar fixed always to the browser viewport. -->
+		<!-- Adding class "toggle-others" will keep only one menu item open at a time. -->
+		<!-- Adding class "collapsed" collapse sidebar root elements and show only icons. -->
+	{% include "home/setup_sidemenu.html" %}
+
+		<div class="main-content">
+
+			{% include "home/topnav.html" %}
+			<div>
+				<ol class="breadcrumb bc-1" >
+					<li>
+						<a href="/app/home/"><i class="fa-home"></i>Home</a>
+					</li>
+				</ol>
+			</div>
+			<div class="row draggable-portlets">
+                {% for group in user.groups.all %}
+                    {% if group.name == 'Student' %}
+                        {% if user.profile.school_id == None %}
+                            <div class="col-md-12 endless_page_template" id="main" role="main">
+                                <div class="row col-md-12">
+                                    <form role="form" method="POST" action="/app/setupGetSchool/" id="schoolSearchForm">
+                                        <div class="form-group">
+                                            <input type="text" name="search" class="form-control" autocomplete="off" required/>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="row col-md-8 col-md-offset-2" id="schoolSearchResult">
+
+                            </div>
+                        {% else %}
+                            <div class="col-md-10 col-md-offset-1">
+                                <center>
+                                    <span class="badge"><h1>{{ user.profile.school.name }} ({{ user.profile.school.code }})</h1></span>
+                                </center><br><br>
+
+                                {% if user.profile.year_id != None and user.profile.school_id != None and user.profile.academic_id != None and user.profile.course_id != None %}
+                                    <div class="alert alert-success">
+                                        <center><span style="font-size: 22px;">You are Good to Continue</span></center>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <table class="table table-hover table-stripped">
+                                            <tr>
+                                                <td>Course:</td>
+                                                <td>{{ user.profile.course.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Level</td>
+                                                <td>{{ user.profile.course.level.name }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Academic Year:</td>
+                                                <td>{{ user.profile.academic.name }}/{{ user.profile.academic.name|add:1 }}</td>
+                                            </tr>
+                                            <tr>
+                                                <td>Study Year</td>
+                                                <td>{{ user.profile.year.name }} ({{ user.profile.year.code }})</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                {% endif %}
+
+                                {% if user.profile.year_id == None %}
+                                    <div class="row col-md-4 col-md-offset-4">
+                                        <div class="xe-widget xe-todo-list xe-todo-list-turquoise">
+                                            <div class="xe-header">
+                                                <div class="xe-icon">
+                                                    <i class="fa-calendar-o"></i>
+                                                </div>
+                                                <div class="xe-label">
+                                                    <span>Pick Your Study</span>
+                                                    <strong>Year</strong>
+                                                </div>
+                                            </div>
+                                            <div class="xe-body">
+
+                                                <ul class="list-unstyled">
+                                                    {% for year in years %}
+                                                        <li class="">
+                                                            <label style="width:100%;">
+                                                                <span>{{ year.name }} ({{ year.code }})</span>
+                                                                <a href="javascript:;" onclick="addStudyYear({{ year.id }});" data-toggle="tooltip" data-placement="top" title="I Study This Year" class="btn btn-xs btn-green pull-right">
+                                                                    <i class="fa fa-plus"></i>
+                                                                    Add
+                                                                </a>
+                                                            </label>
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    {% if user.profile.course_id  == None %}
+                                        <script>
+                                            jQuery(document).ready(function($)
+                                            {
+                                                $("#coursesTable").dataTable({
+                                                    aLengthMenu: [
+                                                        [10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]
+                                                    ]
+                                                });
+                                            });
+                                        </script>
+                                        <hr />
+                                        <table class="table table-bordered table-striped" id="coursesTable" width="100%">
+                                            <thead>
+                                                <tr>
+                                                    <th>Course Name</th>
+                                                    <th>Code</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody class="middle-align">
+                                                {% for course in courses %}
+                                                    <tr>
+                                                        <td>{{ course.name }}</td>
+                                                        <td>{{ course.code }}</td>
+                                                        <td>
+                                                            <a href="javascript:;" onclick="addStudyCourse({{ course.id }});" data-toggle="tooltip" data-placement="top" title="I Study This Course" class="btn btn-sm btn-green pull-right">
+                                                                <i class="fa fa-plus"></i>
+                                                                Add
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    {% else %}
+                                        {% if user.profile.academic_id == None %}
+                                            <div class="row col-md-4 col-md-offset-4">
+                                                <div class="xe-widget xe-todo-list">
+                                                    <div class="xe-header">
+                                                        <div class="xe-icon">
+                                                            <i class="fa-calendar-o"></i>
+                                                        </div>
+                                                        <div class="xe-label">
+                                                            <span>Pick Your</span>
+                                                            <strong>Academic Year</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="xe-body">
+
+                                                        <ul class="list-unstyled">
+                                                            {% for academic in academics %}
+                                                                <li class="">
+                                                                    <label style="width:100%;">
+                                                                        <span>{{ academic.name}}/{{ academic.name|add:1 }}</span>
+                                                                        <a href="javascript:;" onclick="addAcademicYear({{ academic.id }});" data-toggle="tooltip" data-placement="top" title="I Study This Year" class="btn btn-xs btn-green pull-right">
+                                                                            <i class="fa fa-plus"></i>
+                                                                            Add
+                                                                        </a>
+                                                                    </label>
+                                                                </li>
+                                                            {% endfor %}
+                                                        </ul>
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    {% elif group.name == 'Teacher' %}
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="panel-group" id="accordion-test-2">
+                                {% for school in teacherSchools %}
+                                    <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title">
+                                            <a data-toggle="collapse" data-parent="#accordion-test-2" href="#collapseOne-2">
+                                                {{ school.name }}
+                                            </a>
+                                        </h4>
+                                    </div>
+                                    <div id="collapseOne-2" class="panel-collapse collapse in">
+                                        <div class="panel-body">
+                                            <div>
+                                                <button class="btn btn-green btn-lg">Add Subject</button>
+                                            </div>
+                                            <table class="table responsive">
+                                                <thead>
+                                                    <tr>
+                                                        <th>#</th>
+                                                        <th>Subject Name</th>
+                                                        <th>Course Name</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+
+                                                <tbody>
+                                                {% for subject in techerSSubjects %}
+                                                    <tr>
+                                                        <td><i class="fa fa-arrow-right" style="color:green;"></i></td>
+                                                        <td>{{ subject.name }}</td>
+                                                        <td>{{ subject.course.name }}</td>
+                                                        <td><a href="javascript:;" class="btn btn-o"><i class="fa fa-trash"></i></a></td>
+                                                    </tr>
+                                                {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+
+
+			</div>
+			<div id="fakeLoader"></div>
+
+
+            <div class="modal fade custom-width" id="addSchoolTeacher">
+                <div class="modal-dialog" style="width: 60%;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                            <h4 class="modal-title">Configurations</h4>
+                        </div>
+                        <div class="modal-body" id="TeacherConfigurationModalContent">
+                            <div>
+                                <form role="form" action="/app/setupGetSchoolTeacher/" method="POST" id="schoolSearchFormTeachear">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="searchTeachearSchool" placeholder="Search School/College/Institute/University" autocomplete="off" autofocus required />
+                                    </div>
+                                </form>
+                            </div>
+                            <div id="schoolSearchFormTeachearContent">
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-white" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+			<script type="text/javascript">
+
+
+                 $("#schoolSearchFormTeachear").submit(function(e){
+                    e.preventDefault();
+                    var postData = $(this).serializeArray();
+                    var formURL = $(this).attr('action');
+                    $.ajax({
+                        url: formURL,
+                        type: 'POST',
+                        data: postData,
+                        success: function(data, textStatus, jqXHR){
+                            $("#schoolSearchFormTeachearContent").html(data);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alertify.error(textStatus);
+                        }
+                    });
+                });
+
+
+			    $("#schoolSearchForm").submit(function(e){
+                    e.preventDefault();
+                    var postData = $(this).serializeArray();
+                    var formURL = $(this).attr('action');
+                    $.ajax({
+                        url: formURL,
+                        type: 'POST',
+                        data: postData,
+                        success: function(data, textStatus, jqXHR){
+                            $("#schoolSearchResult").html(data);
+                        },
+                        error: function(jqXHR, textStatus, errorThrown){
+                            alertify.error(textStatus);
+                        }
+                    });
+                });
+
+                function addStudyYear(yearId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This Year of Study",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: false
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location ='/app/setupAddStudyYear/'+yearId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+                function addSchool(schoolId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This School/College/University",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: false
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location ='/app/setupAddSchool/'+schoolId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+
+                function addSchoolTeacher(schoolId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This School/College/University",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: true
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location = '/app/setupAddSchoolTeacher/'+schoolId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+
+                function addStudyCourse(courseId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This Course",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: false
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location ='/app/setupAddCourse/'+courseId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+
+                function addAcademicYear(academicId){
+                        swal({
+                             title: "Are you sure?",
+                             text: "Add This Academic Year",
+                             type: "warning",
+                             showCancelButton: true,
+                             confirmButtonColor: "#DD6B55",
+                             confirmButtonText: "Yes, Add it!",
+                             closeOnConfirm: false
+                        },
+                        function(isConfirm){
+                            if(isConfirm){
+                                window.location ='/app/setupAddAcademicYear/'+academicId+'/';
+                            }else{
+                                alertify.success("Cancelled Successfully");
+                            }
+                        });
+                }
+
+
+				jQuery(document).ready(function($)
+				{
+					var $draggable_portlets = $(".draggable-portlets");
+
+					$(".draggable-portlets .sorted" ).sortable({
+						connectWith: ".draggable-portlets .sorted",
+						handle: '.panel-heading',
+						containment: 'window',
+						start: function()
+						{
+							$draggable_portlets.addClass('dragging');
+						},
+						stop: function()
+						{
+							$draggable_portlets.removeClass('dragging');
+						}
+					});
+
+					$( ".draggable-portlets .sorted .panel-heading" ).disableSelection();
+
+				});
+			</script>
+
+
+			<div class="footer-sticked-chat"><!-- Start: Footer Sticked Chat -->
+
+			<script type="text/javascript">
+		function toggleSampleChatWindow()
+		{
+			var $chat_win = jQuery("#sample-chat-window");
+
+			$chat_win.toggleClass('open');
+
+			if($chat_win.hasClass('open'))
+			{
+				var $messages = $chat_win.find('.ps-scrollbar');
+
+				if($.isFunction($.fn.perfectScrollbar))
+				{
+					$messages.perfectScrollbar('destroy');
+
+					setTimeout(function(){
+						$messages.perfectScrollbar();
+						$chat_win.find('.form-control').focus();
+					}, 300);
+				}
+			}
+
+			jQuery("#sample-chat-window form").on('submit', function(ev)
+			{
+				ev.preventDefault();
+			});
+		}
+
+		jQuery(document).ready(function($)
+		{
+			$(".footer-sticked-chat .chat-user, .other-conversations-list a").on('click', function(ev)
+			{
+				ev.preventDefault();
+				toggleSampleChatWindow();
+			});
+
+			$(".mobile-chat-toggle").on('click', function(ev)
+			{
+				ev.preventDefault();
+
+				$(".footer-sticked-chat").toggleClass('mobile-is-visible');
+			});
+		});
+		</script>
+
+	<!-- End: Footer Sticked Chat -->
+	</div>
+			<!-- Main Footer -->
+			<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
+			<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
+			<!-- Or class "fixed" to  always fix the footer to the end of page -->
+			{% include "footer.html" %}
+		</div>
+
+
+		{% include "home/chat_side.html" %}
+
+	</div>
+
+	{% endblock %}
+	<!-- Bottom Scripts -->
+
+	{% block scripts %}
+		{{ block.super }}
+        <script src="/static/assets/js/datatables/js/jquery.dataTables.min.js"></script>
+        <script src="/static/assets/js/datatables/dataTables.bootstrap.js"></script>
+        <script src="/static/assets/js/datatables/yadcf/jquery.dataTables.yadcf.js"></script>
+        <script src="/static/assets/js/datatables/tabletools/dataTables.tableTools.min.js"></script>
+		<script src="/static/endless_pagination/js/endless.js"></script>
+		<script src="/static/endless_pagination/js/endless_on_scroll.js"></script>
+		<script>
+			$.endlessPaginate({
+				paginateOnScroll: true,
+				paginateOnScrollMargin: 20
+			});
+
+		</script>
+	{% endblock %}

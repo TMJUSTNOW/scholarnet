@@ -2,8 +2,9 @@
 # Author: Daniel Kindimba
 # Project: ScholarNet
 ######################################################################################
-from django.conf.urls import include, url
+from django.conf.urls import patterns, include, url
 from django.contrib import admin, auth
+admin.autodiscover()
 from . import views
 
 urlpatterns = [
@@ -11,6 +12,47 @@ urlpatterns = [
     # Base Url Loading the Login View Template
     #################################################################
     url(r'^$', views.login, name='login'),
+
+    #################################################################
+    # Url for Setting up the Profile
+    #################################################################
+    url(r'^setup/$', views.setup, name='login'),
+
+    ##################################################################
+    # Url for Getting the Search School for Setup Page
+    ##################################################################
+    url(r'^setupGetSchool/$', views.setupGetSchool, name='setupGetSchool'),
+
+    ################################################################################################
+    # Url for getting  the school for Teacher configuration page
+    #################################################################################################
+    url(r'^setupGetSchoolTeacher/$', views.setupGetSchoolTeacher, name='setupGetSchoolTeacher'),
+
+    #########################################################################
+    # Url for Adding the School from the Setup page
+    ##########################################################################
+    url(r'^setupAddSchool/([0-9]+)/$', views.setupAddSchool, name='setupAddSchool'),
+
+    ######################################################################################
+    # Url for Adding the School from the setup page for the Teacher
+    ######################################################################################
+    url(r'^setupAddSchoolTeacher/([0-9]+)/$', views.setupAddSchoolTeacher, name='setupAddSchoolTeacher'),
+
+    ###########################################################################################
+    # url for aDding the Study Year for Setup Page
+    ############################################################################################
+    url(r'^setupAddStudyYear/([0-9]+)/$', views.setupAddStudyYear, name='setupAddStudyYear'),
+
+    ############################################################################################
+    # url for Adding the Study Course for setup page
+    #############################################################################################
+    url(r'^setupAddCourse/([0-9]+)/$', views.setupAddCourse, name='setupAddCourse'),
+
+
+    #############################################################################################
+    # Url for Adding the Academic Year for the setup page
+    #############################################################################################
+    url(r'^setupAddAcademicYear/([0-9]+)/$', views.setupAddAcademicYear, name='setupAddAcademicYear'),
 
     ###################################################################################
     # Url for loading the home page After User has been loged in
@@ -153,6 +195,13 @@ urlpatterns = [
     # url for User registration, this is for the web users
     ###################################################################################################################
     url(r'^register/$', views.register, name='register'),
+
+
+
+    ##########################################################################################################
+    # Url for Teacher Registration, this if  for th web users
+    ###########################################################################################################
+    url(r'^registerTeacher/$', views.registerTeacher, name='registerTeacher'),
 
     ###################################################################################################################
     # Url for Successfully registration feedback, loading the success page

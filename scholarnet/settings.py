@@ -26,8 +26,10 @@ SECRET_KEY = 'ymr!=&e-wd2z*-^@zxpu6#3s!e7^0kheq)j$cdd!b^8$y08c^p'
 DEBUG = True
 
 TEMPLATE_DEBUG = DEBUG
-
-ALLOWED_HOSTS = ['www.scholarnetapp.com']
+ADMINS = (
+    ('Daniel Kindimba', 'daniellykindimba@gmail.com'),
+)
+ALLOWED_HOSTS = ['*']
 
 SITE_ID = 1
 # Application definition
@@ -48,6 +50,7 @@ INSTALLED_APPS = (
     'manager',
     'storages',
     'corsheaders',
+    'tastypie',
 )
 TEMPLATES = [
     {
@@ -74,13 +77,12 @@ MIDDLEWARE_CLASSES = (
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
-    'middleware.crossdomainxhr.XsSharing',
 )
+X_FRAME_OPTIONS = 'DENY'
 
 ROOT_URLCONF = 'scholarnet.urls'
 
@@ -109,6 +111,8 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = False
+
+USE_ETAGS = True
 
 
 
@@ -174,17 +178,7 @@ LOGGING = {
 
 APPEND_SLASH = True
 
-
-ENDLESS_PAGINATION_PAGE_LIST_CALLABLE = True
-ENDLESS_PAGINATION_PREVIOUS_LABEL = '<'
-ENDLESS_PAGINATION_NEXT_LABEL = '>'
-ENDLESS_PAGINATION_FIRST_LABEL = '<<'
-ENDLESS_PAGINATION_LAST_LABEL = '>>'
-ENDLESS_PAGINATION_DEFAULT_CALLABLE_EXTREMES = 15
-ENDLESS_PAGINATION_DEFAULT_CALLABLE_AROUNDS = 15
-
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_REPLACE_HTTPS_REFERER = False
 CORS_ALLOW_METHODS = (
     'GET',
     'POST',
@@ -194,11 +188,18 @@ CORS_ALLOW_METHODS = (
     'OPTIONS'
 )
 
-CORS_ORIGIN_WHITELIST = (
-'www.scholarnetapp.com'
-)
+
+ENDLESS_PAGINATION_PAGE_LIST_CALLABLE = True
+ENDLESS_PAGINATION_PREVIOUS_LABEL = '<'
+ENDLESS_PAGINATION_NEXT_LABEL = '>'
+ENDLESS_PAGINATION_FIRST_LABEL = '<<'
+ENDLESS_PAGINATION_LAST_LABEL = '>>'
+ENDLESS_PAGINATION_DEFAULT_CALLABLE_EXTREMES = 15
+ENDLESS_PAGINATION_DEFAULT_CALLABLE_AROUNDS = 15
 
 
-# XS_SHARING_ALLOWED_ORIGINS = "www.scholarnetapp.com"
-
-# XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
+API_LIMIT_PER_PAGE = 50
+TASTYPIE_FULL_DEBUG = True
+TASTYPIE_CANNED_ERROR = "Oops, we broke it!"
+TASTYPIE_DEFAULT_FORMATS = ['json', 'xml', 'yaml', 'plist']
+TASTYPIE_ABSTRACT_APIKEY = False

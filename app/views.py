@@ -4,7 +4,7 @@
 ######################################################################################################
 from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
-from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse
+from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
 from endless_pagination.decorators import page_template
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -14,10 +14,13 @@ from django.contrib.auth.models import *
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+
+
+
+
 import json
 import urllib
 import random
-
 
 #######################################################################
 # A function for striping all the html tags from the passed text
@@ -96,6 +99,7 @@ def getFellowMembers(request):
 #######################################################################
 # A function which return the login View
 ###########################################################################################
+@csrf_exempt
 def login(request):
     if request.method == 'POST':
         if User.objects.filter(username=request.POST.get('username')).count() > 0:
@@ -151,34 +155,232 @@ def recommend(request, post_id):
 @login_required
 @page_template('home/entry_home_article_page.html')
 def home(request, template='home/index.html', extra_context=None):
-    # getting all the subject ids of the current user
-    user_course_id = []
+    """
+    Checking if the Userhas configured His/her Account
+    """
     if request.user.is_superuser:
         return HttpResponseRedirect("/manager/")
     else:
-        user_course_id.append(request.user.profile.course_id)
-        userRelatedCourses = Courses.objects.filter(course_category_id=request.user.profile.course.course_category_id,
-                                                    level_id=request.user.profile.course.level_id)
-        for userRel in userRelatedCourses:
-            user_course_id.append(userRel.id)
-    subject_ids = []
-    subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
-    for sub in subs:
-        subject_ids.append(sub.id)
+        if request.user.profile.course_id != None and \
+                        request.user.profile.year_id != None and \
+                request.user.profile.school_id != None and \
+                        request.user.profile.academic_id != None:
+            # getting all the subject ids of the current user
+            user_course_id = []
+            if request.user.is_superuser:
+                return HttpResponseRedirect("/manager/")
+            else:
+                user_course_id.append(request.user.profile.course_id)
+                userRelatedCourses = Courses.objects.filter(
+                    course_category_id=request.user.profile.course.course_category_id,
+                    level_id=request.user.profile.course.level_id)
+                for userRel in userRelatedCourses:
+                    user_course_id.append(userRel.id)
+            subject_ids = []
+            subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
+            for sub in subs:
+                subject_ids.append(sub.id)
 
-    ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+            ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+            context = {
+                'ugroup': get_usergroup(request),
+                "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id,
+                                                    year_id=request.user.profile.year_id),
+                "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
+                "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
+                "formset": ImageFormSet(queryset=Images.objects.none()),
+                "members": getFellowMembers(request),
+                "title": 'Home',
+            }
+            if extra_context is not None:
+                context.update(extra_context)
+            return render_to_response(template, context, context_instance=RequestContext(request))
+        else:
+            return HttpResponseRedirect("/app/setup/")
+
+##########################################################################################################
+# A function for handling the Profile Setup
+##########################################################################################################
+@login_required
+def setup(request):
+    if request.user.profile.school_id != None:
+        courses = Courses.objects.filter(school_id=request.user.profile.school_id)
+    else:
+        courses = ''
+
+    teacherSchools = ''
+    techerSSubjects = ''
+    for group in request.user.groups.all():
+        if group.name == 'Teacher':
+            teacherSchools = School.objects.all()
+            techerSSubjects = Subjects.objects.all()
+        else:
+            pass
+
     context = {
         'ugroup': get_usergroup(request),
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id, year_id=request.user.profile.year_id),
-        "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
-        "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
-        "formset": ImageFormSet(queryset=Images.objects.none()),
-        "members": getFellowMembers(request),
-        "title": 'Home',
+        'courses': courses,
+        'years': Year.objects.all(),
+        'academics': AcademicYear.objects.filter()[:10],
+        'teacherSchools': teacherSchools,
+        'techerSSubjects': techerSSubjects,
+        "title": 'Account Setup',
     }
-    if extra_context is not None:
-        context.update(extra_context)
-    return render_to_response(template, context, context_instance=RequestContext(request))
+    return render(request, "home/setup.html", context)
+
+###############################################################################################
+# A fucntion for Getting the List  of School Search for Setup
+###############################################################################################
+@csrf_exempt
+@login_required
+def setupGetSchool(request):
+    if request.method == 'POST':
+        context = ''
+        context += '<table class="table table-model-2 table-hover">'
+        context += '<thead>'
+        context += '<tr>'
+        context += '<th>School Name</th>'
+        context += '<th>Action</th>'
+        context += '</tr>'
+        context += '</thead>'
+
+        context += '<tbody>'
+        key = request.POST.get('search')
+        schools = School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+        if School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key)).count() > 0:
+            for school in schools:
+                context += '<tr>'
+                context += '<td>'+str(school.name)+' ('+str(school.code)+')</td>'
+                context += '<td><a href="javascript:;" onclick="addSchool('+str(school.id)+');" class="btn btn-green btn-sm pull-right">Add</a></td>'
+                context += '</tr>'
+        else:
+            context += '<script>'
+            context += 'alertify.warning("We can not Find it, Please Try again with another search keyword");'
+            context += '</script>'
+
+        context += '</tbody>'
+        context += '</table>'
+    else:
+        context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
+    return HttpResponse(context)
+
+
+
+#######################################################################################################
+# A function for getting all the school for teacher Configuration page
+#######################################################################################################
+@csrf_exempt
+@login_required
+def setupGetSchoolTeacher(request):
+    if request.method == 'POST':
+        context = ''
+        context += '<table class="table table-model-2 table-hover">'
+        context += '<thead>'
+        context += '<tr>'
+        context += '<th>School Name</th>'
+        context += '<th>Action</th>'
+        context += '</tr>'
+        context += '</thead>'
+
+        context += '<tbody>'
+        key = request.POST.get('searchTeachearSchool')
+        schools = School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+        if School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key)).count() > 0:
+            for school in schools:
+                context += '<tr>'
+                context += '<td>'+str(school.name)+' ('+str(school.code)+')</td>'
+                context += '<td><a href="javascript:;" onclick="addSchoolTeacher('+str(school.id)+');" class="btn btn-green btn-sm pull-right">Add</a></td>'
+                context += '</tr>'
+        else:
+            context += '<script>'
+            context += 'alertify.warning("We can not Find it, Please Try again with another search keyword");'
+            context += '</script>'
+
+        context += '</tbody>'
+        context += '</table>'
+    else:
+        context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
+    return HttpResponse(context)
+
+####################################################################################################
+# A fucntion for Adding a School To user from the Setup page
+####################################################################################################
+@login_required
+def setupAddSchool(request, schoolId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.school_id=schoolId
+    userObject.save()
+
+    schoolObject = School.objects.get(id=schoolId)
+    if UserProfile.objects.filter(user_id=request.user.id, school_id=schoolId).exists():
+        messages.success(request, str(schoolObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(schoolObject.name) + ' Failed to Add, please Try again')
+    return HttpResponseRedirect("/app/setup/")
+
+
+#####################################################################################################
+# A function for Adding a school to User for the Teacher in sthe setup page (Configurations)
+#####################################################################################################
+@login_required
+def setupAddSchoolTeacher(request, schoolId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.school_id = schoolId
+    userObject.save()
+    return HttpResponseRedirect("/app/setup/")
+
+
+####################################################################################################
+# A function for Adding the Study Year
+####################################################################################################
+@login_required
+def setupAddStudyYear(request, yearId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.year_id = yearId
+    userObject.save()
+
+    yearObject = Year.objects.get(id=yearId)
+    if UserProfile.objects.filter(user_id=request.user.id, year_id=yearId).exists():
+        messages.success(request, str(yearObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(yearObject.name) + ' Failed to Add, Please Try again')
+    return HttpResponseRedirect("/app/setup/")
+
+
+#######################################################################################################
+# A function for adding the Study Course for the setup page user configuration
+#######################################################################################################
+@login_required
+def setupAddCourse(request, courseId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.course_id=courseId
+    userObject.save()
+
+    courseObject = Courses.objects.get(id=courseId)
+    if UserProfile.objects.filter(user_id=request.user.id, course_id=courseId).exists():
+        messages.success(request, str(courseObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(courseObject.name) + ' Failed to Add')
+    return HttpResponseRedirect("/app/setup/")
+
+
+
+#######################################################################################################
+# A function for adding the Academic Year for the setup page user configuration
+#######################################################################################################
+@login_required
+def setupAddAcademicYear(request, academicId):
+    userObject = UserProfile.objects.get(user_id=request.user.id)
+    userObject.academic_id = academicId
+    userObject.save()
+
+    academicObject = AcademicYear.objects.get(id=academicId)
+    if UserProfile.objects.filter(user_id=request.user.id, academic_id=academicId).exists():
+        messages.success(request, str(academicObject.name) + ' Successfully Added')
+    else:
+        messages.error(request, str(academicObject.name) + ' Faield to Add')
+
+    return HttpResponseRedirect("/app/setup/")
 
 
 ######################################################################################
@@ -667,6 +869,66 @@ def register(request):
             user.username = internationalizePhone(request.POST.get('username'))
             user.set_password(request.POST.get('password'))
             user.is_active = False
+            if User.objects.filter(username=internationalizePhone(request.POST.get('username'))).exists():
+                messages.error(request, str(request.POST.get('username')) + ' Already Registered')
+                messages.info(request, 'Please Login or Register with Another Phone Number')
+                return HttpResponseRedirect("/register/")
+            else:
+                user.save()
+                role = request.POST.get('role')
+                group = Group.objects.get(name=role)
+                newUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                newUser.groups.add(group)
+
+                confirmationRequest = Recovery()
+                confirmationRequest.phone = internationalizePhone(request.POST.get('username'))
+                confirmationRequest.code = random.randint(1000, 10000)
+                if Recovery.objects.filter(phone=internationalizePhone(request.POST.get('username'))).count() > 0:
+                    oldRequest = Recovery.objects.get(phone=internationalizePhone(request.POST.get('username')))
+                    oldRequest.delete()
+                else:
+                    pass
+                confirmationRequest.save()
+
+            if user:
+                registeredUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
+                if registeredUser.is_active == False:
+                    return HttpResponseRedirect("/app/registrationConfiratiom/" +
+                                                str(internationalizePhone(request.POST.get('username')))+"/")
+                else:
+                    return HttpResponseRedirect("/app/registerSuccess/")
+            else:
+                return HttpResponseRedirect("/app/registerFail/")
+        else:
+            context = {
+                "title": "Registration",
+                "form": user_form,
+            }
+            return render(request, 'registration/register.html', context)
+    else:
+        context = {
+            "title": "Registration",
+            "form": registration(),
+            "years": Year.objects.all(),
+            "groups": Group.objects.filter(name='Student'),
+            "courses": Courses.objects.all().exclude(is_active=False),
+            "institutes": School.objects.all().exclude(is_active=False),
+        }
+        return render(request, 'registration/register.html', context)
+
+
+
+###################################################################################
+# A function Handling User(Teachers) Registration
+##################################################################################
+def registerTeacher(request):
+    if request.method == 'POST':
+        user_form = registration(data=request.POST)
+        if user_form.is_valid():
+            user = User()
+            user.username = internationalizePhone(request.POST.get('username'))
+            user.set_password(request.POST.get('password'))
+            user.is_active = False
             user.save()
 
             username = user_form.cleaned_data['username']
@@ -738,12 +1000,11 @@ def register(request):
             "title": "Registration",
             "form": registration(),
             "years": Year.objects.all(),
-            "groups": Group.objects.all().exclude(name='Adminstrators').exclude(name='School Adminstrator'),
+            "groups": Group.objects.filter(name='Teacher'),
             "courses": Courses.objects.all().exclude(is_active=False),
             "institutes": School.objects.all().exclude(is_active=False),
         }
-        return render(request, 'registration/register.html', context)
-
+        return render(request, 'registration/register_teacher.html', context)
 
 
 #####################################################################################################

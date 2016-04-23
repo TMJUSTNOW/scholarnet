@@ -59,6 +59,7 @@
 					 </center>
 				 </div>
 					<form method="post" role="form" action="/login/" id="login" class="login-form fade-in-effect1">
+						{% csrf_token %}
 						<center><h3>Login to ScholarNet</h3></center>
 						<div>
 							{% if messages %}
@@ -109,7 +110,7 @@
 						</div>
 						<div class="login-footer">
 							<div class="col-sm-6">
-								<a href="/app/register/" class="btn btn-gray">Sign Up</a>
+								<a href="/register/" class="btn btn-gray">Sign Up</a>
 							</div>
 							<div class="col-sm-6">
 								<a href="/user/password/reset/" class="btn btn-gray">Forgot your password?</a>

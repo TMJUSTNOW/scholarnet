@@ -20,7 +20,11 @@
 						<div class="user-details">
 
 							<h3>
-								<a href="extra-profile.html">{{ user.profile.display }}</a>
+								{% if user.profile.display != '' %}
+									<a href="javascript:;">{{ user.profile.display }}</a>
+								{% else %}
+									<a href="javascript:;">Scholar</a>
+								{% endif %}
 
 								<!-- Available statuses: is-online, is-idle, is-busy and is-offline -->
 								<span class="user-status is-online"></span>
@@ -31,7 +35,9 @@
 							</p>
 
 							<div class="user-links">
-								<a href="javascript:;" data-toggle="modal" data-target="#upgrading" class="btn btn-gray">Upgrade</a>
+								{% if user.profile.school_id != None and user.profile.year_id != None and user.profile.course_id != None %}
+									<a href="javascript:;" data-toggle="modal" data-target="#upgrading" class="btn btn-gray">Upgrade</a>
+								{% endif %}
 							</div>
 
 						</div>

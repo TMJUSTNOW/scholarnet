@@ -93,6 +93,7 @@ class Courses(models.Model):
     def __str__(self):
         return self.name
 
+Courses.subjects = property(lambda u: Subjects.objects.filter(course=u).count())
 
 #######################################################################################################
 # A class for Creating the table for storing the Academic Year that are supported
@@ -198,29 +199,16 @@ class Images(models.Model):
         verbose_name_plural = u'Images'
 
 
-########################################################################################################
-# A class for Creating ImageComments Table for Storing Institute Course Subjects Images Comments
-########################################################################################################
-class ImageComments(models.Model):
-    image = models.ForeignKey(Images)
-    comment = models.TextField()
-    user = models.ForeignKey(User)
-    registered = models.DateTimeField(auto_now_add=True, null=True)
-    updated = models.DateTimeField(auto_now=True, null=True)
-
-Images.comments = property(lambda u: ImageComments.objects.filter(image=u).count())
-
-
 ##########################################################################################################
 # A class for creating UserProfile Table for Registered user, to Store basic Information of users
 ###########################################################################################################
 class UserProfile(models.Model):
     user = models.OneToOneField(User, related_name='profile')
     display = models.CharField(max_length=50, null=False, blank=False)
-    school = models.ForeignKey(School)
-    year = models.ForeignKey(Year)
+    school = models.ForeignKey(School, null=True, blank=True)
+    year = models.ForeignKey(Year, null=True, blank=True)
     academic = models.ForeignKey(AcademicYear, null=True, blank=True)
-    course = models.ForeignKey(Courses)
+    course = models.ForeignKey(Courses, null=True, blank=True)
 
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
@@ -249,7 +237,6 @@ class Notifications(models.Model):
     description = models.TextField()
     school = models.ForeignKey(School)
     course = models.ForeignKey(Courses)
-    year = models.ForeignKey(Year)
 
 
 #####################################################################################################
@@ -262,3 +249,11 @@ class Recovery(models.Model):
 
     def __str__(self):
         return self.phone
+
+########################################################################################################
+# A class for Creating a Table for storing the Teacher Teaching Stubjects
+########################################################################################################
+class TeacherSubject(models.Model):
+    user = models.ForeignKey(User)
+    subject = models.ForeignKey(Subjects)
+    is_active = models.BooleanField(default=True)
