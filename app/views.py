@@ -214,11 +214,17 @@ def home(request, template='home/index.html', extra_context=None):
             postObject = Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated')
             obj_dict = dict([(obj.id, obj) for obj in postObject])
             imageObject = Images.objects.filter(description__in=postObject)
+            likesObject = Likes.objects.filter(description__in=postObject, user_id=request.user.id)
             relation_dict = {}
+            likes_dict = {}
             for obj in imageObject:
                 relation_dict.setdefault(obj.description_id, []).append(obj)
+                for ob in likesObject:
+                    likes_dict.setdefault(ob.description_id, []).append(ob)
             for id, related_items in relation_dict.items():
                 obj_dict[id].post_images = related_items
+            for id, liked_items in likes_dict.items():
+                obj_dict[id].faved = 'true'
             context = {
                 'ugroup': get_usergroup(request),
                 "subjects": getUserSubjects(request),
@@ -625,11 +631,17 @@ def subjectReader(request, subject_id, template='home/subject_reader.html', extr
     postObject = Descriptions.objects.filter(subject_id=subject_id).order_by('-updated')
     obj_dict = dict([(obj.id, obj) for obj in postObject])
     imageObject = Images.objects.filter(description__in=postObject)
+    likesObject = Likes.objects.filter(description__in=postObject, user_id=request.user.id)
     relation_dict = {}
+    likes_dict = {}
     for obj in imageObject:
         relation_dict.setdefault(obj.description_id, []).append(obj)
+        for ob in likesObject:
+            likes_dict.setdefault(ob.description_id, []).append(ob)
     for id, related_items in relation_dict.items():
         obj_dict[id].post_images = related_items
+    for id, liked_items in likes_dict.items():
+        obj_dict[id].faved = 'true'
     context = {
         "upgrop": get_usergroup(request),
         "subjects": getUserSubjects(request),
