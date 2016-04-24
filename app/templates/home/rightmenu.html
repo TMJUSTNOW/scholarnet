@@ -1,0 +1,35 @@
+<div id="chat" class="sidemenu sidemenu-right"><!-- start: Chat Section -->
+	<div class="chat-inner">
+		<h5 style="color:#777;padding: 10px">Members</h5>
+		<div id="members">
+			{% for member in members %}
+				{% if member.user.profile.display != '' %}
+					<a href="#"
+					   title="{% for group in member.user.groups.all %} {{ group}} {% endfor %}" style="display: block;height: 35px;">
+						{% if user.profile.photo == None %}
+							<img src="/static/images/dp.jpg"
+							 style="width: 35px; height: 35px; border-radius: 50%;float: left;margin-left: 10px" />
+						{% else %}
+							<img src="/static/{{ user.profile.photo }}"
+							 style="width: 35px; height: 35px; border-radius: 50%;float: left;margin-left: 10px" />
+						{% endif %}
+						<div style="displa: inline-block;margin-top: 5px;margin-left: 12px;float: left;margin-bottom: 10px">{{ member.user.profile.display }}</div>
+					</a>
+					<hr class="separator" />
+				{% else %}
+					<a href="#"
+					   title="{% for group in member.user.groups.all %} {{ group}} {% endfor %}" style="display: block;height: 35px;">
+						{% if user.profile.photo == None %}
+							<img src="/static/images/dp.jpg" style="width: 35px; height: 35px; border-radius: 50%;float: left;margin-left: 10px" />
+						{% else %}
+							<img src="/static/images/dp.jpg" style="width: 35px; height: 35px; border-radius: 50%;float: left;margin-left: 10px" />
+						{% endif %}
+						<div style="displa: inline-block;margin-top: 5px;margin-left: 12px;float: left;margin-bottom: 10px">{{ member.user.username }}</div>
+					</a>
+					<hr class="separator" />
+				{% endif %}
+			{% endfor %}
+		</div>
+	</div>
+	<!-- end: Chat Section -->
+</div>

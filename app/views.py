@@ -92,8 +92,33 @@ def get_usergroup(request):
 # A function for getting fellow Members
 #########################################################################
 def getFellowMembers(request):
-    members = UserProfile.objects.filter(course_id=request.user.profile.course.id)
+    course_id = []
+    for ugroup in request.user.groups.all():
+        if ugroup.name == 'Teacher':
+            userRelatedCourse = TeacherSubject.objects.filter(user_id=request.user.id)
+            for userRel in userRelatedCourse:
+                course_id.append(userRel.subject.course.id)
+        elif ugroup.name == 'Student':
+            course_id.append(request.user.profile.course.id)
+    members = UserProfile.objects.filter(course_id__in=course_id)
     return members
+
+
+###########################################################################
+# A function for Getting User subjects for Teachers and Students
+###########################################################################
+def getUserSubjects(request):
+    subjects = ''
+    for ugroup in request.user.groups.all():
+        if ugroup.name == 'Teacher':
+            subjects_ids = []
+            teacherSubjects = TeacherSubject.objects.filter(user_id=request.user.id)
+            for tsubject in teacherSubjects:
+                subjects_ids.append(tsubject.subject.id)
+            subjects = Subjects.objects.filter(id__in=subjects_ids)
+        elif ugroup.name == 'Student':
+            subjects = Subjects.objects.filter(course_id=request.user.profile.course.id)
+    return subjects
 
 
 #######################################################################
@@ -156,37 +181,48 @@ def recommend(request, post_id):
 @page_template('home/entry_home_article_page.html')
 def home(request, template='home/index.html', extra_context=None):
     """
-    Checking if the Userhas configured His/her Account
+    Checking if the User has configured His/her Account
     """
     if request.user.is_superuser:
         return HttpResponseRedirect("/manager/")
     else:
-        if request.user.profile.course_id != None and \
-                        request.user.profile.year_id != None and \
-                request.user.profile.school_id != None and \
-                        request.user.profile.academic_id != None:
+        if request.user.profile.school_id != None:
             # getting all the subject ids of the current user
             user_course_id = []
             if request.user.is_superuser:
                 return HttpResponseRedirect("/manager/")
             else:
                 user_course_id.append(request.user.profile.course_id)
-                userRelatedCourses = Courses.objects.filter(
-                    course_category_id=request.user.profile.course.course_category_id,
-                    level_id=request.user.profile.course.level_id)
-                for userRel in userRelatedCourses:
-                    user_course_id.append(userRel.id)
+                for ugroup in request.user.groups.all():
+                    if ugroup.name == 'Teacher':
+                        userRelatedCourses = TeacherSubject.objects.filter(user_id=request.user.id)
+                        for userRel in userRelatedCourses:
+                            user_course_id.append(userRel.subject.course.id)
+                    elif ugroup.name == 'Student':
+                        userRelatedCourses = Courses.objects.filter(
+                            course_category_id=request.user.profile.course.course_category_id,
+                            level_id=request.user.profile.course.level_id)
+                        for userRel in userRelatedCourses:
+                            user_course_id.append(userRel.id)
             subject_ids = []
-            subs = Subjects.objects.filter(course_id__in=user_course_id, year_id=request.user.profile.year_id)
+            subs = getUserSubjects(request)
             for sub in subs:
                 subject_ids.append(sub.id)
 
             ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
+
+            postObject = Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated')
+            obj_dict = dict([(obj.id, obj) for obj in postObject])
+            imageObject = Images.objects.filter(description__in=postObject)
+            relation_dict = {}
+            for obj in imageObject:
+                relation_dict.setdefault(obj.description_id, []).append(obj)
+            for id, related_items in relation_dict.items():
+                obj_dict[id].post_images = related_items
             context = {
                 'ugroup': get_usergroup(request),
-                "subjects": Subjects.objects.filter(course_id=request.user.profile.course.id,
-                                                    year_id=request.user.profile.year_id),
-                "posts": Descriptions.objects.filter(subject_id__in=subject_ids).order_by('-updated'),
+                "subjects": getUserSubjects(request),
+                "posts": postObject,
                 "totalPost": Descriptions.objects.filter(subject_id__in=subject_ids).count(),
                 "formset": ImageFormSet(queryset=Images.objects.none()),
                 "members": getFellowMembers(request),
@@ -212,8 +248,8 @@ def setup(request):
     techerSSubjects = ''
     for group in request.user.groups.all():
         if group.name == 'Teacher':
-            teacherSchools = School.objects.all()
-            techerSSubjects = Subjects.objects.all()
+            teacherSchools = TeacherSchool.objects.filter(user_id=request.user.id)
+            techerSSubjects = TeacherSubject.objects.filter(user_id=request.user.id)
         else:
             pass
 
@@ -251,7 +287,8 @@ def setupGetSchool(request):
             for school in schools:
                 context += '<tr>'
                 context += '<td>'+str(school.name)+' ('+str(school.code)+')</td>'
-                context += '<td><a href="javascript:;" onclick="addSchool('+str(school.id)+');" class="btn btn-green btn-sm pull-right">Add</a></td>'
+                context += '<td><a href="javascript:;" onclick="addSchool('+str(school.id)+\
+                           ');" class="btn btn-green btn-sm pull-right">Add</a></td>'
                 context += '</tr>'
         else:
             context += '<script>'
@@ -324,10 +361,138 @@ def setupAddSchool(request, schoolId):
 #####################################################################################################
 @login_required
 def setupAddSchoolTeacher(request, schoolId):
-    userObject = UserProfile.objects.get(user_id=request.user.id)
-    userObject.school_id = schoolId
-    userObject.save()
+    if request.user.profile.school_id == '':
+        userObject = UserProfile.objects.get(user_id=request.user.id)
+        userObject.school_id = schoolId
+        userObject.save()
+    else:
+        teacherSchoolObject = TeacherSchool()
+        teacherSchoolObject.user_id = request.user.id
+        teacherSchoolObject.school_id = schoolId
+        teacherSchoolObject.save()
     return HttpResponseRedirect("/app/setup/")
+
+
+#########################################################################################################
+# A function for Deleting the Teacher Subject
+#########################################################################################################
+@login_required
+def deleteTeacherSubject(request, subjectId):
+    if TeacherSubject.objects.filter(id=subjectId, user_id=request.user.id).count() > 0:
+        teacherSubjectObject = TeacherSubject.objects.get(id=subjectId)
+        teacherSubjectObject.delete()
+        if TeacherSubject.objects.filter(id=subjectId) == 0:
+            messages.success(request, str(teacherSubjectObject.subject.name) + ' Successfully Deleted')
+        else:
+            messages.error(request, str(teacherSubjectObject.subject.name) + ' Deletion Failed')
+    else:
+        messages.warning(request, 'No subject')
+    return HttpResponseRedirect("/app/setup/")
+
+
+
+#######################################################################################################
+# A function for Getting the List of Course for a school for Teacher configuration page
+#######################################################################################################
+@login_required
+def getCourseListTeacher(request, schoolId):
+    courses = Courses.objects.filter(school_id=schoolId)
+    context = ''
+    context += '<div class="form-group">'
+    context += '<input type="text" name="school" value="'+str(schoolId)+'" class="hidden" hidden required />'
+    context += '</div>'
+    context += '<div class="form-group">'
+    context += '<label>Course</label>'
+    context += '<select name="course" onchange="loadSubjects();" id="courseValue" class="form-control" required>'
+    context += '<option value="">Please Select </option>'
+    for course in courses:
+        context += '<option value="'+str(course.id)+'">'+str(course.name)+' ('+str(course.code)+')</option>'
+    context += '</select>'
+    context += '</div>'
+    context += '<div class="form-group">'
+    context += '<label>Academic Year</label>'
+    context += '<select name="academic" onchange="loadSubjects();" id="academicValue" class="form-control" required>'
+    context += '<option value="">Please Select ...</option>'
+    academics = AcademicYear.objects.all().exclude(is_active=False)
+    for academic in academics:
+        context += '<option value="'+str(academic.id)+'">'+str(academic.name)+\
+                   '/'+str(int(academic.name) + 1)+'</option>'
+    context += '</select>'
+    context += '</div>'
+
+    context += '<div class="form-group">'
+    context += '<label>Study Year</label>'
+    context += '<select name="year" onchange="loadSubjects();" id="yearValue" class="form-control" required>'
+    context += '<option value="">Please Select ...</option>'
+    years = Year.objects.all().exclude(is_active=False)
+    for year in years:
+        context += '<option value="'+str(year.id)+'">'+str(year.name)+' ('+str(year.code)+')</option>'
+    context += '</select>'
+    context += '</div>'
+
+    context += '<div class="form-group" id="subjectContainerChooser">'
+    context += '<label>Subject</label>'
+    context += '<select name="subject" class="form-control" required>'
+    context += '<option value="">Please Select ...</option>'
+    context += '</select>'
+    context += '</div>'
+
+    context += '<div id="subjectFetchStatus">'
+    context += '</div>'
+
+    context += '<div class="form-group">'
+    context += '<button type="submit" class="btn btn-green pull-right btn-lg">ADD</button>'
+    context += '</div>'
+
+    return HttpResponse(context)
+
+
+#####################################################################################################
+# A function for getting user subject list in the configuration page
+#####################################################################################################
+@login_required
+def loadTeacherSubjectList(request, courseId, academicId, yearId):
+    context = ''
+    context += '<label>Subject</label>'
+    context += '<select name="subject" class="form-control" required>'
+    context += '<option value="">Please Select ...</option>'
+    subjects = Subjects.objects.filter(course_id=courseId, year_id=yearId)
+    for subject in subjects:
+        context += '<option value="'+str(subject.id)+'">'+str(subject.name)+' ('+str(subject.code)+')</option>'
+    context += '</select>'
+    return HttpResponse(context)
+
+
+
+#######################################################################################################
+# A function for Adding a subject
+#######################################################################################################
+@login_required
+@csrf_exempt
+def teacherAddSubject(request):
+    if request.method == 'POST':
+        school = request.POST.get('school')
+        course = request.POST.get('course')
+        academic = request.POST.get('academic')
+        subject = request.POST.get('subject')
+        year = request.POST.get('year')
+        teacherSubject = TeacherSubject()
+        teacherSubject.user_id = request.user.id
+        teacherSubject.subject_id = subject
+        if TeacherSubject.objects.filter(user_id=request.user.id, subject_id=subject).count() == 0:
+            teacherSubject.save()
+
+
+        #Getting the subject object
+        subjectObj  = Subjects.objects.get(id=subject)
+        context = '<center><a href="javascript:;" onclick="addSubjectTeacherModal('+str(school)+');" ' \
+                  'class="btn btn-green btn-lg">Add New</a></center>'
+        if TeacherSubject.objects.filter(user_id=request.user.id, subject_id=subject).count() > 0:
+            context += '<script>alertify.success('+str(subjectObj.name)+' " Successfully Added");</script>'
+        else:
+            context += '<script>alertify.error("Faield to Register "'+str(subjectObj.name)+');</script>'
+    return HttpResponse(context)
+
 
 
 ####################################################################################################
@@ -416,12 +581,22 @@ def reader(request, post_id):
             return HttpResponseRedirect("/app/error/")
     else:
         return HttpResponseRedirect("/app/error/")
+
+
+    postObject = Descriptions.objects.filter(id=post_id)
+    obj_dict = dict([(obj.id, obj) for obj in postObject])
+    imageObject = Images.objects.filter(description__in=postObject)
+    relation_dict = {}
+    for obj in imageObject:
+        relation_dict.setdefault(obj.description_id, []).append(obj)
+    for id, related_items in relation_dict.items():
+        obj_dict[id].post_images = related_items
     context = {
         'ugroup': get_usergroup(request),
         "post_id": post_id,
         "postObj": postObj,
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id, year_id=request.user.profile.year_id),
-        "posts": Descriptions.objects.filter(id=post_id),
+        "subjects": getUserSubjects(request),
+        "posts": postObject,
         "formset": ImageFormSet(queryset=Images.objects.none()),
         "comments": DescriptionsComments.objects.filter(description_id=post_id).order_by('-updated')[:10],
         "totalComments": DescriptionsComments.objects.filter(description_id=post_id).count(),
@@ -435,22 +610,30 @@ def reader(request, post_id):
 # A function for Retreiving partuclar Subjects Posts
 #######################################################################################
 @login_required
-@page_template('home/entry_subject_article_page.html')
+@page_template('home/entry_home_article_page.html')
 def subjectReader(request, subject_id, template='home/subject_reader.html', extra_context=None):
     ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
     #getting all subject_id in which user is studying
-    subjectsObj = Subjects.objects.filter(course_id=request.user.profile.course_id)
     subjects_ids = []
-    for subjectsO in subjectsObj:
+    for subjectsO in getUserSubjects(request):
         subjects_ids.append(subjectsO.id)
     if int(subject_id) in subjects_ids:
         subject = Subjects.objects.get(id=subject_id)
     else:
         return HttpResponseRedirect("/app/error/")
+
+    postObject = Descriptions.objects.filter(subject_id=subject_id).order_by('-updated')
+    obj_dict = dict([(obj.id, obj) for obj in postObject])
+    imageObject = Images.objects.filter(description__in=postObject)
+    relation_dict = {}
+    for obj in imageObject:
+        relation_dict.setdefault(obj.description_id, []).append(obj)
+    for id, related_items in relation_dict.items():
+        obj_dict[id].post_images = related_items
     context = {
         "upgrop": get_usergroup(request),
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id, year_id=request.user.profile.year_id),
-        "posts": Descriptions.objects.filter(subject_id=subject_id).order_by('-updated'),
+        "subjects": getUserSubjects(request),
+        "posts": postObject,
         "subject_name": subject.name,
         "totalPost": Descriptions.objects.filter(subject_id=subject_id).count(),
         "formset": ImageFormSet(queryset=Images.objects.none()),
@@ -473,7 +656,7 @@ def fake(request):
         subjects_ids.append(subjectsO.id)
     context = {
         "upgrop": get_usergroup(request),
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id, year_id=request.user.profile.year_id),
+        "subjects": getUserSubjects(request),
         "members": getFellowMembers(request),
         "subjectObj": subjects_ids,
         "title": "Wrong Access",

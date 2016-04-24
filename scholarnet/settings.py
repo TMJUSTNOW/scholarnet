@@ -28,6 +28,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 ADMINS = (
     ('Daniel Kindimba', 'daniellykindimba@gmail.com'),
+    ('Emmanuel Meena', 'mcamocci@gmail.com'),
 )
 ALLOWED_HOSTS = ['*']
 
@@ -82,7 +83,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.contrib.redirects.middleware.RedirectFallbackMiddleware',
 )
-X_FRAME_OPTIONS = 'DENY'
+# X_FRAME_OPTIONS = 'DENY'
 
 ROOT_URLCONF = 'scholarnet.urls'
 
@@ -111,8 +112,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = False
-
-USE_ETAGS = True
 
 
 
@@ -176,7 +175,7 @@ LOGGING = {
     }
 }
 
-APPEND_SLASH = True
+APPEND_SLASH = False
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_METHODS = (

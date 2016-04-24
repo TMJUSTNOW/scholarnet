@@ -1,95 +1,48 @@
 {% load endless %}
-<div class="sorted" id="tiles">
-    {% paginate posts %}
-    {% if totalPost > 0 %}
+
+{% if totalPost <= 0 %}
+    <div class="sorted" id="tiles">
+        <div style="font-size: 20px; color:#999;text-align: center;margin-top:60px;">
+            You have no articles yet...click the button below to create one
+        </div>
+    </div>
+{% else %}
     {% for post in posts %}
-    <div class="col-md-8 col-md-offset-2 posts">
-        <div class="panel panel-color panel-info">
-            <!-- panel head -->
-            <div class="panel-heading">
-                <div class="col-md-2 col-sm-2 text-left">
-                    <img src="/static/images/user.jpg" class="img img-circle img-responsive"/>
-                    <span>{{ post.user.profile.display }}</span>
-                </div>
-                <div class="col-md-10 col-sm-10 text-right">
-                    <div class="panel-title">
-                        <span style="font-size:18px;">
-                            <b>{{ post.subject.course.school.name|truncatewords:4 }}&nbsp;&nbsp;
-                                <a href="javascript:;" data-toggle="tooltip" data-placement="top" title="{{ post.subject.course.school.name }}"><i class="fa fa-star text-white"></i></a></b>
-                        </span><br />
-                        <span><b>{{ post.subject.course }}</b></span><br />
-                        <span><h6>{{ post.subject }}</h6></span><br />
-                        <span class="badge">{{ post.updated }}</span>
-                    </div>
-                </div>
-            </div>
-            <!-- panel body -->
-            <a href="/app/reader/{{ post.id }}/">
-                <div class="panel-body">
-                    <div>
-                        <p style="font-size: 18px;">
-                            {{ post.description|safe|truncatewords:30 }}
-                        </p>
-                    </div>
-                    <div id="image_{{ post.id }}"></div>
-                    <!--- Javascript for Loading the images -->
-                    <script>
-					jQuery.ajax({
-                        type: "GET",
-                        url: "/app/imageAjaxLoader/{{ post.id }}/",
-                        dataType: "html",
-                        success: function(data) {
-                            jQuery("#image_"+{{ post.id }}).html(data);
-                        }
-                    });
-					</script>
-                </div>
-            </a>
-            <div class=""><hr />
-                <a href="javascript:;" onclick="recommend('{{ post.id }}');" data-toggle="tooltip" data-placement="top" title="Recommend" class="btn btn-icon btn-xs btn-green">
-                    <i class="fa-thumbs-o-up">&nbsp;&nbsp;
-                        <span id="recomment_{{ post.id }}">{{ post.recommend }}</span>
-                    </i>
-                </a>
-                <a href="javascript:;" data-toggle="tooltip" data-placement="top" title="Comments" class="btn btn-icon btn-green btn-xs">
-                    <i class="fa fa-comments">&nbsp;&nbsp;
-                        <span>{{ post.comments }}</span>
-                    </i>
-                </a>
-                {% if user.id == post.user_id %}
-                <a href="javascript:;" data-id="{{ post.id }}" data-toggle="tooltip" data-placement="top" title="Delete" class="postDelete btn btn-icon btn-xs btn-red pull-right">
-                    <i class="fa fa-trash"></i>
-                </a>
-                {% endif %}
-                <a href="/app/reader/{{ post.id }}/" data-toggle="tooltip" data-placement="top" title="Open" class="btn btn-icon btn-green btn-xs pull-right">
-                    <i class="fa fa-folder-open-o">&nbsp;&nbsp;Open</i>
-                </a>
-            </div>
-        </div>
-    </div>
+        <div class="card col m6">
+						<div style="height: 60px;padding: 15px" class="gre">
+							<div class="left item-avatar one-line">
+								{% if user.profile.photo == None %}
+                                    <img src="/static/images/dp.jpg" class="circle" width="35" />
+                                {% else %}
+                                    <img src="/static/{{ user.profile.photo }}" class="circle" width="35" />
+                                {% endif %}
+								<p>{{ post.user.profile.display }}</p>
+							</div>
+						</div>
+						<div class="card-content">
+                            {{ post.description|truncatewords:50 }}
+						</div>
+						<div class="card-image">
+                            {% for image in post.post_images|slice:'1' %}
+							    <img src="/static/{{ image.url }}" class="" style1="height: 220px">
+                            {% endfor %}
+						</div>
+						<div class="card-action" style="paddin: 0;padding-right:0">
+							<!-- <div class="righ" style="margin-bottom: 10px"> -->
+								<a class="btn-flat grey-text btn-fav" style="padding: 0 5px;overflow: visible;position: relative;" href="#">
+									<i class="zmdi zmdi-favorite-outline true {{faved}}" style="font-size:39px"></i>
+									<span class="grey-text text-darken-4" style="top:5px;right:-8px">{{ post.recommend }}</span>
+								</a>
+								<a class="btn-flat grey-text" style="padding: 0 5px;overflow: visible;position: relative;" href="#">
+									<i class="zmdi zmdi-comment-alt-text"></i>
+									<span class="a-badge blue">{{ post.comments }}</span>
+								</a>
+							<!-- </div> -->
+						</div>
+					</div>
     {% endfor %}
-    {% else %}
-    <div class="col-md-8 col-md-offset-2">
-        <div class="alert alert-info">
-            <center>
-                <h3>No Article Posted.....</h3>
-            </center>
-        </div>
-    </div>
-    {% endif %}
-        <div class="col-md-8 col-md-offset-2">
-            {% get_pages %}
-               <center>
-                    <ul class="pagination">
-                        <li>{{ pages.previous }}</li>
-                        {% for page in pages %}
-                        <li class="{% if page.is_current %} active  {% endif %}">
-                            <a href="{{ page.path }}">{{ page.number }}</a>
-                        </li>
-                        {% endfor %}
-                        <li>{{ pages.next }}</li>
-                    </ul>
-               </center>
-        </div>
-</div>
+{% endif %}
+
+
+
 

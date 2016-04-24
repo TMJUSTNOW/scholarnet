@@ -1,109 +1,70 @@
-<nav class="navbar user-info-navbar"  role="navigation"><!-- User Info, Notifications and Menu Bar -->
-
-				<!-- Left links for user info navbar -->
-				<ul class="user-info-menu left-links list-inline list-unstyled">
-
-					<li class="hidden-sm hidden-xs">
-						<a href="#" data-toggle="sidebar">
-							<i class="fa-bars"></i>
-						</a>
-					</li>
-					{% for group in user.groups.all %}
-						{% if group.name == 'School Adminstrator' %}
-							<li class="hover-line topNav">
-								<a href="/app/manageSchool/">
-									<span class="title">Manage School</span>
-								</a>
-							</li>
-						{% endif %}
-					{% endfor %}
-
-					{% if user.profile.school_id != None and user.profile.course_id != None and user.profile.year_id != None %}
-						<li class="hover-line topNav">
-							<a href="/app/linker/" data-toggle="tooltip" data-placement="bottom" title="Connect With Other Universities/Colleges/Schools">
-								<span class="title">Linker</span>
-							</a>
-						</li>
-					{% endif %}
-					<!--<li class="dropdown hover-line">-->
-						<!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">-->
-							<!--<i class="fa-bell-o"></i>-->
-							<!--<span class="badge badge-info">0</span>-->
-						<!--</a>-->
-
-						<!--<ul class="dropdown-menu notifications">-->
-							<!--<li class="top">-->
-								<!--<p class="small">-->
-									<!--<a href="#" class="pull-right">Mark all Read</a>-->
-									<!--You have <strong>3</strong> new notifications.-->
-								<!--</p>-->
-							<!--</li>-->
-
-							<!--<li>-->
-								<!--<ul class="dropdown-menu-list list-unstyled ps-scrollbar">-->
-									<!--<li class="active notification-success">-->
-										<!--<a href="#">-->
-											<!--<i class="fa-user"></i>-->
-
-											<!--<span class="line">-->
-												<!--<strong>New user registered</strong>-->
-											<!--</span>-->
-
-											<!--<span class="line small time">-->
-												<!--30 seconds ago-->
-											<!--</span>-->
-										<!--</a>-->
-									<!--</li>-->
-								<!--</ul>-->
-							<!--</li>-->
-
-							<!--<li class="external">-->
-								<!--<a href="#">-->
-									<!--<span>View all notifications</span>-->
-									<!--<i class="fa-link-ext"></i>-->
-								<!--</a>-->
-							<!--</li>-->
-						<!--</ul>-->
-					<!--</li>-->
-
-				</ul>
+<nav class="navbar blue" style="position: fixed;z-index: 9">
+	<ul class="user-info-menu left-links list-inline list-unstyled">
+		<!-- <li class="hidden-sm hidden-xs">
+			<a href="#" data-toggle="sidebar">
+				<i class="zmdi zmdi-menu"></i>
+			</a>
+		</li> -->
+		<li style="margin-right: 30px">
+			<a href="#" data-toggle="sidebar">
+				<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
+			</a>
+		</li>
+		<li style="margin-left: 195px">
+			<form name="userinfo_search_form" method="get" action="extra-search.html">
+				<div id="searchbar">
+					<input type="text" name="s" placeholder="Type to search..." />
+					<!-- <button type="submit" class="btn btn-link">
+						<i class="linecons-search"></i>
+					</button> -->
+				</div>
+			</form>
+		</li>
+	</ul>
 
 
-				<!-- Right links for user info navbar -->
-				<ul class="user-info-menu right-links list-inline list-unstyled">
-					<li class="search-form"><!-- You can add "always-visible" to show make the search input visible -->
-						<form name="userinfo_search_form" method="get" action="extra-search.html">
-							<input type="text" name="s" class="form-control search-field" placeholder="Type to search..." />
-							<button type="submit" class="btn btn-link">
-								<i class="linecons-search"></i>
-							</button>
-						</form>
-					</li>
-					<li class="dropdown user-profile hover-line topNav">
-						<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-							<img src="/static/images/user.jpg" class="img-circle img-inline userpic-32" width="28" />
-							<span>
-								{{ user.profile.display }}
-								<i class="fa-angle-down"></i>
-							</span>
-						</a>
+	<!-- Right links for user info navbar -->
+	<ul class="right">
+		<!-- <li>
+			<a href="#" data-toggle="user-info-menu">
+				<i class="zmdi zmdi-notifications-active"></i>
+				<span class="badge badge-success">7</span>
+			</a>
+		</li> -->
+		<li class="dropdown user-profile hover-line topNav">
+			<a href="#" class="dropdown-toggle" data-toggle="dropdown">
+				{% if user.profile.photo == None %}
+					<img src="/static/images/dp.jpg" class="img-circle img-inline userpic-32"
+						 style="width: 40px; height: 40px; border-radius: 50%;margin-top:10px" />&nbsp;
+				{% else %}
+					<img src="/static/{{ user.profile.photo }}" class="img-circle img-inline userpic-32"
+						 style="width: 40px; height: 40px; border-radius: 50%;margin-top:10px" />&nbsp;
+				{% endif %}
+				<span style="display: inline-block;position: relative;top:-12px">
+					{{ user.profile.display }}
+				</span>
+			</a>
 
-						<ul class="dropdown-menu user-profile-menu list-unstyled">
-							<li class="last">
-								<a href="/logout/">
-									<i class="fa-lock"></i>
-									Logout
-								</a>
-							</li>
-						</ul>
-					</li>
+			<ul class="dropdown-menu user-profile-menu">
+				<!-- <li>
+					<a href="/logout/">
+						Profile
+					</a>
+				</li> -->
+				<li style="width: 100%;">
+					<a href="/logout/" style="width: inherit;height: 30px; line-height: 30px">
+						Logout
+					</a>
+				</li>
+			</ul>
+		</li>
 
-					<li>
-						<a href="#" data-toggle="chat" title="Groups">
-							<i class="fa fa-users"></i>
-						</a>
-					</li>
+		<li>
+			<a href="#" data-toggle="chat" title="Groups">
+				<i class="fa fa-users"></i>
+			</a>
+		</li>
 
-				</ul>
+	</ul>
 
-			</nav>
+</nav>

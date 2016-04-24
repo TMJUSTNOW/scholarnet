@@ -38,6 +38,28 @@ urlpatterns = [
     ######################################################################################
     url(r'^setupAddSchoolTeacher/([0-9]+)/$', views.setupAddSchoolTeacher, name='setupAddSchoolTeacher'),
 
+    ######################################################################################################
+    # Url for Loading the Teacher Course List
+    ######################################################################################################
+    url(r'^getCourseListTeacher/([0-9]+)/$', views.getCourseListTeacher, name='getCourseListTeacher'),
+
+    ##########################################################################################
+    # Url for loading Subject list for Teacher Configuration
+    ##########################################################################################
+    url(r'^loadTeacherSubjectList/([0-9]+)/([0-9]+)/([0-9]+)/$',
+        views.loadTeacherSubjectList, name='loadTeacherSubjectList'),
+
+    ##########################################################################################
+    # Url for Adding Subject for the Teacher in the Configuration Page
+    ##########################################################################################
+    url(r'^teacherAddSubject/$', views.teacherAddSubject, name='teacherAddSubject'),
+
+
+    #######################################################################################################
+    # Url for Deleting the Teacher subject in the configuration panel for teachers
+    #######################################################################################################
+    url(r'^deleteTeacherSubject/([0-9]+)/$', views.deleteTeacherSubject, name='deleteTeacherSubject'),
+
     ###########################################################################################
     # url for aDding the Study Year for Setup Page
     ############################################################################################

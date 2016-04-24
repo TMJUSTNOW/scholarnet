@@ -209,6 +209,7 @@ class UserProfile(models.Model):
     year = models.ForeignKey(Year, null=True, blank=True)
     academic = models.ForeignKey(AcademicYear, null=True, blank=True)
     course = models.ForeignKey(Courses, null=True, blank=True)
+    photo = models.ImageField(upload_to="images/user/%Y/%m/%d", null=True, blank=True)
 
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
@@ -256,4 +257,14 @@ class Recovery(models.Model):
 class TeacherSubject(models.Model):
     user = models.ForeignKey(User)
     subject = models.ForeignKey(Subjects)
+    is_active = models.BooleanField(default=True)
+
+
+
+########################################################################################################
+# A class for creating table for storing the TEacher Schools
+########################################################################################################
+class TeacherSchool(models.Model):
+    user = models.ForeignKey(User)
+    school = models.ForeignKey(School)
     is_active = models.BooleanField(default=True)

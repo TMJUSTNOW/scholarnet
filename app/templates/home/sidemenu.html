@@ -1,5 +1,5 @@
-<div class="sidebar-menu toggle-others fixed">
-			<div class="sidebar-menu-inner">
+<div class="sidebar-menu toggle-others fixed" style="background:#0D47A1;">
+			<div class="sidebar-menu-inner" style="background:#0D47A1;">
 
 				<header class="logo-env">
 
@@ -39,19 +39,13 @@
 
 
 				<ul id="main-menu" class="main-menu">
-					<!-- add class "multiple-expanded" to allow multiple submenus to open -->
-					<!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
-					<li>
-						<a href="/app/home/">
-							<img avatar="Home" class="img img-circle" width="28" />
-							<span class="title">Home</span>
-						</a>
-					</li>
 					{% for subject in subjects %}
-						<li>
+						<li style="border:0px;" class="withripple">
 							<a href="/app/subjectReader/{{ subject.id }}/" data-toggle="tooltip" data-placement="top" title="{{ subject.name }}">
-								<img avatar="{{ subject.name|truncatewords:1 }}" class="img img-circle" width="28" />
-								<span class="title">{{ subject.name|truncatewords:3 }}</span>
+
+									<img avatar="{{ subject.name|slice:'1' }}" class="img img-circle" width="28" />
+									<span class="title" style="color:white;font-size:12px;">{{ subject.name|truncatewords:3 }}</span>
+
 							</a>
 						</li>
 					{% endfor %}

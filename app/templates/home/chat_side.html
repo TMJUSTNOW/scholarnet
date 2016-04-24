@@ -6,37 +6,32 @@
 			</a>
 			Members
 		</h2>
-		<div class="chat-group">
-			<div class="panel panel-default panel-tabs"><!-- Add class "collapsed" to minimize the panel -->
-				<div class="panel-heading">
-					<div class="panel-options">
 
-					</div>
-				</div>
-				<div class="panel-body">
-					<div class="tab-content">
-						<div class="tab-pane active" id="members">
-							{% for member in members %}
-								{% if member.user.profile.display != '' %}
-									<a href="#" data-toggle="tooltip" data-placement="top"
-									   title="{% for group in member.user.groups.all %} {{ group}} {% endfor %}">
-										<img src="/static/images/user.jpg" class="img img-circle" width="35" />
-										<span>{{ member.user.profile.display }}</span>
-									</a><hr />
-								{% else %}
-									<a href="#" data-toggle="tooltip" data-placement="top"
-									   title="{{ member.user.groups.all }}">
-										<img src="/static/images/user.jpg" class="img img-circle" width="35" />
-										<span>{{ member.user.username }}</span>
-									</a><hr />
-								{% endif %}
-							{% endfor %}
-						</div>
-						<div class="tab-pane" id="groups">
-
-						</div>
-					</div>
-				</div>
+		<div class="row" style="margin-top:10px;">
+			<div class="col-md-10 col-md-offset-1" id="members">
+				{% for member in members %}
+				{% if member.user.profile.display != '' %}
+				<a href="#" data-toggle="tooltip" data-placement="right"
+				   title="{% for group in member.user.groups.all %} {{ group}}.{% endfor %}">
+					{% if user.profile.photo == None %}
+						<img src="/static/images/user.jpg" class="img-circle" width="35" />
+					{% else %}
+						<img src="/static/{{ user.profile.photo }}" class="img-circle" width="35" />
+					{% endif %}
+					<span>{{ member.user.profile.display }}</span>
+				</a><hr />
+				{% else %}
+				<a href="#" data-toggle="tooltip" data-placement="right"
+				   title="{% for group in member.user.groups.all %} {{ group}},{% endfor %}">
+					{% if user.profile.photo == None %}
+						<img src="/static/images/user.jpg" class="img-circle" width="35" />
+					{% else %}
+						<img src="/static/{{ user.profile.photo }}" class="img-circle" width="35" />
+					{% endif %}
+					<span>{{ member.user.username }}</span>
+				</a><hr />
+				{% endif %}
+				{% endfor %}
 			</div>
 		</div>
 	</div>

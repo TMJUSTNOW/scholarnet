@@ -8,12 +8,13 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from functools import wraps
 from django.middleware.csrf import CsrfViewMiddleware, get_token
 from django.utils.decorators import available_attrs, decorator_from_middleware
+from django.views.decorators.clickjacking import xframe_options_deny
 from django.contrib.auth.models import *
 from django.core import serializers
 from app.views import *
 from django.contrib import auth
 from django.views.decorators.cache import never_cache
-# from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt
 from functools import wraps
 import json
 
@@ -203,7 +204,8 @@ def getDisplayName(request):
 ####################################################################################################################
 # function for registering a post
 ####################################################################################################################
-# @csrf_exempt
+@xframe_options_deny
+@csrf_exempt
 def setPost(request):
     if request.method == 'POST':
         user = internationalizePhone(request.POST.get('user'))
@@ -230,16 +232,16 @@ def setPost(request):
             if Images.objects.filter(description_id=articleObj.id, name=request.FILES[filename].name).count() == 0:
                 newImage.save()
         response = HttpResponse(json.dumps({"message": "Successfully Post"}))
-        response["Access-Control-Allow-Origin"] = "*"
-        response["Access-Control-Allow-Methods"] = "POST"
-        response["Access-Control-Max-Age"] = "1000"
-        response["Access-Control-Allow-Headers"] = "*"
+        # response["Access-Control-Allow-Origin"] = "*"
+        # response["Access-Control-Allow-Methods"] = "POST"
+        # response["Access-Control-Max-Age"] = "1000"
+        # response["Access-Control-Allow-Headers"] = "*"
     else:
         response = HttpResponse(json.dumps({"message": "Failed Post"}))
-        response["Access-Control-Allow-Origin"] = "*"
-        response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-        response["Access-Control-Max-Age"] = "1000"
-        response["Access-Control-Allow-Headers"] = "*"
+        # response["Access-Control-Allow-Origin"] = "*"
+        # response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
+        # response["Access-Control-Max-Age"] = "1000"
+        # response["Access-Control-Allow-Headers"] = "*"
 
     return HttpResponse(response)
 
