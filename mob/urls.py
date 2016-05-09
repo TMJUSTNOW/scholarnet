@@ -42,6 +42,12 @@ urlpatterns = [
     ############################################################################
     url(r'^postSubjectList/$', views.postSubjectList, name='postSubjectList'),
 
+
+    ##############################################################################
+    # Url for returning all the post list for the mobile user
+    ###############################################################################
+    url(r'^postSubjectListAll/$', views.postSubjectListAll, name='postSubjectListAll'),
+
     #############################################################################
     # Url for retreiving all the comments of the post
     #############################################################################

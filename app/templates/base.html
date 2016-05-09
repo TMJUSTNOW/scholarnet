@@ -9,8 +9,8 @@
 	{% block main_css %}
 		<link rel="stylesheet" href="{% static 'materialize/css/materialize.min.css' %}">
 		<link rel="stylesheet" href="{% static 'materialize/css/animate.css' %}">
-		<link rel="stylesheet" href="{% static 'materialize/css/main.css' %}">
 		<link rel="stylesheet" href="{% static 'materialize/css/material-design-iconic-font.min.css' %}">
+		<link rel="stylesheet" href="{% static 'materialize/css/main.css' %}">
 		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!--[if lt IE 9]>
 			<script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -22,14 +22,166 @@
     {% block css %}
     {% endblock %}
 </head>
-<body class="page-body">
-	{% include "home/topnav.html" %}
-	{% include "home/leftmenu.html" %}
-	
-	{% block body %}
-	{% endblock %}
+<body>
+<style>
+	/*********************************
+	END FLEX ALIGNMENT STUFF
+*********************************/
 
-	{% include "home/rightmenu.html" %}
+	.layout-flex{
+		display: -webkit-flex;
+		display: flex;
+	}
+	.layout-flex.center-center{
+		justify-content: center;
+		align-items: center;
+	}
+
+	.layout-flex.as-row{
+		flex-direction: row;
+	}
+
+	.layout-flex.as-column{
+		flex-direction: column;
+	}
+
+	/*HORIZONTAL ALIGNMENT*/
+	.layout-flex.h-start{
+		justify-content:flex-start;
+	}
+	.layout-flex.h-end{
+		justify-content:flex-end;
+	}
+	.layout-flex.h-space-between{
+		justify-content:space-between;
+	}
+	.layout-flex.h-space-around{
+		justify-content:space-around;
+	}
+
+
+	/*VERTICAL ALIGNMENT*/
+	.layout-flex.v-center{
+		align-items: center;
+	}
+	.layout-flex.v-start{
+		align-items: flex-start;
+	}
+	.layout-flex.v-end{
+		align-items: flex-end;
+	}
+
+	/*CHILD ALIGNMENT OVERRIDES*/
+
+	/*VERTICAL ALIGNMENT*/
+	.self-v-center{
+		align-self: center;
+	}
+	.self-v-start{
+		align-self: flex-start;
+	}
+	.self-v-end{
+		align-self: flex-end;
+	}
+
+	/*HORIZONTAL ALIGNMENT*/
+	.self-h-center{
+		justify-self: center;
+	}
+	.self-h-start{
+		justify-self: flex-start;
+	}
+	.self-h-end{
+		justify-self: flex-end;
+	}
+
+	/*********************************
+        END FLEX ALIGNMENT STUFF
+    *********************************/
+
+
+	.some-menu-container{
+		display: none;
+		position: fixed;
+		top: 0; left: 0;
+		width: 100%;height: 100%;
+		background: rgba(0,0,0,0);
+		z-index: 9999;
+		/*pointer-events: none;*/
+	}
+	.some-menu {
+		position: absolute;
+		width: 170px;
+		padding: 1px 10px;
+		/*top:65px;right: 20px;*/
+		background: #f6f6f6;
+		box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .26);
+		opacity: 0;
+		will-change:opacity;
+
+		-webkit-transition: opacity 0.2s;
+		-moz-transition: opacity 0.2s;
+		-ms-transition: opacity 0.2s;
+		-o-transition: opacity 0.2s;
+		transition: opacity 0.2s;
+	}
+	.some-menu.from-top-right{
+		-webkit-transition: transform 0.2s;
+		-moz-transition: transform 0.2s;
+		-ms-transition: transform 0.2s;
+		-o-transition: transform 0.2s;
+		transition: transform 0.2s;
+
+		-webkit-transform: translate3d(10%,-5%,0);
+		transform: translate3d(10%,-5%,0);
+	}
+	.some-menu.from-down{
+		-webkit-transition: transform 0.2s;
+		-moz-transition: transform 0.2s;
+		-ms-transition: transform 0.2s;
+		-o-transition: transform 0.2s;
+		transition: transform 0.2s;
+
+		-webkit-transform: translate3d(0,10%,0);
+		transform: translate3d(0,10%,0);
+	}
+	.some-menu.open{
+		opacity: 1;
+
+		-webkit-transform: none;
+		transform: none;
+	}
+	.some-menu > div{
+		margin:10px 0;width: 100%;
+		min-height:30px;
+		color: #989898 !important;
+	}
+	.some-menu div i{
+		width: 25px;
+	}
+	.some-menu div a{
+		margin-left:10px;
+		color: #989898 !important;
+	}
+</style>
+
+	{% include "home/topnav.html" %}
+
+	<div class="row">
+		<div id="left-menu" style="padding-top: 60px" class="col m4 l2 hide-on-med-and-down sidemenu">
+			{% include "home/leftmenu.html" %}
+		</div>
+
+		<div class="col m8 offset-m2 l8 offset-l1" style="margin-top: 60px; position: absolute; height:calc(100% - 60px);">
+			<div style="height: 20px" class="hide-on-small-only">&nbsp;</div>
+			{% block body %} {% endblock %}
+		</div>
+
+		<div style="padding: 17px;padding-top: 80px;box-shadow: 0 0 1px rgba(0, 0, 0,0.26);overflow: auto" class="col l3 sidemenu sidemenu-right hide-on-med-and-down">{% include "home/rightmenu.html" %}</div>
+	</div>
+
+
+
 
 	<div class="modal fade" id="aboutUs">
 		<div class="modal-dialog">
@@ -124,104 +276,147 @@
 		<script src="{% static 'web/js/jquery.imagesloaded.js' %}"></script>
 		<script src="{% static 'materialize/js/materialize.min.js' %}"></script>
 		<script src="{% static 'materialize/js/masonry.pkgd.min.js' %}"></script>
+		<script src="{% static 'materialize/js/jquery.nicescroll.min.js' %}"></script>
+		<script src="{% static 'materialize/js/jquery.scrollTo.min.js' %}"></script>
+		<script src="{% static 'materialize/js/jquery.autogrowtextarea.min.js' %}"></script>
 	{% endblock %}
 
 
     {% block scripts %}
     {% endblock %}
 	<script type="text/javascript">
-	$(".development").on("click", function(){
-		swal({
-		  title: "Feature On-Development!",
-		  text: "We are sorry, Next Version this feature will be incorporated",
+		$(document).ready(function(){
+			$(".sidemenu").niceScroll({cursorcolor:"#999",cursoropacitymax:1,touchbehavior:true});
 		});
-	});
-	{% for message in messages %}
-		{% if message.tags == 'error' %}
-				alertify.error("{{ message }}");
-		{% else %}
-				alertify.{{ message.tags }}("{{ message }}");
-		{% endif %}
-    {% endfor %}
-	$('#publishModal').on('show.bs.modal', function () {
-		document.documentElement.style.overflow=document.body.style.overflow='hidden';
-		$('.modal .modal-body').css('overflow-y', 'auto');
-		$('.modal').css('overflow-y', 'hidden');
-		$('.modal .modal-body').css('overflow-x', 'hidden');
-		$('.modal .modal-body').css('max-height', $(window).height() * 0.7);
-	});
-	$(".postDelete").on('click',function(){
-		var id = $(this).data("id");
-		swal({
-			 title: "Are you sure?",
-			 text: "Comment will be Deleted",
-		     type: "warning",
-			 showCancelButton: true,
-			 confirmButtonColor: "#DD6B55",
-			 confirmButtonText: "Yes, delete it!",
-			 closeOnConfirm: false
-		},
-		function(isConfirm){
-			if(isConfirm){
-				window.location ='/app/deletePost/'+id+'/';
+
+		function createToast(message, autoclose = true, duration = 2000){
+			var id = 'toast'+parseInt($('atoast-container').length + 1);
+			var toast = '<div id="'+id+'" class="atoast-container"><div class="atoast">'+message+'</div></div>';
+			
+			pushToastsUp();
+
+			var toastCount = $('.atoast-container').length;
+
+			if(!toastCount)
+				$('body').append(toast);
+			else{
+				setTimeout(function(){
+					$('body').append(toast);
+				}, 300 * toastCount);
+			}
+
+			TweenMax.from('#'+id, .3, {y:50});
+
+			if(autoclose){
+				setTimeout(function(){
+					hideToast(id);
+				}, duration);
 			}else{
-				alertify.success("Cancelled Successfully");
+				return id;
+			}
+		}
+
+		function pushToastsUp(){
+			var toastsArray = $('.atoast-container').length;
+
+			$('.atoast-container').each(function(index, el) {
+				if($('this').css('opacity') !== 0){
+					id = $(this).prop('id');
+					var newTop = $('#'+id).position().top - $('#'+id).height() - 10;
+
+					$('#'+id).css({top : newTop}, 350);
+					// console.log();
+					// TweenMax.to('#'+id, .3, {y:-180});
+				}
+			});
+		}
+
+		function hideToast(toastId, duration = 300, down = false){
+			var duration = duration / 1000;
+
+			if(!down)
+				TweenMax.to('#'+toastId+'', duration, {y:-50, opacity: 0});
+			else
+				TweenMax.to('#'+toastId+'', duration, {y:+50, opacity: 0});
+
+			setTimeout(function(){
+				$('#'+toastId+'').remove();
+			}, 200);
+		}
+
+		function showUSerDropdown(){
+			$('#user-dropdown').show();
+
+			setTimeout(function(){
+				$('#user-dropdown').find('.some-menu').addClass("open");
+			});
+		}
+
+		$('.js-menu-shower').click(function(e){
+			var target = $(this).data('target');
+			var dynamicPositioning = $('#'+target).hasClass('static-menu');
+
+			if(!dynamicPositioning){
+				var topPos = $(this).position().top + $(this).parent().offset().top - $(window).scrollTop();
+				var leftPos = $(this).position().left + $(this).parent().position().left;
+				var cardPos = $(this).offset().top;
+
+				var botEdge = $(window).scrollTop() + window.innerHeight - 200;
+				var fromBot = cardPos - botEdge;
+				var toSroll = $(window).scrollTop() + fromBot;
+
+				if(fromBot > 0){
+					$('body').scrollTo(toSroll, 500, { axis:'y' });
+					setTimeout(function(){
+						$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
+						$("#"+target).show();
+
+						setTimeout(function(){
+							$("#"+target).find('.some-menu').addClass("open");
+						});
+					}, 600);
+				}else{
+					fromBot = 0;
+					$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
+					$("#"+target).show();
+
+					setTimeout(function(){
+						$("#"+target).find('.some-menu').addClass("open");
+					});
+				}
+			}else{
+				$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
+				$("#"+target).show();
+
+				setTimeout(function(){
+					$("#"+target).find('.some-menu').addClass("open");
+				});
 			}
 		});
-	});
-	$('#feedbckForm').on('hidden.bs.modal', function (e) {
-	  	location.reload();
-	});
-	function recommend(postId){
-		$("#recomment_"+postId).load("/app/recommend/"+postId+"/");
-	}
 
-	$("#feedbackForm").submit(function(e){
-		e.preventDefault();
-		var postData = $(this).serializeArray();
-		var formURL = $(this).attr('action');
-		alertify.warning('Sending Your Feedback');
-		$.ajax({
-			url: formURL,
-			type: 'POST',
-			data: postData,
-			success: function(data, textStatus, jqXHR){
-				$("#feedbackModalContainer").html(data);
-			},
-			error: function(jqXHR, textStatus, errorThrown){
-				alertify.error(textStatus);
-			}
+		$('.some-menu-container').click(function(){
+			var mimi = $(this);
+			var menu = $(this).find('.some-menu');
+			$(this).find('.some-menu').removeClass("open");
+
+			setTimeout(function(){
+				mimi.hide();
+			});
 		});
-	});
 
-	function feedbackForm(){
-		var html = '';
-			html += '<div class="form-group">';
-			html += '<label>Are you generally satisfied with ScholarNet? Ho do you rate the product?</label>';
-			html += '<textarea name="satisfaction" class="form-control"></textarea>';
-			html += '</div>';
-			html += '<div class="form-group">';
-			html += '<label>What features Appear to be more Useful?</label>';
-			html += '<textarea name="features" class="form-control"></textarea>';
-			html += '</div>';
-			html += '<div class="form-group">';
-			html += '<label>Did you Experience Any Problems?</label>';
-			html += '<textarea name="problems" class="form-control"></textarea>';
-			html += '</div>';
-			html += '<div class="form-group">';
-			html += '<label>Are there any feature you like to have but did not find in ScholarNet</label>'
-			html += '<textarea name="addfeature" class="form-control"></textarea>';
-			html += '</div>';
-			html += '<div class="form-group">';
-			html += '<center>';
-			html += '<button type="submit" class="btn btn-lg btn-green">';
-			html += 'SEND FEEDBACK';
-			html += '</button>';
-			html += '</center>';
-			html += '</div>';
+		$(window).scroll(function(){
+			$('.some-menu-container').each(function(){
+				var mimi = $(this);
+				var menu = $(this).find('.some-menu');
+				$(this).find('.some-menu').removeClass("open");
 
-			$("#feedbackModalContainer").html(html);
-	}
+				setTimeout(function(){
+					mimi.hide();
+				});
+			});
+		});
+
+
 	</script>
 
 

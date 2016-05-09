@@ -1,10 +1,11 @@
-#####################################################################################################
-# Author: Daniel Kindimba
-# Project: ScholarNet
-######################################################################################################
+"""
+Author: Daniel Kindimba
+Project: ScholarNet
+"""
 from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
-from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse, HttpResponseBadRequest, HttpResponseNotAllowed
+from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse, \
+    HttpResponseBadRequest, HttpResponseNotAllowed
 from endless_pagination.decorators import page_template
 from django.template import RequestContext
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -14,17 +15,13 @@ from django.contrib.auth.models import *
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-
-
-
-
 import json
 import urllib
 import random
 
-#######################################################################
-# A function for striping all the html tags from the passed text
-######################################################################
+"""
+A function for striping all the html tags from the passed text
+"""
 def stripHTMLTags(html):
     """
     Strip HTML tags from any string and transfrom special entities
@@ -62,9 +59,9 @@ def stripHTMLTags(html):
     return text
 
 
-####################################################################
-# Function for validing the Email -address , Return True or False
-###################################################################
+"""
+Function for validing the Email -address , Return True or False
+"""
 def validatePhone(username):
     return True
 
@@ -80,17 +77,33 @@ def internationalizePhone(phone):
         part2 = str(phone)[4:]
         return '+' + part1 + part2
 
-######################################################################
-# A function Returning the List of User Roles (Groups Names)
-#######################################################################
+
+"""
+A function checking the Existence of the Phone number in the System
+"""
+def checkPhoneExistence(request):
+    phone = internationalizePhone(request.GET.get('phone'))
+    context = ''
+    if User.objects.filter(username=phone).exists():
+        context = 'true'
+    else:
+        context = 'false'
+    return HttpResponse(context)
+
+
+
+"""
+A function Returning the List of User Roles (Groups Names)
+"""
 def get_usergroup(request):
     if request.user.groups.all().exists():
         return Group.objects.get(id=request.user.groups.all())
 
 
-#########################################################################
-# A function for getting fellow Members
-#########################################################################
+
+"""
+A function for getting fellow Members
+"""
 def getFellowMembers(request):
     course_id = []
     for ugroup in request.user.groups.all():
@@ -104,9 +117,9 @@ def getFellowMembers(request):
     return members
 
 
-###########################################################################
-# A function for Getting User subjects for Teachers and Students
-###########################################################################
+"""
+A function for Getting User subjects for Teachers and Students
+"""
 def getUserSubjects(request):
     subjects = ''
     for ugroup in request.user.groups.all():
@@ -121,9 +134,9 @@ def getUserSubjects(request):
     return subjects
 
 
-#######################################################################
-# A function which return the login View
-###########################################################################################
+"""
+A function which return the login View
+"""
 @csrf_exempt
 def login(request):
     if request.method == 'POST':
@@ -150,33 +163,41 @@ def login(request):
         }
         return render(request, "registration/login.html", context)
 
-#######################################################################
-# A function which allow user to recommend on different Posts
-######################################################################
+
+"""
+A function which allow user to recommend on different Posts
+"""
 def recommend(request, post_id):
-    context = ''
-    context += '<script>'
+    content = []
     if Likes.objects.filter(user_id=request.user.id).filter(description_id=post_id).count() == 0:
         recommend = Likes()
         recommend.description_id = post_id
         recommend.user_id = request.user.id
         recommend.save()
         if Likes.objects.filter(user_id=request.user.id, description_id=post_id).count() == 1:
-            context += 'alertify.success("Thanks for your Recommendation");'
+            info = {}
+            info = {
+                "recommendation": Likes.objects.filter(description_id=post_id).count(),
+                "faved": 1,
+            }
+            content.append(info)
         else:
-            context += 'alertify.error("Failed to Recommend");'
+            pass
     elif Likes.objects.filter(description_id=post_id, user=request.user).count() == 1:
         unrecommend = Likes.objects.get(Q(description_id=post_id) & Q(user_id=request.user.id))
         unrecommend.delete()
-        context += 'alertify.error("Successfully Un-Recommended");'
-    context += '</script>'
-    context += str(Likes.objects.filter(description_id=post_id).count())
-    return HttpResponse(context)
+        info = {}
+        info = {
+            "recommendation": Likes.objects.filter(description_id=post_id).count(),
+            "faved": 0,
+        }
+        content.append(info)
+    return HttpResponse(json.dumps(content))
 
 
-############################################################################
-# A fucntion handling the home page Content
-############################################################################
+"""
+A function handling the home page Content
+"""
 @login_required
 @page_template('home/entry_home_article_page.html')
 def home(request, template='home/index.html', extra_context=None):
@@ -187,7 +208,9 @@ def home(request, template='home/index.html', extra_context=None):
         return HttpResponseRedirect("/manager/")
     else:
         if request.user.profile.school_id != None:
-            # getting all the subject ids of the current user
+            """
+            getting all the subject ids of the current user
+            """
             user_course_id = []
             if request.user.is_superuser:
                 return HttpResponseRedirect("/manager/")
@@ -215,8 +238,10 @@ def home(request, template='home/index.html', extra_context=None):
             obj_dict = dict([(obj.id, obj) for obj in postObject])
             imageObject = Images.objects.filter(description__in=postObject)
             likesObject = Likes.objects.filter(description__in=postObject, user_id=request.user.id)
+            commentsObject = DescriptionsComments.objects.filter(description__in=postObject).order_by('updated')
             relation_dict = {}
             likes_dict = {}
+            comments_dict = {}
             for obj in imageObject:
                 relation_dict.setdefault(obj.description_id, []).append(obj)
                 for ob in likesObject:
@@ -225,6 +250,11 @@ def home(request, template='home/index.html', extra_context=None):
                 obj_dict[id].post_images = related_items
             for id, liked_items in likes_dict.items():
                 obj_dict[id].faved = 'true'
+
+            for obj in commentsObject:
+                comments_dict.setdefault(obj.description_id, []).append(obj)
+            for id, related_items in comments_dict.items():
+                obj_dict[id].comment = related_items
             context = {
                 'ugroup': get_usergroup(request),
                 "subjects": getUserSubjects(request),
@@ -240,9 +270,11 @@ def home(request, template='home/index.html', extra_context=None):
         else:
             return HttpResponseRedirect("/app/setup/")
 
-##########################################################################################################
-# A function for handling the Profile Setup
-##########################################################################################################
+
+
+"""
+A function for handling the Profile Setup
+"""
 @login_required
 def setup(request):
     if request.user.profile.school_id != None:
@@ -270,9 +302,11 @@ def setup(request):
     }
     return render(request, "home/setup.html", context)
 
-###############################################################################################
-# A fucntion for Getting the List  of School Search for Setup
-###############################################################################################
+
+
+"""
+A fucntion for Getting the List  of School Search for Setup
+"""
 @csrf_exempt
 @login_required
 def setupGetSchool(request):
@@ -309,9 +343,9 @@ def setupGetSchool(request):
 
 
 
-#######################################################################################################
-# A function for getting all the school for teacher Configuration page
-#######################################################################################################
+"""
+A function for getting all the school for teacher Configuration page
+"""
 @csrf_exempt
 @login_required
 def setupGetSchoolTeacher(request):
@@ -345,9 +379,9 @@ def setupGetSchoolTeacher(request):
         context = '<div class="alert alert-danger text-center">Something Went Wrong</div>'
     return HttpResponse(context)
 
-####################################################################################################
-# A fucntion for Adding a School To user from the Setup page
-####################################################################################################
+"""
+A fucntion for Adding a School To user from the Setup page
+"""
 @login_required
 def setupAddSchool(request, schoolId):
     userObject = UserProfile.objects.get(user_id=request.user.id)
@@ -362,9 +396,11 @@ def setupAddSchool(request, schoolId):
     return HttpResponseRedirect("/app/setup/")
 
 
-#####################################################################################################
-# A function for Adding a school to User for the Teacher in sthe setup page (Configurations)
-#####################################################################################################
+
+
+"""
+A function for Adding a school to User for the Teacher in sthe setup page (Configurations)
+"""
 @login_required
 def setupAddSchoolTeacher(request, schoolId):
     if request.user.profile.school_id == '':
@@ -379,9 +415,9 @@ def setupAddSchoolTeacher(request, schoolId):
     return HttpResponseRedirect("/app/setup/")
 
 
-#########################################################################################################
-# A function for Deleting the Teacher Subject
-#########################################################################################################
+"""
+A function for Deleting the Teacher Subject
+"""
 @login_required
 def deleteTeacherSubject(request, subjectId):
     if TeacherSubject.objects.filter(id=subjectId, user_id=request.user.id).count() > 0:
@@ -396,66 +432,9 @@ def deleteTeacherSubject(request, subjectId):
     return HttpResponseRedirect("/app/setup/")
 
 
-
-#######################################################################################################
-# A function for Getting the List of Course for a school for Teacher configuration page
-#######################################################################################################
-@login_required
-def getCourseListTeacher(request, schoolId):
-    courses = Courses.objects.filter(school_id=schoolId)
-    context = ''
-    context += '<div class="form-group">'
-    context += '<input type="text" name="school" value="'+str(schoolId)+'" class="hidden" hidden required />'
-    context += '</div>'
-    context += '<div class="form-group">'
-    context += '<label>Course</label>'
-    context += '<select name="course" onchange="loadSubjects();" id="courseValue" class="form-control" required>'
-    context += '<option value="">Please Select </option>'
-    for course in courses:
-        context += '<option value="'+str(course.id)+'">'+str(course.name)+' ('+str(course.code)+')</option>'
-    context += '</select>'
-    context += '</div>'
-    context += '<div class="form-group">'
-    context += '<label>Academic Year</label>'
-    context += '<select name="academic" onchange="loadSubjects();" id="academicValue" class="form-control" required>'
-    context += '<option value="">Please Select ...</option>'
-    academics = AcademicYear.objects.all().exclude(is_active=False)
-    for academic in academics:
-        context += '<option value="'+str(academic.id)+'">'+str(academic.name)+\
-                   '/'+str(int(academic.name) + 1)+'</option>'
-    context += '</select>'
-    context += '</div>'
-
-    context += '<div class="form-group">'
-    context += '<label>Study Year</label>'
-    context += '<select name="year" onchange="loadSubjects();" id="yearValue" class="form-control" required>'
-    context += '<option value="">Please Select ...</option>'
-    years = Year.objects.all().exclude(is_active=False)
-    for year in years:
-        context += '<option value="'+str(year.id)+'">'+str(year.name)+' ('+str(year.code)+')</option>'
-    context += '</select>'
-    context += '</div>'
-
-    context += '<div class="form-group" id="subjectContainerChooser">'
-    context += '<label>Subject</label>'
-    context += '<select name="subject" class="form-control" required>'
-    context += '<option value="">Please Select ...</option>'
-    context += '</select>'
-    context += '</div>'
-
-    context += '<div id="subjectFetchStatus">'
-    context += '</div>'
-
-    context += '<div class="form-group">'
-    context += '<button type="submit" class="btn btn-green pull-right btn-lg">ADD</button>'
-    context += '</div>'
-
-    return HttpResponse(context)
-
-
-#####################################################################################################
-# A function for getting user subject list in the configuration page
-#####################################################################################################
+"""
+A function for getting user subject list in the configuration page
+"""
 @login_required
 def loadTeacherSubjectList(request, courseId, academicId, yearId):
     context = ''
@@ -470,9 +449,9 @@ def loadTeacherSubjectList(request, courseId, academicId, yearId):
 
 
 
-#######################################################################################################
-# A function for Adding a subject
-#######################################################################################################
+"""
+A function for Adding a subject
+"""
 @login_required
 @csrf_exempt
 def teacherAddSubject(request):
@@ -489,7 +468,9 @@ def teacherAddSubject(request):
             teacherSubject.save()
 
 
-        #Getting the subject object
+        """
+        Getting the subject object
+        """
         subjectObj  = Subjects.objects.get(id=subject)
         context = '<center><a href="javascript:;" onclick="addSubjectTeacherModal('+str(school)+');" ' \
                   'class="btn btn-green btn-lg">Add New</a></center>'
@@ -501,9 +482,9 @@ def teacherAddSubject(request):
 
 
 
-####################################################################################################
-# A function for Adding the Study Year
-####################################################################################################
+"""
+A function for Adding the Study Year
+"""
 @login_required
 def setupAddStudyYear(request, yearId):
     userObject = UserProfile.objects.get(user_id=request.user.id)
@@ -518,9 +499,9 @@ def setupAddStudyYear(request, yearId):
     return HttpResponseRedirect("/app/setup/")
 
 
-#######################################################################################################
-# A function for adding the Study Course for the setup page user configuration
-#######################################################################################################
+"""
+A function for adding the Study Course for the setup page user configuration
+"""
 @login_required
 def setupAddCourse(request, courseId):
     userObject = UserProfile.objects.get(user_id=request.user.id)
@@ -536,9 +517,9 @@ def setupAddCourse(request, courseId):
 
 
 
-#######################################################################################################
-# A function for adding the Academic Year for the setup page user configuration
-#######################################################################################################
+"""
+A function for adding the Academic Year for the setup page user configuration
+"""
 @login_required
 def setupAddAcademicYear(request, academicId):
     userObject = UserProfile.objects.get(user_id=request.user.id)
@@ -554,9 +535,9 @@ def setupAddAcademicYear(request, academicId):
     return HttpResponseRedirect("/app/setup/")
 
 
-######################################################################################
-# A function for searching Extra Post Related information from google
-######################################################################################
+"""
+A function for searching Extra Post Related information from google
+"""
 @login_required
 def extraInfos(request, post_id):
     context = ""
@@ -564,9 +545,9 @@ def extraInfos(request, post_id):
     return HttpResponse(context)
 
 
-#####################################################################################
-# A Fucntion for Reading the Post Details
-#####################################################################################
+"""
+A Fucntion for Reading the Post Details
+"""
 @login_required
 def reader(request, post_id):
     ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
@@ -612,12 +593,12 @@ def reader(request, post_id):
     return render(request, "home/reader.html", context)
 
 
-######################################################################################
-# A function for Retreiving partuclar Subjects Posts
-#######################################################################################
+"""
+A function for Retreiving partuclar Subjects Posts
+"""
 @login_required
 @page_template('home/entry_home_article_page.html')
-def subjectReader(request, subject_id, template='home/subject_reader.html', extra_context=None):
+def subjectReader(request, subject_id, template='home/index.html', extra_context=None):
     ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
     #getting all subject_id in which user is studying
     subjects_ids = []
@@ -632,8 +613,10 @@ def subjectReader(request, subject_id, template='home/subject_reader.html', extr
     obj_dict = dict([(obj.id, obj) for obj in postObject])
     imageObject = Images.objects.filter(description__in=postObject)
     likesObject = Likes.objects.filter(description__in=postObject, user_id=request.user.id)
+    commentsObject = DescriptionsComments.objects.filter(description__in=postObject).order_by('-updated')
     relation_dict = {}
     likes_dict = {}
+    comments_dict = {}
     for obj in imageObject:
         relation_dict.setdefault(obj.description_id, []).append(obj)
         for ob in likesObject:
@@ -642,6 +625,11 @@ def subjectReader(request, subject_id, template='home/subject_reader.html', extr
         obj_dict[id].post_images = related_items
     for id, liked_items in likes_dict.items():
         obj_dict[id].faved = 'true'
+
+    for obj in commentsObject:
+        comments_dict.setdefault(obj.description_id, []).append(obj)
+    for id, related_items in comments_dict.items():
+        obj_dict[id].comment = related_items
     context = {
         "upgrop": get_usergroup(request),
         "subjects": getUserSubjects(request),
@@ -675,9 +663,9 @@ def fake(request):
     }
     return render(request, "home/fake_data.html", context)
 
-#################################################################################################################
-# A function for retreveing List of users using ScholarNet, Exculding the Super User(Adminstrator of the System)
-#################################################################################################################
+"""
+A function for retreveing List of users using ScholarNet, Exculding the Super User(Adminstrator of the System)
+"""
 @login_required
 def users(request):
     context = {
@@ -688,9 +676,10 @@ def users(request):
     return render(request, "home/user_list.html", context)
 
 
-##########################################################################
-# A function for returning the Institues List (All Institues/Schools)
-##########################################################################
+
+"""
+A function for returning the Institues List (All Institues/Schools)
+"""
 @login_required
 def institutes(request):
     context = {
@@ -701,9 +690,11 @@ def institutes(request):
     return render(request, 'home/institute_list.html', context)
 
 
-############################################################################
-# A function for Registering Courses for a particular Institute/School
-###########################################################################
+
+
+"""
+A function for Registering Courses for a particular Institute/School
+"""
 @login_required
 def registerCourse(request, school_id):
     if request.method == 'POST':
@@ -726,9 +717,9 @@ def registerCourse(request, school_id):
     return render(request, 'home/add_course.html', context)
 
 
-######################################################################
-# A function for registering the Institues to the ScholarNet System
-######################################################################
+"""
+A function for registering the Institues to the ScholarNet System
+"""
 @login_required
 def registerInstitute(request):
     form = SchoolRegistration()
@@ -754,9 +745,9 @@ def registerInstitute(request):
     return render(request, 'home/register_institute.html', context)
 
 
-#################################################################################
-# A function Returning the Courses List Regarding the School/Institue Id Passed
-#################################################################################
+"""
+A function Returning the Courses List Regarding the School/Institue Id Passed
+"""
 @login_required
 def coursesList(request, institute_id):
     context = {
@@ -767,9 +758,9 @@ def coursesList(request, institute_id):
     return render(request, "home/courses_list.html", context)
 
 
-###################################################################################
-# A function Returning the Subject List Regarding the Course Id passed
-###################################################################################
+"""
+A function Returning the Subject List Regarding the Course Id passed
+"""
 @login_required
 def subjectList(request, course_id):
     institute = Courses.objects.get(id=course_id)
@@ -782,9 +773,9 @@ def subjectList(request, course_id):
     return render(request, "home/subjects_list.html", context)
 
 
-#####################################################################################
-# A function for registering A subject Refering a Subject to a System
-#####################################################################################
+"""
+A function for registering A subject Refering a Subject to a System
+"""
 @login_required
 def registerSubject(request, course_id):
     course = Courses.objects.get(id=course_id)
@@ -809,9 +800,9 @@ def registerSubject(request, course_id):
     return render(request, "home/add_subject.html", context)
 
 
-#########################################################################################
-# A function for Publishing a New Post
-##########################################################################################
+"""
+A function for Publishing a New Post
+"""
 @login_required
 def postPublish(request):
     if request.method == 'POST':
@@ -843,12 +834,46 @@ def postPublish(request):
     return HttpResponseRedirect("/home/")
 
 
-############################################################################
-# A function for Deleting a Post, where by Post Unique Identifier is Passed
-#############################################################################
+"""
+A function for Editing the post
+"""
+def editPost(request):
+    content = []
+    if request.method == 'POST':
+        post_id = request.POST.get('post_id')
+        article = request.POST.get('article')
+
+        """
+        Initializing the Object to be updated
+        """
+        articleObject = Descriptions.objects.get(id=post_id)
+        articleObject.description = article
+        articleObject.save()
+        info = {}
+        if Descriptions.objects.filter(id=post_id, description=article).exists():
+            info = {
+                "content": article,
+                "updated": 1,
+            }
+        else:
+            info = {
+                "content": article,
+                "updated": 0,
+            }
+    content.append(info)
+    return HttpResponse(json.dumps(content))
+
+
+
+"""
+A function for Deleting a Post, where by Post Unique Identifier is Passed
+"""
 @login_required
 def deletePost(request, post_id):
-    # deleting all the images posted
+    """
+    deleting all the images posted
+    """
+    content = []
     images = Images.objects.filter(description_id=post_id)
     for image in images:
         image.delete()
@@ -862,12 +887,27 @@ def deletePost(request, post_id):
     for like in likes:
         like.delete()
 
-    return HttpResponseRedirect("/app/home/")
+    if Images.objects.filter(description_id=post_id).exists() and Likes.objects.filter(description_id=post_id).exists():
+        info = {}
+        info = {
+            "post_id": post_id,
+            "deleted": 0,
+        }
+        content.append(info)
+    else:
+        info = {}
+        info = {
+            "post_id": post_id,
+            "deleted": 1,
+        }
+        content.append(info)
+
+    return HttpResponse(json.dumps(content))
 
 
-#############################################################################
-# A function Loading the User Upgrade Interface
-############################################################################
+"""
+A function Loading the User Upgrade Interface
+"""
 @login_required
 def upgradeLoader(request):
     context = ""
@@ -897,13 +937,12 @@ def upgradeLoader(request):
     return HttpResponse(context)
 
 
-##################################################################################################
-# A fucntion for publishing a Post Comment
-##################################################################################################
+"""
+A fucntion for publishing a Post Comment
+"""
 @login_required
 def publishComment(request):
     context = ''
-    context += '<script>'
     post_id = request.POST.get('post_id')
     comment = request.POST.get('comment')
     user_id = request.user.id
@@ -912,22 +951,30 @@ def publishComment(request):
     commentObj.description_id = post_id
     commentObj.user_id = user_id
     commentObj.comment = comment
+    content = []
     if DescriptionsComments.objects.filter(description_id=post_id, comment=comment, user_id=user_id).count() == 0:
         commentObj.save()
     else:
-        context += 'alertify.warning("You allready Commented, with the same Comment");'
+        pass
     if DescriptionsComments.objects.filter(description_id=post_id, comment=comment, user_id=user_id).count() > 0:
-        context += 'alertify.success("Your Comment Successfully Published");'
+        commentObject = DescriptionsComments.objects.filter(description_id=post_id, comment=comment, user_id=user_id)
+        for comment in commentObject:
+            info = {}
+            info = {
+                "id": comment.id,
+                "comment": comment.comment,
+                "updated": str(comment.updated),
+                "total_comments": DescriptionsComments.objects.filter(description_id=post_id).count(),
+            }
+            content.append(info)
     else:
-        context += 'alertify.error("Failed to Publish Your Comment");'
-    context += '$("#commentContainer").load("/app/loadPostComments/' + str(post_id) + '/");'
-    context += '</script>'
-    return HttpResponse(context)
+        pass
+    return HttpResponse(json.dumps(content))
 
 
-###################################################################################################
-# Url for laoding the Post Comments
-###################################################################################################
+"""
+Url for laoding the Post Comments
+"""
 @login_required
 def loadPostComments(request, post_id):
     context = ""
@@ -988,13 +1035,12 @@ def loadPostComments(request, post_id):
     context += '</div>'
     context += '</div>'
     context += '</div>'
-    # context += '<script>location.reload();</script>'
     return HttpResponse(context)
 
 
-#######################################################################################################
-# A fuction for Viewing All the Comments
-#######################################################################################################
+"""
+A fuction for Viewing All the Comments
+"""
 @login_required
 def loadAllPostComments(request, post_id):
     context = ""
@@ -1053,21 +1099,27 @@ def loadAllPostComments(request, post_id):
     return HttpResponse(context)
 
 
-###################################################################################
-# A function Handling User Registration
-##################################################################################
+"""
+A function Handling User Registration
+"""
 def register(request):
     if request.method == 'POST':
         user_form = registration(data=request.POST)
+        content = []
         if user_form.is_valid():
             user = User()
             user.username = internationalizePhone(request.POST.get('username'))
             user.set_password(request.POST.get('password'))
             user.is_active = False
             if User.objects.filter(username=internationalizePhone(request.POST.get('username'))).exists():
-                messages.error(request, str(request.POST.get('username')) + ' Already Registered')
-                messages.info(request, 'Please Login or Register with Another Phone Number')
-                return HttpResponseRedirect("/register/")
+                info = {}
+                info = {
+                    "message": "Account Available",
+                    "phone": internationalizePhone(request.POST.get('username')),
+                    "status": False
+                }
+                content.append(info)
+                return HttpResponse(json.dumps(content))
             else:
                 user.save()
                 role = request.POST.get('role')
@@ -1085,37 +1137,48 @@ def register(request):
                     pass
                 confirmationRequest.save()
 
-            if user:
-                registeredUser = User.objects.get(username=internationalizePhone(request.POST.get('username')))
-                if registeredUser.is_active == False:
-                    return HttpResponseRedirect("/app/registrationConfiratiom/" +
-                                                str(internationalizePhone(request.POST.get('username')))+"/")
+                if User.objects.filter(username=internationalizePhone(request.POST.get('username'))).exists():
+                    info = {}
+                    info = {
+                        "message": "Successfully Registered",
+                        "phone": internationalizePhone(request.POST.get('username')),
+                        "status": True
+                    }
+                    content.append(info)
+                    return HttpResponse(json.dumps(content))
                 else:
-                    return HttpResponseRedirect("/app/registerSuccess/")
-            else:
-                return HttpResponseRedirect("/app/registerFail/")
+                    info = {}
+                    info = {
+                        "message": "Failed To Register",
+                        "phone": internationalizePhone(request.POST.get('username')),
+                        "status": False
+                    }
+                    content.append(info)
+                    return HttpResponse(json.dumps(content))
         else:
-            context = {
-                "title": "Registration",
-                "form": user_form,
+            info = {}
+            info = {
+                "message": "Invalid Data",
+                "phone": internationalizePhone(request.POST.get('username')),
+                "status": False
             }
-            return render(request, 'registration/register.html', context)
+            content.append(info)
+            return HttpResponse(json.dumps(content))
     else:
-        context = {
-            "title": "Registration",
-            "form": registration(),
-            "years": Year.objects.all(),
-            "groups": Group.objects.filter(name='Student'),
-            "courses": Courses.objects.all().exclude(is_active=False),
-            "institutes": School.objects.all().exclude(is_active=False),
+        content = []
+        info = {}
+        info = {
+            "message": "Bad Request",
+            "status": False,
         }
-        return render(request, 'registration/register.html', context)
+        content.append(info)
+        return HttpResponse(json.dumps(content))
 
 
 
-###################################################################################
-# A function Handling User(Teachers) Registration
-##################################################################################
+"""
+A function Handling User(Teachers) Registration
+"""
 def registerTeacher(request):
     if request.method == 'POST':
         user_form = registration(data=request.POST)
@@ -1128,11 +1191,15 @@ def registerTeacher(request):
 
             username = user_form.cleaned_data['username']
             if validatePhone(username):
-                # updating the username if not registered
+                """
+                updating the username if not registered
+                """
                 userName = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 userName.username = internationalizePhone(request.POST.get('username'))
                 userName.save()
-                # Create and save user profile
+                """
+                Create and save user profile
+                """
                 new_user = User.objects.get(username=internationalizePhone(request.POST.get('username')))
                 new_profile = UserProfile()
                 new_profile.user_id = new_user.id
@@ -1149,8 +1216,8 @@ def registerTeacher(request):
                 newUser.groups.add(group)
 
                 """
-                    registering the registration confirmation request
-                    For the ScholarNet Message Service Responder to Process the requests
+                Registering the registration confirmation request
+                For the ScholarNet Message Service Responder to Process the requests
                 """
 
                 confirmationRequest = Recovery()
@@ -1202,9 +1269,9 @@ def registerTeacher(request):
         return render(request, 'registration/register_teacher.html', context)
 
 
-#####################################################################################################
-# A function for confirming the registration Process
-#####################################################################################################
+"""
+A function for confirming the registration Process
+"""
 def registrationConfirm(request):
     if request.method == 'POST':
         phone = internationalizePhone(request.POST.get('phone'))
@@ -1229,9 +1296,9 @@ def registrationConfirm(request):
         messages.error(request, 'Bad Request')
     return HttpResponseRedirect("/login/")
 
-####################################################################################################
-# A function for confirmining user registration process requiring to enter the received code in sms
-####################################################################################################
+"""
+A function for confirmining user registration process requiring to enter the received code in sms
+"""
 def registrationConfiratiom(request, phone):
     if request.method == 'POST':
         code = request.POST.get('code')
@@ -1242,12 +1309,14 @@ def registrationConfiratiom(request, phone):
             userToConfirm.is_active = True
             userToConfirm.save()
 
-            # Deleting the Confirmed User from the Confirmation Request
+            """
+            Deleting the Confirmed User from the Confirmation Request
+            """
             confirmedRequest = Recovery.objects.get(Q(phone=phone) & Q(code=code) & Q(waiting=True))
             confirmedRequest.delete()
 
             """
-                User Object who is confirmed
+            User Object who is confirmed
             """
             confirmedUser = User.objects.get(username=recoveryObj.phone)
             if confirmedUser.is_active:
@@ -1272,9 +1341,9 @@ def registrationConfiratiom(request, phone):
 
 
 
-################################################################################
-# A function for Resetting the User passwordd
-################################################################################
+"""
+A function for Resetting the User passwordd
+"""
 def passwordReset(request):
     if request.method == 'POST':
         phone = internationalizePhone(request.POST.get('phone'))
@@ -1308,9 +1377,10 @@ def passwordReset(request):
 
 
 
-#######################################################################################
-# a function for receiving and processing the password code confirmation
-#######################################################################################
+
+"""
+A function for receiving and processing the password code confirmation
+"""
 def passwordCodeConfirm(request):
     if request.method == 'POST':
         phone = internationalizePhone(request.POST.get('phone'))
@@ -1326,9 +1396,12 @@ def passwordCodeConfirm(request):
         pass
     return HttpResponseRedirect("/user/password/reset/")
 
-########################################################################################
-# A fucntion for resetting the user password
-########################################################################################
+
+
+
+"""
+A function for resetting the user password
+"""
 def passwordResseter(request):
     if request.method == 'POST':
         phone = internationalizePhone(request.POST.get('phone'))
@@ -1350,9 +1423,9 @@ def passwordResseter(request):
 
 
 
-###############################################################################
-# A function which laod List of courses in Ajax Call
-###############################################################################
+"""
+A function which laod List of courses in Ajax Call
+"""
 def loadCourses(request, institute_id):
     context = ""
     context += '<option value="">Please Select....</option>'
@@ -1363,109 +1436,9 @@ def loadCourses(request, institute_id):
     return HttpResponse(context)
 
 
-###############################################################################
-# A function which load the List of Images in Ajax clall
-##############################################################################
-@login_required
-def imageAjaxLoader(request, description_id):
-    images = Images.objects.filter(description_id=description_id)
-    context = ""
-    for image in images:
-        context += '<div class="col-md-6" style="object-fit: cover;"><a href="/static/' + str(
-            image.url) + '" data-gallery>'
-        context += '<img src="/static/' + str(image.url) + '"'
-        context += 'class="img img-thumbnail img-responsive"'
-        context += ' width: 100%;max-height: 100%" /></a></div>'
-    return HttpResponse(context)
-
-
-##############################################################################
-# A function Loading images for Comment Reader
-##############################################################################
-def imageAjaxLoaderReader(request, description_id):
-    images = Images.objects.filter(description_id=description_id)
-    context = ""
-
-    for image in images:
-        context += '<div class="col-md-6" style="object-fit: cover;"><a href="/static/' + str(
-            image.url) + '" data-gallery>'
-        context += '<img src="/static/' + str(image.url) + '"'
-        context += 'class="img img-thumbnail img-responsive"'
-        context += ' width: 100%;max-height: 100%" /></a></div>'
-    return HttpResponse(context)
-
-
-########################################################################################
-# A function for laoding images in Modal Comment
-##############################################################
-@login_required()
-def loadImageCommentModal(request, imageId):
-    imageObj = Images.objects.get(id=imageId)
-    context = ""
-    context += '<div class="alert alert-info">'
-    context += '<h5>' + str(imageObj.description.user.profile.course.name) + '</h5>'
-    context += '<h6>' + str(imageObj.description.subject.name) + '</h6>'
-    context += '</div>'
-    context += '<div>'
-    context += '<span class="badge badge-success">' + str(imageObj.comments) + '&nbsp;&nbsp;Comments</span>'
-    context += '<div>'
-    context += '<form role="form" action="" method="">'
-    context += '<div class="form-group">'
-    context += '<textarea name="image_content" class="form-control" placeholder="Your Comment" required></textarea>'
-    context += '</div>'
-    context += '<div class="form-group">'
-    context += '<button type="submitt" class="btn btn-gray btn-icon btn-xs pull-right">' \
-               '<i class="fa fa-comment-o"></i>&nbsp;&nbsp;Comment</button>'
-    context += '</div>'
-    context += '</form>'
-    context += '</div>'
-    context += '<div class="row">'
-    context += '<div class="col-md-12">'
-    context += '<div class="xe-widget xe-conversations">'
-    context += '<div class="xe-body">'
-    context += '<ul class="list-unstyled">'
-    for i in range(10):
-        context += '<li>'
-        context += '<div class="xe-comment-entry">'
-        context += '<a href="#" class="xe-user-img">'
-        # context += '<img src="/static/images/user.png" class="img-circle" width="40" />'
-        context += '</a>'
-        context += '<div class="xe-comment">'
-        context += '<a href="#" class="xe-user-name">'
-        context += '<strong>Arlind Nushi</strong>'
-        context += '</a>'
-        context += '<p>Age sold some full like rich new. Amounted repeated as believed in confined juvenile.</p>'
-        context += '</div>'
-        context += '</div>'
-        context += '</li>'
-    context += '</ul>'
-    context += '</div>'
-    context += '<div class="xe-footer">'
-    context += '<a href="#">More</a>'
-    context += '</div>'
-    context += '</div>'
-    context += '</div>'
-    context += '</div>'
-
-    return HttpResponse(context)
-
-
-#####################################################################################################################
-# A function for loding image to the Modal
-#####################################################################################################################
-@login_required
-def loadImageModal(request, imageId):
-    context = ""
-    image = Images.objects.get(id=imageId)
-    context += '<img src="/static/' + str(
-        image.url) + '" class="img img-responsive main_image" style="max-width:800px;">'
-
-    return HttpResponse(context)
-
-
-######################################################################################################################
-# a function for deleting the Post Comment
-######################################################################################################################
+"""
+A function for deleting the Post Comment
+"""
 @login_required
 def deleteComment(request, commentId):
     commentObj = DescriptionsComments.objects.get(id=commentId)
@@ -1473,18 +1446,22 @@ def deleteComment(request, commentId):
     commentObj.delete()
     response = ''
     response += '<script>'
+    content = []
     if DescriptionsComments.objects.filter(id=commentId).count() == 0:
-        response += 'alertify.success("Successfully Deleted");'
+        info = {}
+        info = {
+            "id": commentId,
+            "total_comment": DescriptionsComments.objects.filter(description_id=post_id).count(),
+        }
+        content.append(info)
     else:
-        response += 'alertify.error("Failed to Delete");'
-    response += '$("#commentContainer").load("/app/loadPostComments/' + str(post_id) + '/");'
-    response += '</script>'
-    return HttpResponse(response)
+        pass
+    return HttpResponse(json.dumps(content))
 
 
-#######################################################################################################################
-# A function for loading the Institute Upgrade Form
-#######################################################################################################################
+"""
+A function for loading the Institute Upgrade Form
+"""
 @login_required
 @csrf_exempt
 def upgradeInstituteLoadForm(request):
@@ -1524,9 +1501,9 @@ def upgradeInstituteLoadForm(request):
     return HttpResponse(context)
 
 
-#######################################################
-# A function for loading the Course Upgrade Form
-#######################################################
+"""
+A function for loading the Course Upgrade Form
+"""
 @login_required
 @csrf_exempt
 def upgradeCourseLoadForm(request):
@@ -1567,9 +1544,11 @@ def upgradeCourseLoadForm(request):
     return HttpResponse(context)
 
 
-#######################################################
-# A fucntion for loading the Year upgrade Form
-#######################################################
+
+
+"""
+A fucntion for loading the Year upgrade Form
+"""
 @login_required
 @csrf_exempt
 def upgradeDisplayNameLoadForm(request):
@@ -1602,9 +1581,9 @@ def upgradeDisplayNameLoadForm(request):
         return HttpResponse(context)
 
 
-##########################################################################################
-# A function for upgrading the Year of study
-##########################################################################################
+"""
+A function for upgrading the Year of study
+"""
 @login_required
 @csrf_exempt
 def upgradeYearLoadForm(request):
@@ -1642,10 +1621,11 @@ def upgradeYearLoadForm(request):
         context += '</script>'
         return HttpResponse(context)
 
+"""
+A function for returning the Success page for Successfully registration process
+"""
 
-###################################################################################
-# A function for returning the Success page for Successfully registration process
-###################################################################################
+
 def registerSuccess(request):
     context = {
         "message": "Your successfully registered",
@@ -1653,9 +1633,11 @@ def registerSuccess(request):
     return render(request, 'registration/success.html', context)
 
 
-##################################################################################
-# A function for returning the Fail page for Un-Successfully Registration Process
-##################################################################################
+"""
+A function for returning the Fail page for Un-Successfully Registration Process
+"""
+
+
 def registerFail(request):
     context = {
         "message": "We are Sorry, Registration Failed",
@@ -1663,24 +1645,34 @@ def registerFail(request):
     return render(request, 'registration/failure.html', context)
 
 
-######################################################################################################
-# A function for confiruming the registered User
-######################################################################################################
+"""
+A function for confirming the registered User
+"""
+
+
 def register_confirm(request, activation_key):
-    # check if user is already logged in and if he is redirect him to some other url, e.g. home
+    """
+    check if user is already logged in and if he is redirect him to some other url, e.g. home
+    """
     if request.user.is_authenticated():
         HttpResponseRedirect('/home/')
 
-    # check if there is UserProfile which matches the activation key (if not then display 404)
+    """
+    check if there is UserProfile which matches the activation key (if not then display 404)
+    """
     user_profile = get_object_or_404(UserProfile, activation_key=activation_key)
 
-    # check if the activation key has expired, if it hase then render confirm_expired.html
+    """
+    check if the activation key has expired, if it hase then render confirm_expired.html
+    """
     if user_profile.key_expires < timezone.now():
         context = {
             "message": "We are sorry, Time for activation expired, please Register Again"
         }
         return render(request, 'registration/activation_expired.html', context)
-    # if the key hasn't expired save user and set him as active and render some template to confirm activation
+    """
+    if the key hasn't expired save user and set him as active and render some template to confirm activation
+    """
     user = user_profile.user
     user.is_active = True
     activated = user.save()
@@ -1690,9 +1682,11 @@ def register_confirm(request, activation_key):
     return render(request, 'registration/activation_success.html', context)
 
 
-####################################################################################################
-# A function for Manageing User Feedbacks
-####################################################################################################
+"""
+A function for Managing User Feedbacks
+"""
+
+
 @login_required
 @csrf_exempt
 def feedbackManager(request):
@@ -1716,9 +1710,11 @@ def feedbackManager(request):
     return HttpResponse(context)
 
 
-##########################################################################################################
-# A function for searching the Institute ( University/College/School)
-###########################################################################################################
+"""
+A function for searching the Institute ( University/College/School)
+"""
+
+
 @csrf_exempt
 def instituteSearch(request):
     context = ''
@@ -1752,7 +1748,9 @@ def instituteSearch(request):
         context += '<div class="alert alert-danger"><center>Something Went Wrong, Please Try again</center></div>'
     return HttpResponse(context)
 
-
+"""
+A function for Loading the Page for Managing the School/Institute/College/Univerity
+"""
 @login_required
 def manageSchool(request):
     context = {
@@ -1765,6 +1763,10 @@ def manageSchool(request):
         "title": "Manage",
     }
     return render(request, "home/manage_schools.html", context)
+
+"""
+A function for Getting lIs tof Courses Subjects To Manage
+"""
 
 
 @login_required
@@ -1808,6 +1810,10 @@ def getCoursesSubjectManage(request, courseId):
     context += '</script>'
     return HttpResponse(context)
 
+"""
+A function To Add New Course
+"""
+
 
 @login_required
 def addNewCourseManager(request):
@@ -1841,6 +1847,9 @@ def addNewCourseManager(request):
     return HttpResponse(response)
 
 
+"""
+A function for Deleting the Courses
+"""
 @login_required
 def deleteCourseMenage(request, courseId):
     response = ''

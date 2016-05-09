@@ -93,10 +93,10 @@
                                     <div class="col m12 input-field" style="height: 65px">
                                         <span class="left-align" style="position: relative;left:-45px;top:10px;line-height: 25px; text-align: left;">Register as: </span>
                                         <span>
-                                          <input class="with-gap" name="role" type="radio" id="student" />
+                                          <input class="with-gap" name="role" value="Student" type="radio" id="student" />
                                           <label for="student">Student</label>
                                           &emsp;&emsp;
-                                          <input class="with-gap" name="role" type="radio" id="lecturer" />
+                                          <input class="with-gap" name="role" value="Teacher" type="radio" id="lecturer" />
                                           <label for="lecturer">Lecturer</label>
                                         </span>
                                     </div>
@@ -105,12 +105,12 @@
                                             <div class="g-recaptcha" data-sitekey="6LdNwRwTAAAAABHKqJPjv1jDQbw8psVaBCvciiN1"></div>
                                         </center>
                                     </div>
-                                    <div class="col m12" style="margin-top: 12px;margin-bottom: 10px;text-align: left;">
+                                    <div class="col m12" style="margin-bottom: 22px;text-align: left;">
                                         <input id="termsAndConditions" type="checkbox" required>
                                         <label for="termsAndConditions">Terms and Conditions</label>
                                     </div>
                                     <div class="col m12">
-                                        <!-- <a href="/login/" class="btn-flat">Back to Login</a> -->
+                                        <a onclick="switchForm('login')" href="javascript:void(0);" class="btn-flat blue-text left">Back to Login</a>
                                         <button type="submit" class="btn blue right">Register</button>
                                     </div>
                                 </form>
@@ -128,7 +128,7 @@
         <script src="{% static 'materialize/js/materialize.min.js' %}" type="text/javascript"></script>
         <script>
             function switchForm(to){
-                $('.a-form:first').fadeOut(400);
+                $('.a-form:first').fadeToggle(400);
             }
         </script>
     </body>

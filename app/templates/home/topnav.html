@@ -1,70 +1,58 @@
-<nav class="navbar blue" style="position: fixed;z-index: 9">
-	<ul class="user-info-menu left-links list-inline list-unstyled">
-		<!-- <li class="hidden-sm hidden-xs">
-			<a href="#" data-toggle="sidebar">
-				<i class="zmdi zmdi-menu"></i>
-			</a>
-		</li> -->
-		<li style="margin-right: 30px">
-			<a href="#" data-toggle="sidebar">
-				<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
-			</a>
-		</li>
-		<li style="margin-left: 195px">
-			<form name="userinfo_search_form" method="get" action="extra-search.html">
-				<div id="searchbar">
-					<input type="text" name="s" placeholder="Type to search..." />
-					<!-- <button type="submit" class="btn btn-link">
-						<i class="linecons-search"></i>
-					</button> -->
-				</div>
-			</form>
-		</li>
-	</ul>
+<style>
+	#mainNav{
+		position: fixed;z-index: 9;
+		padding: 0 20px;
+	}
+	@media (min-width:960px) {
+		#mainNav{
+			padding: 0 50px;
+		}
+	}
+	#searchbar{
+		width: calc(100% - 120px);
+		max-width: 400px;
+		margin:0;top: 0;
+	}
+	@media (min-width:960px) {
+		#searchbar{
+			max-width: 700px;
+		}
+	}
+</style>
+<nav id="mainNav" class="navbar blue layout-flex v-center h-space-between">
+	<a href="#" data-toggle="sidebar">
+		<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
+	</a>
+	<div id="searchbar" class="hide-on-small-only">
+		<input type="text" name="s" placeholder="Search" />
+	</div>
+	<a class="layout-flex v-center hide-on-med-and-down js-menu-shower" data-target="user-dropdown" href="javascript:void(0);">
+		{% if user.profile.photo == None %}
+		<img src="/static/images/dp.jpg" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
+		{% else %}
+		<img src="/static/{{ user.profile.photo }}" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
+		{% endif %}
+		<span style="display: inline-block;margin-left: 7px;">
+			{{ user.profile.display }}
+		</span>
 
+		<i style="margin-left: 8px;" class="zmdi zmdi-caret-down"></i>
+	</a>
 
-	<!-- Right links for user info navbar -->
-	<ul class="right">
-		<!-- <li>
-			<a href="#" data-toggle="user-info-menu">
-				<i class="zmdi zmdi-notifications-active"></i>
-				<span class="badge badge-success">7</span>
-			</a>
-		</li> -->
-		<li class="dropdown user-profile hover-line topNav">
-			<a href="#" class="dropdown-toggle" data-toggle="dropdown">
-				{% if user.profile.photo == None %}
-					<img src="/static/images/dp.jpg" class="img-circle img-inline userpic-32"
-						 style="width: 40px; height: 40px; border-radius: 50%;margin-top:10px" />&nbsp;
-				{% else %}
-					<img src="/static/{{ user.profile.photo }}" class="img-circle img-inline userpic-32"
-						 style="width: 40px; height: 40px; border-radius: 50%;margin-top:10px" />&nbsp;
-				{% endif %}
-				<span style="display: inline-block;position: relative;top:-12px">
-					{{ user.profile.display }}
-				</span>
-			</a>
-
-			<ul class="dropdown-menu user-profile-menu">
-				<!-- <li>
-					<a href="/logout/">
-						Profile
-					</a>
-				</li> -->
-				<li style="width: 100%;">
-					<a href="/logout/" style="width: inherit;height: 30px; line-height: 30px">
-						Logout
-					</a>
-				</li>
-			</ul>
-		</li>
-
-		<li>
-			<a href="#" data-toggle="chat" title="Groups">
-				<i class="fa fa-users"></i>
-			</a>
-		</li>
-
-	</ul>
-
+	<a href="javascript:void(0);" class="hide-on-large-only js-menu-shower" data-target="user-dropdown" style="display: flex;padding: 8px 15px">
+		<i class="zmdi zmdi-more-vert"></i>
+	</a>
 </nav>
+
+<div id="user-dropdown" class="some-menu-container static-menu">
+	<div class="some-menu from-down" style="right:0;top:65px">
+		<!--<div class="layout-flex v-center">-->
+			<!--<i class="zmdi zmdi-account-o"></i>-->
+			<!--<a href="/profile/">Profile</a>-->
+		<!--</div>-->
+		<div class="layout-flex v-center">
+			<i class="zmdi zmdi-lock-open"></i>
+			<a href="/logout/">Logout</a>
+		</div>
+	</div>
+</div>

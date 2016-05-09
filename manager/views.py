@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render, render_to_response, get_object_or_404
 from django.http import HttpRequest, Http404, HttpResponseRedirect, HttpResponse
 from django.contrib.auth.decorators import login_required, user_passes_test
@@ -6,11 +7,36 @@ from django.template import RequestContext
 from django.contrib import messages
 from django.contrib.auth.models import *
 from django.views.decorators.csrf import csrf_exempt
+from pusher import Pusher
 from app.models import *
+
+
+@login_required
+def notify(request):
+    if request.method == 'POST':
+        pusher = Pusher(
+            app_id=str(settings.PUSHER_APP_ID),
+            key=str(settings.PUSHER_KEY),
+            secret=str(settings.PUSHER_SECRET)
+        )
+        pusher.trigger('test_channel', 'notification', {
+            'message': 'First Notification',
+        })
+    context = {
+        "title": 'Notification Manager',
+    }
+    return render(request, "manager/notification_manager.html", context)
+
+@login_required
+def message(request):
+    context = ""
+    return HttpResponse(context)
+
 
 @login_required
 def home(request):
     context = {
+        "title": "Manager",
         "totalUsers": User.objects.all().count(),
         "totalEducators": User.objects.filter(groups__name='Educator').count(),
         "totalStudents": User.objects.filter(groups__name='Student').count(),
@@ -28,11 +54,26 @@ def home(request):
 @login_required
 @page_template('manager/common/paginated_members.html')
 def adminstrators(request, template='manager/members.html', extra_context=None):
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        members = User.objects.filter(is_superuser=True).filter(username__icontains=key)
+        if User.objects.filter(is_superuser=True).filter(username__icontains=key).exists():
+            members = User.objects.filter(is_superuser=True).filter(username__icontains=key)
+        elif UserProfile.objects.filter(display__icontains=key).exists():
+            user_ids = []
+            userProfileObject = UserProfile.objects.filter(display__icontains=key)
+            for up in userProfileObject:
+                user_ids.append(up.user.id)
+            members = User.objects.filter(is_superuser=True).filter(id__in=user_ids)
+        else:
+            members = ''
+    else:
+        members = User.objects.filter(is_superuser=True)
     context = {
         "memberName": 'Adminstrators',
         "activatorSwitcher": 'adminstratorsActivator',
         "memberType": 'adminstrator',
-        "members": User.objects.filter(is_superuser=True),
+        "members": members,
         "title": 'Adminstrators',
     }
     if extra_context is not None:
@@ -55,11 +96,25 @@ def adminstratorsActivator(request, key, adminstratorId):
 @login_required
 @page_template('manager/common/paginated_members.html')
 def students(request, template='manager/members.html', extra_context=None):
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        if User.objects.filter(groups__name='Student').filter(username__icontains=key).exists():
+            members = User.objects.filter(groups__name='Student').filter(username__icontains=key)
+        elif UserProfile.objects.filter(display__icontains=key).exists():
+            user_ids = []
+            userProfileObject = UserProfile.objects.filter(display__icontains=key)
+            for up in userProfileObject:
+                user_ids.append(up.user.id)
+            members = User.objects.filter(groups__name='Student').filter(id__in=user_ids)
+        else:
+            members = ''
+    else:
+        members = User.objects.filter(groups__name='Student')
     context = {
         "memberName": 'Students',
         "activatorSwitcher": 'studentsActivator',
         "memberType": 'student',
-        "members": User.objects.filter(groups__name='Student'),
+        "members": members,
         "title": 'Students',
     }
     if extra_context is not None:
@@ -82,11 +137,25 @@ def studentsActivator(request, key,  studentId):
 @login_required
 @page_template('manager/common/paginated_members.html')
 def educators(request, template='manager/members.html', extra_context=None):
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        if User.objects.filter(Q(groups__name='Teacher') | Q(groups__name='Educator')).filter(username__icontains=key).exists():
+            members = User.objects.filter(Q(groups__name='Teacher') | Q(groups__name='Educator')).filter(username__icontains=key)
+        elif UserProfile.objects.filter(display__icontains=key).exists():
+            userProfileObject = UserProfile.objects.filter(display__icontains=key)
+            user_ids = []
+            for up in userProfileObject:
+                user_ids.append(up.user.id)
+            members = User.objects.filter(Q(groups__name='Teacher') | Q(groups__name='Educator')).filter(id__in=user_ids)
+        else:
+            members = ''
+    else:
+        members = User.objects.filter(Q(groups__name='Teacher') | Q(groups__name='Educator'))
     context = {
         "memberName": 'Educators',
         "activatorSwitcher": 'educatorsActivator',
         "memberType": 'educator',
-        "members": User.objects.filter(groups__name='Educator'),
+        "members": members,
         "title": 'Educators',
     }
     if extra_context is not None:
@@ -136,8 +205,13 @@ def schools(request):
         else:
             messages.warning(request, str(request.POST.get('school')) + 'Allready Registered')
             return HttpResponseRedirect("/manager/schools/")
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        schools = School.objects.filter(Q(name__icontains=key) | Q(code__icontains=key))
+    else:
+        schools = School.objects.all()
     context = {
-        "schools": School.objects.all(),
+        "schools": schools,
         "title": 'Schools',
     }
     return render(request, "manager/schools.html", context)
@@ -228,11 +302,20 @@ def groups(request):
         newGroup.name = request.POST.get('group')
         if Group.objects.filter(name=request.POST.get('group')).count() == 0:
             newGroup.save()
+            if Group.objects.filter(name=request.POST.get('group')).count() > 0:
+                messages.success(request, request.POST.get('group') + ' Successfully Registered')
+            else:
+                messages.error(request, "Failed to Register " + request.POST.get('group'))
         else:
             pass
         return HttpResponseRedirect("/manager/groups/")
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        groups = Group.objects.filter(name__icontains=key).order_by('name')
+    else:
+        groups = Group.objects.all().order_by('name')
     context = {
-        "groups": Group.objects.all(),
+        "groups": groups,
         "title": 'Groups',
     }
     return render(request, "manager/groups.html", context)
@@ -241,7 +324,12 @@ def groups(request):
 @login_required
 def deleteGroup(request, groupId):
     groupObj = Group.objects.get(id=groupId)
+    groupName = groupObj.name
     groupObj.delete()
+    if Group.objects.filter(id=groupId).count() == 0:
+        messages.success(request, groupName + " Successfully Deleted")
+    else:
+        messages.error(request, "Failed to Delete " + groupName)
     return HttpResponseRedirect("/manager/groups/")
 
 
@@ -260,8 +348,13 @@ def schoolCourses(request, schoolId):
         else:
             pass
         return HttpResponseRedirect("/manager/schoolCourses/"+str(schoolId)+"/")
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        courses = Courses.objects.filter(school_id=schoolId).filter(Q(name__icontains=key) | Q(code__icontains=key)).order_by('-name')
+    else:
+        courses = Courses.objects.filter(school_id=schoolId).order_by('-name')
     context = {
-        "courses": Courses.objects.filter(school_id=schoolId).order_by('-name'),
+        "courses": courses,
         "schoolId": schoolId,
         "categories": CourseCategory.objects.all().exclude(is_active=False),
         "levels": CourseLevel.objects.all().exclude(is_active=False),
@@ -288,10 +381,15 @@ def courseSubjects(request, courseId):
         else:
             pass
         return HttpResponseRedirect("/manager/courseSubjects/"+courseId+"/")
+    if request.method == 'GET' and 'key' in request.GET:
+        key = request.GET.get('key')
+        subjects = Subjects.objects.filter(course_id=courseId).filter(Q(name__icontains=key) | Q(code__icontains=key)).order_by('-name')
+    else:
+        subjects = Subjects.objects.filter(course_id=courseId).order_by('-name')
     context = {
         "courseId": courseId,
         "schoolId": courseObj.school_id,
-        "subjects": Subjects.objects.filter(course_id=courseId).order_by('-name'),
+        "subjects": subjects,
         "years": Year.objects.all(),
         "academics": AcademicYear.objects.all().exclude(is_active=False),
         "title": 'Subjects',

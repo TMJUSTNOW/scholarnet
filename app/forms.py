@@ -63,11 +63,11 @@ class registration(forms.ModelForm):
                 self._errors['password1'] = 'Password Must Match'
         if 'username' in self.cleaned_data and 'username1' in self.cleaned_data:
             if self.cleaned_data['username'] != self.cleaned_data['username1']:
-                self._errors['username'] = 'Phone Number/E-mail Must Match'
-                self._errors['username1'] = 'PhoneNumber/E-mail Must Match'
+                self._errors['username'] = 'Phone Number Must Match'
+                self._errors['username1'] = 'Phone Number Must Match'
         if 'username' in self.cleaned_data:
             if self. cleaned_data['username'] and User.objects.filter(username= self.cleaned_data['username']).count() > 0:
-                self._errors['username'] = 'This Phone/E-mail is already registered, Try another'
+                self._errors['username'] = 'This Phone is already registered, Try another'
         return self.cleaned_data
 
     def save(self, commit=True):

@@ -59,19 +59,29 @@
 
 					<div class="col-md-12">
 						<div class="tab-content">
+							<div class="row">
+								<form role="form" action="" method="GET">
+									<div class="form-group">
+										<input type="search" name="key" class="form-control input-lg" autofocus="true" placeholder="Write Key Word to Search..." required/>
+									</div>
+								</form>
+							</div>
 							<div class="tab-pane endless_page_template active" id="all">
-
-								{% include "manager/common/paginated_members.html" %}
+								{% if members|length == 0 %}
+									<div class="alert alert-info">
+										<center>
+											<h3>No Results...</h3>
+										</center>
+									</div>
+								{% else %}
+									{% include "manager/common/paginated_members.html" %}
+								{% endif %}
 							</div>
 						</div>
 
 					</div>
 
 				</div>
-				<!-- Main Footer -->
-				<!-- Choose between footer styles: "footer-type-1" or "footer-type-2" -->
-				<!-- Add class "sticky" to  always stick the footer to the end of page (if page contents is small) -->
-				<!-- Or class "fixed" to  always fix the footer to the end of page -->
 				{% include "manager/common/footer.html" %}
 			</div>
 
@@ -83,7 +93,6 @@
 
 
 	{% block main_scripts %}
-		<!-- Bottom Scripts -->
 		<script src="{% static 'assets/js/bootstrap.min.js' %}"></script>
 		<script src="{% static 'assets/js/TweenMax.min.js' %}"></script>
 		<script src="{% static 'assets/js/resizeable.js' %}"></script>
@@ -106,6 +115,10 @@
 		</script>
 
 	<script type="text/javascript">
+		$("#memberSearchForm").on("submit", function(e){
+			alert('Kindimba');
+			e.preventDefault();
+		});
 		function deleteMember(memberType, memberId){
 			swal({
 			  title: "Are you sure?",

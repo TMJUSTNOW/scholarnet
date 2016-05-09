@@ -44,6 +44,7 @@ INSTALLED_APPS = (
     'django.contrib.redirects',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.humanize',
     'widget_tweaks',
     'endless_pagination',
     'app',
@@ -52,6 +53,7 @@ INSTALLED_APPS = (
     'storages',
     'corsheaders',
     'tastypie',
+    'easy_thumbnails',
 )
 TEMPLATES = [
     {
@@ -202,3 +204,10 @@ TASTYPIE_FULL_DEBUG = True
 TASTYPIE_CANNED_ERROR = "Oops, we broke it!"
 TASTYPIE_DEFAULT_FORMATS = ['json', 'xml', 'yaml', 'plist']
 TASTYPIE_ABSTRACT_APIKEY = False
+
+
+#PUSHER SETUP
+PUSHER_APP_ID = '202526',
+PUSHER_KEY = '3619f2e74eb77fcb6132',
+PUSHER_SECRET = '9977cfc739916fd1248c',
+PUSHER_SSL = True

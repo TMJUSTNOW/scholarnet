@@ -43,45 +43,51 @@
 					<!-- add class "multiple-expanded" to allow multiple submenus to open -->
 					<!-- class "auto-inherit-active-class" will automatically add "active" class for parent elements who are marked already with class "active" -->
 					<li>
-						<a href="/manager/" >
+						<a href="{% url 'manager' %}" >
 							<i class="fa fa-dashboard"></i>
 							<span class="title">Dashboard</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/adminstrators/">
+						<a href="{% url 'adminstrators' %}">
 							<img avatar="Admistrators" class="" width="35"/>
 							<span class="title">Adminstrators (Managers)</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/educators/">
+						<a href="{% url 'educators' %}">
 							<img avatar="Educators" width="35" />
-							<span class="title">Educators</span>
+							<span class="title">Teachers/Educators</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/students/">
+						<a href="{% url 'students' %}">
 							<img avatar="Students" width="35" />
 							<span class="title">Students(Scholars)</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/schools/">
+						<a href="{% url 'schools' %}">
 							<img avatar="Schools List" width="35" />
 							<span class="title">List of Schools</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/groups/">
+						<a href="{% url 'groups' %}">
 							<img avatar="User Groups" width="35" />
 							<span class="title">User Groups</span>
 						</a>
 					</li>
 					<li>
-						<a href="/manager/feedbacks/all/">
+						<a href="{% url 'feedbacks' 'all' %}">
 							<img avatar="Feedbacks Problems and Recommendation" width="35" />
 							<span class="tittle">Feed & Reco & Prob</span>
+						</a>
+					</li>
+					<li>
+						<a href="{% url 'notify' %}">
+							<img avatar="Notification Manager" width="35" />
+							<span class="title">Notification Manager</span>
 						</a>
 					</li>
 				</ul>

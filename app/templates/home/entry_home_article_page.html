@@ -1,45 +1,143 @@
 {% load endless %}
-
+{% load humanize %}
 {% if totalPost <= 0 %}
-    <div class="sorted" id="tiles">
-        <div style="font-size: 20px; color:#999;text-align: center;margin-top:60px;">
+    <div class="col s12 m12 l9 offset-l2 hide-on-small-only" style="position: absolute;height: calc(100% - 20px);display: flex; align-items: center; justify-content: center">
+        <div style="font-size: 20px; color:#999;text-align: center;">
+			<i class="zmdi zmdi-broken-image" style="font-size: 60px"></i><br><br>
             You have no articles yet...click the button below to create one
         </div>
     </div>
+
+	<div class="hide-on-med-and-up grey lighten-5" style="font-size: 20px; color:#999;text-align: center;margin-top: 60px;">
+		<i class="zmdi zmdi-broken-image" style="font-size: 60px"></i><br><br>
+		You have no articles yet...click the button below to create one
+	</div>
 {% else %}
     {% for post in posts %}
-        <div class="card col m6">
-						<div style="height: 60px;padding: 15px" class="gre">
-							<div class="left item-avatar one-line">
-								{% if user.profile.photo == None %}
-                                    <img src="/static/images/dp.jpg" class="circle" width="35" />
-                                {% else %}
-                                    <img src="/static/{{ user.profile.photo }}" class="circle" width="35" />
-                                {% endif %}
-								<p>{{ post.user.profile.display }}</p>
+        <div id="post{{post.id}}" class="card col s12 m12 l7 offset-l3" style="padding:0">
+			<div class="layout-flex v-center h-space-between" style="height: 60px;padding: 15px">
+					<div class="layout-flex v-center">
+						{% if post.user.profile.photo == None %}
+							<img src="/static/images/dp.jpg" class="circle" style="height:35px;width:35" />
+						{% else %}
+							<img src="/static/{{ post.user.profile.photo }}" class="circle" style="height:35px;width:35" />
+						{% endif %}
+						<p style="margin-left: 8px">{{ post.user.profile.display }}</p>
+					</div>
+					<span class="hide js-article-subject">{{post.subject}}</span>
+					<span class="layout-flex v-center">
+						<span style="font-size: 12px">
+							{% if post.updated|naturalday == "today" %}
+								{{ post.updated|naturaltime}}
+							{% else %}
+								{{ post.updated|naturalday }}
+							{% endif %}
+						</span>
+						&nbsp;&nbsp;
+						<a href="javascript:void(0);" class="grey-text text-darken-5 layout-flex v-center js-menu-shower" data-target="post-menu-{{post.id}}" style="padding:5px 15px"><i class="zmdi zmdi-more-vert" style="font-size: 23px; color: #888"></i></a>&nbsp;
+
+						<div id="post-menu-{{post.id}}" class="some-menu-container from-top-right">
+							<div class="some-menu">
+								<div class="layout-flex v-center">
+									<a href="javascript:void(0);" onclick="deletePost({{post.id}})">Delete</a>
+								</div>
+								<div class="layout-flex v-center">
+									<a href="javascript:void(0);" onclick="editArticle({{post.id}})">Edit</a>
+								</div>
 							</div>
 						</div>
-						<div class="card-content">
-                            {{ post.description|truncatewords:50 }}
+
+						<!--<ul class="adropdown med">-->
+							<!--<li><a href="javascript:void(0);" onclick="deletePost({{post.id}})">Delete</a>-->
+							<!--</li>-->
+							<!--<li><a href="javascript:void(0);" onclick="editArticle({{post.id}})">Edit</a>-->
+							<!--</li>-->
+						<!--</ul>-->
+					</span>
+				<!--</div>-->
+			</div>
+			<div class="card-content post-desc">{{ post.description|truncatewords:50 }}</div>
+			<div class="card-image">
+				<div class="row" style="margin: 0">
+					{% for image in post.post_images %}
+						{% if forloop.counter == 1 %}
+							<div class="col m12 grey lighten-3" style="background: url(/static/{{ image.url }});height: 300px;background-position: center center;background-size: cover;background-repeat: no-repeat;">
+							</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+				<div class="row" style="margin: 0">
+					{% for image in post.post_images %}
+						{% if forloop.counter > 1 %}
+							<div class="col m4" style="padding:1px 0.8px;">
+								<div class="grey lighten-3" style="background: url(/static/{{ image.url }});width:100%;height: 120px;background-position: center center;background-size: cover;background-repeat: no-repeat;">
+								</div>
+							</div>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+			<div class="card-action" style="padding: 10px;padding-right:0;">
+				<div class="right" style="margin-bottom: 10px; margin-right: 20px">
+					<a class="btn-flat grey-text btn-fav" style="padding: 0 5px;overflow: visible;position: relative;" href="javascript:void(0);" onclick="recommendPost({{post.id}})">
+						<i class="zmdi zmdi-favorite-outline js-favicon {{ post.faved }}" style="font-size:24px"></i>
+					</a>
+
+					<span class="grey-text text-darken-4 js-fav-text" style="top:-5px; display: inline-block; margin-left: -15px; margin-right: 10px">{{ post.recommend }}</span>
+
+					<a class="btn-flat grey-text btn-comment comments-toggler" style="padding: 0 5px;overflow: visible;position: relative;" href="javascript:void(0);">
+						<i class="zmdi zmdi-comment-alt-text" style="font-size:24px"></i>
+					</a>
+
+					<span class="comments-count" class="grey-text text-darken-4" style="top:-5px;display: inline-block;margin-left: -15px; margin-right: 10px">{{ post.comments }}</span>
+				</div>
+			</div>
+			<div class="comments-div" style="width: 100%;display: none;margin-top: 32px">
+				<ul class="collection grey lighten-4" style="margin:0;width: 100%; display: {% if post.comments < 1 %} none {% endif %};">
+					{% for comment in post.comment %}
+						<li id="comment{{comment.id}}" class="collection-item avatar" style="min-height: 10px;">
+							{% if comment.user.profile.photo == None %}
+								<img src="/static/images/dp.jpg" class="circle" width="35" />
+							{% else %}
+								<img src="/static/{{ comment.user.profile.photo }}" class="circle" width="35" />
+							{% endif %}
+							<span class="title" style="font-weight:400">{{ comment.user.profile.display }}</span>
+							<p class="grey-text text-darken-1">{{comment.comment}}</p>
+							<span class="secondary-content grey-text text-darken-5" style="margin-top: -4px; font-size: 14px">
+								{% if comment.updated|naturalday == "today" %}
+									{{ comment.updated|naturaltime}}
+								{% else %}
+									{{ comment.updated|naturalday }}
+								{% endif %}
+
+								<a href="javascript:void(0);" class="grey-text text-darken-5 adropdowner"><i class="zmdi zmdi-chevron-down"></i></a>&nbsp;<ul class="adropdown"><li><a href="javascript:void(0);" onclick="deleteComment({{comment.id}})">Delete</a></li></ul>
+							</span>
+						</li>
+					{% endfor %}
+				</ul>
+
+				<div class="client-comment-area left item-avatar one-line" style="box-shadow: 0 -1px 1px rgba(0,0,0,0.06);">
+					<form class="comment-poster-form" action="/app/publishComment/" method="POST">
+						{% if post.user.profile.photo == None %}
+							<img data-username="{{user.profile.display}}" src="/static/images/dp.jpg" class="circle" width="35" style="margin: 0 10px;" />
+						{% else %}
+							<img data-username="{{user.profile.display}}" src="/static/{{user.profile.photo}}" class="circle" width="35" style="margin: 0 10px;" />
+						{% endif %}
+
+						{% csrf_token %}
+						<input type="hidden" name="post_id" value="{{post.id}}">
+						<div style="width: calc(100% - 95px); min-height: 20px;max-height: 150px; margin-left: 55px;margin-top: 10px;">
+							<textarea class="comment-area" placeholder="Add comment..." name="comment" rows="2" style="width: 100%;font-size: 17px; border: none;resize: none;margin-top: 5px;"></textarea>
 						</div>
-						<div class="card-image">
-                            {% for image in post.post_images|slice:'1' %}
-							    <img src="/static/{{ image.url }}" class="" style1="height: 220px">
-                            {% endfor %}
-						</div>
-						<div class="card-action" style="paddin: 0;padding-right:0">
-							<!-- <div class="righ" style="margin-bottom: 10px"> -->
-								<a class="btn-flat grey-text btn-fav" style="padding: 0 5px;overflow: visible;position: relative;" href="#">
-									<i class="zmdi zmdi-favorite-outline {{ post.faved }}" style="font-size:39px"></i>
-									<span class="grey-text text-darken-4" style="top:5px;right:-8px">{{ post.recommend }}</span>
-								</a>
-								<a class="btn-flat grey-text" style="padding: 0 5px;overflow: visible;position: relative;" href="#">
-									<i class="zmdi zmdi-comment-alt-text"></i>
-									<span class="a-badge blue">{{ post.comments }}</span>
-								</a>
-							<!-- </div> -->
-						</div>
-					</div>
+						<span class="secondary">
+							<button disabled class="white btn-floating send-btn" style="margin-top: 5px; margin-right: -5px;">
+								<i class="zmdi zmdi-mail-send grey-text text-darken-1"></i>
+							</button>
+						</span>
+					</form>
+				</div>
+			</div>
+		</div>
     {% endfor %}
 {% endif %}
 

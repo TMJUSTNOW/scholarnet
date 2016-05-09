@@ -1,5 +1,4 @@
 <div class="settings-pane">
-
 		<a href="#" data-toggle="settings-pane" data-animate="true">
 			&times;
 		</a>
@@ -14,24 +13,31 @@
 
 						<div class="user-image">
 							<a href="javascript:;">
-								<img avatar="{{ user.username }}" class="img-responsive img-circle" />
+								<img src="/static/images/user.jpg" class="img img-circle" width="100" />
 							</a>
 						</div>
 
 						<div class="user-details">
 
 							<h3>
-								<a href="extra-profile.html">{{ user.username }}</a>
+								{% if user.profile.display != '' %}
+									<a href="javascript:;">{{ user.profile.display }}</a>
+								{% else %}
+									<a href="javascript:;">Scholar</a>
+								{% endif %}
 
 								<!-- Available statuses: is-online, is-idle, is-busy and is-offline -->
 								<span class="user-status is-online"></span>
 							</h3>
 
-							<p class="user-title">Manager</p>
+							<p class="user-title">
+								{{ ugroup }}
+							</p>
 
 							<div class="user-links">
-								<a href="extra-profile.html" class="btn btn-primary">Edit Profile</a>
-								<a href="extra-profile.html" class="btn btn-success">Upgrade</a>
+								{% if user.profile.school_id != None and user.profile.year_id != None and user.profile.course_id != None %}
+									<a href="javascript:;" data-toggle="modal" data-target="#upgrading" class="btn btn-gray">Upgrade</a>
+								{% endif %}
 							</div>
 
 						</div>
@@ -41,62 +47,61 @@
 				</div>
 
 				<div class="col-md-8 link-blocks-env">
-
-					<div class="links-block left-sep">
+					<div class="links-block left-sep col-md-8">
 						<h4>
 							<span>Notifications</span>
 						</h4>
-
-						<ul class="list-unstyled">
-							<li>
-								<input type="checkbox" class="cbr cbr-primary" checked="checked" id="sp-chk1" />
-								<label for="sp-chk1">Messages</label>
-							</li>
-							<li>
-								<input type="checkbox" class="cbr cbr-primary" checked="checked" id="sp-chk2" />
-								<label for="sp-chk2">Events</label>
-							</li>
-							<li>
-								<input type="checkbox" class="cbr cbr-primary" checked="checked" id="sp-chk3" />
-								<label for="sp-chk3">Updates</label>
-							</li>
-							<li>
-								<input type="checkbox" class="cbr cbr-primary" checked="checked" id="sp-chk4" />
-								<label for="sp-chk4">Server Uptime</label>
-							</li>
-						</ul>
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk1" />
+									<label for="sp-chk1">Messages</label>
+								</li>
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk2" />
+									<label for="sp-chk2">Events</label>
+								</li>
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk3" />
+									<label for="sp-chk3">Updates</label>
+								</li>
+							</ul>
+						</div>
+						<div class="col-md-6">
+							<ul class="list-unstyled">
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk1" />
+									<label for="sp-chk1">Messages</label>
+								</li>
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk2" />
+									<label for="sp-chk2">Events</label>
+								</li>
+								<li>
+									<input type="checkbox" class="cbr cbr-primary development" checked="checked" id="sp-chk3" />
+									<label for="sp-chk3">Updates</label>
+								</li>
+							</ul>
+						</div>
 					</div>
-
-					<div class="links-block left-sep">
+					<div class="links-block left-sep col-md-4">
 						<h4>
 							<a href="#">
-								<span>Help Desk</span>
+								<span>Help</span>
 							</a>
 						</h4>
 
 						<ul class="list-unstyled">
 							<li>
-								<a href="#">
+								<a href="javascript:;" data-toggle="modal" data-target="#feedbckForm">
 									<i class="fa-angle-right"></i>
-									Support Center
+									Submitt a Feedback
 								</a>
 							</li>
 							<li>
-								<a href="#">
+								<a href="javascript:;" data-toggle="modal" data-target="#aboutUs">
 									<i class="fa-angle-right"></i>
-									Submit a Ticket
-								</a>
-							</li>
-							<li>
-								<a href="#">
-									<i class="fa-angle-right"></i>
-									Domains Protocol
-								</a>
-							</li>
-							<li>
-								<a href="#">
-									<i class="fa-angle-right"></i>
-									Terms of Service
+									About Us
 								</a>
 							</li>
 						</ul>

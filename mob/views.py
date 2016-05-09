@@ -15,6 +15,7 @@ from app.views import *
 from django.contrib import auth
 from django.views.decorators.cache import never_cache
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.humanize.templatetags import humanize
 from functools import wraps
 import json
 
@@ -91,11 +92,82 @@ def userSubjectList(request):
 #function returning the list of subjects post content
 ############################################################################################
 @never_cache
+def postSubjectListAll(request):
+    subjects = ''
+    content = []
+    if request.method == 'GET' and 'phone' in request.GET and 'offset' in request.GET:
+        userPhone = internationalizePhone(request.GET.get('phone'))
+        if User.objects.filter(username=userPhone).exists():
+            cUser = User.objects.get(username=userPhone)
+            for ugroup in cUser.groups.all():
+                if ugroup.name == 'Teacher':
+                    subjects_ids = []
+                    teacherSubjects = TeacherSubject.objects.filter(user_id=cUser.id)
+                    for tsubject in teacherSubjects:
+                        subjects_ids.append(tsubject.subject.id)
+                    subjects = Subjects.objects.filter(id__in=subjects_ids)
+                elif ugroup.name == 'Student':
+                    subjects = Subjects.objects.filter(course_id=cUser.profile.course.id)
+
+            subject_ids = []
+
+            for sub in subjects:
+                subject_ids.append(sub.id)
+
+            offset_limit=5
+            if int(request.GET.get('offset')) == 0:
+                offset = 0
+            else:
+                offset = int(request.GET.get('offset'))-1
+            posts = Descriptions.objects.filter(subject_id__in=subject_ids).values().order_by('-updated')[int(offset)*offset_limit:(int(offset)*offset_limit)+offset_limit]
+            total = Descriptions.objects.filter(subject_id__in=subject_ids).count()
+            for post in posts:
+                postObj = Descriptions.objects.get(id=post['id'])
+                images = Images.objects.filter(description_id=post['id']).count()
+                user = User.objects.get(id=post['user_id'])
+                for gp in user.groups.all():
+                    group = gp
+                info = {}
+                updated = ''
+                if humanize.naturalday(post['updated']) == 'today':
+                    updated = humanize.naturaltime(post['updated'])
+                else:
+                    updated = humanize.naturalday(post['updated'])
+                info = {
+                    'id': post['id'],
+                    'display': user.profile.display,
+                    'role': str(group),
+                    'description': post['description'],
+                    'updated': updated,
+                    'recommendation': postObj.recommend,
+                    'comments': postObj.comments,
+                    'images': images,
+                    'user': str(postObj.user.username),
+                }
+                content.append(info)
+        else:
+            pass
+    else:
+        pass
+
+    return HttpResponse(json.dumps(content))
+
+
+
+
+############################################################################################
+#function returning the list of subjects post content
+############################################################################################
+@never_cache
 def postSubjectList(request):
     subjectId = request.GET.get('id')
-    posts = Descriptions.objects.filter(subject_id=subjectId).values().order_by('-updated')[:100]
+    offset_limit=5
+    if int(request.GET.get('offset')) == 0:
+        offset = 0
+    else:
+        offset = int(request.GET.get('offset'))-1
+    posts = Descriptions.objects.filter(subject_id=subjectId).values().order_by('-updated')[int(offset)*offset_limit:(int(offset)*offset_limit)+offset_limit]
     total = Descriptions.objects.filter(subject_id=subjectId).count()
-    context = ''
     content = []
     for post in posts:
         postObj = Descriptions.objects.get(id=post['id'])
@@ -104,12 +176,17 @@ def postSubjectList(request):
         for gp in user.groups.all():
             group = gp
         info = {}
+        updated = ''
+        if humanize.naturalday(post['updated']) == 'today':
+            updated = humanize.naturaltime(post['updated'])
+        else:
+            updated = humanize.naturalday(post['updated'])
         info = {
             'id': post['id'],
             'display': user.profile.display,
             'role': str(group),
             'description': post['description'],
-            'updated': str(post['updated'].strftime("%d/%m/%Y   @  %I:%M %p")),
+            'updated': updated,
             'recommendation': postObj.recommend,
             'comments': postObj.comments,
             'images': images,
@@ -131,11 +208,16 @@ def getPostComments(request):
     for comment in comments:
         info = {}
         userObj = User.objects.get(id=comment.user_id)
+        updated = ''
+        if humanize.naturalday(comment.updated) == 'today':
+            updated = humanize.naturaltime(comment.updated)
+        else:
+            updated = humanize.naturalday(comment.updated)
         info = {
             'id': comment.id,
             'info': comment.comment,
             'poster': userObj.profile.display,
-            'date': str(comment.updated.strftime("%d/%m/%y  @  %I:%M %p")),
+            'date': updated,
         }
         content.append(info)
     return HttpResponse(json.dumps(content))

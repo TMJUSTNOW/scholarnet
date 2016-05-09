@@ -7,7 +7,7 @@ from django.contrib import admin, auth
 from . import views
 
 urlpatterns = [
-    url(r'^$', views.home, name='home'),
+    url(r'^$', views.home, name='manager'),
     url(r'^adminstrators/$', views.adminstrators, name='adminstrators'),
     url(r'^adminstratorsActivator/([a-z]+)/([0-9]+)/$',
         views.adminstratorsActivator, name='adminstratorsActivator'),
@@ -22,6 +22,11 @@ urlpatterns = [
     url(r'^schools/$', views.schools, name='schools'),
     url(r'^deleteSchool/([0-9]+)/$', views.deleteSchool, name='deleteSchool'),
     url(r'^editSchool/([0-9]+)/$', views.editSchool, name='editSchool'),
+
+    #################################################################################
+    # Url for Publishing Notifications to the users
+    #################################################################################
+    url(r'^notify/$', views.notify, name='notify'),
 
 
 

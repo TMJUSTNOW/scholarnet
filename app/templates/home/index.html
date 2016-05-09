@@ -8,99 +8,474 @@
 			float: left;
 			margin-bottom:10px;
 		}
+		.btn-floating.btn-floating-bottom{
+			position: fixed;
+			bottom: 20px;right: 20px;
+		}
+
+		@media (min-width:960px) {
+			.btn-floating.btn-floating-bottom{
+				position: fixed;bottom:20px;
+				right:calc(28% + 15px) !important;
+			}
+		}
 	</style>
 {% endblock %}
-
 	{% block body %}
-<!-- 		<div class="grid-sizer" style="width:60%"></div> -->
-		<div class="row">
-			<div class="col" style="width: 21%">&nbsp;</div>
-			<div class="col m7 offset-m" style="margin-top: 75px">
-				<div class="row" id="posts">
-					{% include "home/entry_home_article_page.html" %}
-				</div>
-			</div>
-			<div class="col" style="width: 3%">&nbsp;</div>
-
-			<button onclick="newArticle()" style="position: fixed;bottom: 20px;right:22%" class="btn-floating btn-large pink"><i class="zmdi zmdi-edit"></i></button>
-		</div>
+		<section class="deep-orange" style="positio: relative;">
+			{% include "home/entry_home_article_page.html" %}
+			<button onclick="newArticle()" class="btn-floating btn-floating-bottom btn-large pink"><i class="zmdi zmdi-edit"></i></button>
+		</section>
 
 
-		<div id="new-post" class="modal">
+
+
+	<div id="new-post" class="modal">
+		<form id="articleForm" action="/app/postPublish/" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
 			<div style="height: 60px;padding: 15px" class="gre">
 				<div class="left item-avatar one-line">
 					<img src="/static/images/dp.jpg" class="circle" width="35" />
-					<p>James Wolpert</p>
+					<p>{{user.profile.display}}</p>
+
+					<div class="secondary" style="margin-top: -10px; margin-right: -15px;">
+						<a id="subjectChooser" class="grey lighten-5 grey-text dropdown-button btn-flat" href="javascript:void(0);" data-activates="dropdown1" style="text-transform: none; box-shadow: 0 1px 3px 0 rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 2px 1px -1px rgba(0,0,0,.12);width:200px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;">Choose subject</a>
+
+						<!-- Dropdown Structure -->
+						<ul id='dropdown1' class='dropdown-content grey lighten-5' style="max-height: 250px;width:200px; overflow-x: hidden;">
+							{% for subject in subjects %}
+								<li data-subid="{{ subject.id }}">
+									<a href="javascript:void(0);" style="font-size: 15px">
+										<span class="title grey-text">{{ subject.name }}</span>
+									</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</div>
 				</div>
 
-				<div class="right">
-					<a class="grey lighten-5 grey-text dropdown-button btn-flat" href="javascript:void:0;" data-activates="dropdown1" style="text-transform: none; box-shadow: 0 1px 3px 0 rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 2px 1px -1px rgba(0,0,0,.12);">Choose subject</a>
-
-					<!-- Dropdown Structure -->
-					<ul id='dropdown1' class='dropdown-content grey lighten-5' style="max-height: 70%;overflow-x: hidden;">
-						{% for subject in subjects %}
-							<li>
-								<a href="javascript:void(0);" style="font-size: 15px">
-									<span class="title grey-text">{{ subject.name|truncatewords:3 }}</span>
-								</a>
-							</li>
-						{% endfor %}
-					</ul>
-				</div>
+				<input id="selectedSubjectInput" type="hidden" name="subject">
 			</div>
-	        <div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
-	        	<textarea placeholder="Type article" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
+	        <div class="modal-content re" style="position: relative;margin-top: 1px; max-height: calc(100% - 500px); padding: 5px;padding-top: 10px">
+	        	<span id="wordCount" style="position: absolute;top:-2px; right:10px; font-size:12px;">80 / 80</span>
+	        	<textarea placeholder="Article content" name="description" cols="30" rows="7" style="height: 80%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;" onkeyup="updateWordCount(this)"></textarea>
+
 	        </div>
 	        <div id="attachments">
-	        	<span class="grey-text text-darken-1" style="font-size: 17px; padding-left: 5px">Attachments</span>
+	        	<span class="grey-text text-darken-1" style="font-size: 17px; padding-left: 5px">	Attachments
+	        		<!-- <span id="fileCount" class="right" styl="top: 26px">No files &nbsp;</span> -->
+	        	</span>
 
-	        	<div class="gre lighten-1 attachment-container">
-	        		<a href="javascript:void(0);" class="grey lighten-3 grey-text center-align attachment" style="line-height: 100px">
+	        	<div class="attachment-containe" style="border-top: 1px solid rgba(189, 189, 189, 0.2);">
+	        		<!-- <a href="javascript:void(0);" class="grey lighten-3 grey-text center-align attachment" style="line-height: 100px">
 						ADD
-					</a>
+					</a> -->
+
+					<input id="attacher" name="files" multiple type="file" class="grey lighten-3 grey-text center-align attachment zmdi" accept="image/*" onchange="readUrl(this)">
 				</div>
 	        </div>
 	        <div style="height: 70px;width:100%;position: fixed;bottom: 0;left: 0">
 	        	<hr class="separator">
-		        <div class="right" style="padding-top: 8px">
-		        	<a class="btn-flat waves-effect waves-blue">Cancel</a>
-		    		<a class="btn-flat waves-effect waves-blue">Save</a>
+		        <div class="right" style="padding-top: 8px; margin-right: 10px;">
+		        	<a class="btn-flat waves-effec" onclick="closeNewArticle()">Cancel</a>
+		    		<button type="submit" class="btn-flat white">Save</button>
 		        </div>
 	        </div>
-	    </div>
+		</form>
+    </div>
 
-	    <div id="contact-modal" class="modal">
-	    	<div style="height: 60px;padding: 15px" class="gre">
-		    	<div class="left item-avatar one-line">
-					<img src="/static/images/dp.jpg" class="circle" width="35" />
-					<p>James Wolpert</p>
+	<div id="edit-article" class="modal">
+		<form id="editArticleForm" action="/app/editPost/" method="POST" enctype="multipart/form-data">
+			{% csrf_token %}
+			<div style="display:flex;align-items:center;justify-content:space-between;height: 60px;padding: 15px">
+				<div style="display: flex;align-items: center">
+					<img src="/static/images/dp.jpg" class="circle" style="height: 35px;width:35px;" />
+					<span style="margin-left: 10px">{{user.profile.display}}</span>
+				</div>
+				<div class="secondary">
+					<a class="grey lighten-5 grey-text btn-flat js-article-subject" href="javascript:void(0);" style="width:200px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;"></a>
+				</div>
+				<input class="hide js-post-id" type="hidden" name="post_id">
+			</div>
+
+			<div class="modal-content" style="margin-top: 1px; margin-bottom: 67px; max-height: 300px; padding: 5px">
+				<textarea placeholder="Article desciption" name="article" cols="30" rows="8" style="height: 80%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;" onkeyup="return this.value.length < 60"></textarea>
+			</div>
+
+			<div style="height: 70px;width:100%;position: fixed;bottom: 0;left: 0">
+				<hr class="separator">
+				<div class="right" style="padding-top: 8px; margin-right: 10px;">
+					<a class="btn-flat" onclick="closeEditArticle()">Cancel</a>
+					<button type="submit" class="btn-flat white">Save</button>
 				</div>
 			</div>
-			<div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
-	        	<textarea placeholder="Type your message" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
-	        </div>
-		    <div class="modal-footer">
-		      <a href="#!" class=" modal-action modal-close waves-effect waves-gree btn-flat">Send</a>
-		    </div>
+		</form>
+	</div>
+
+    <div id="contact-modal" class="modal">
+    	<div style="height: 60px;padding: 15px" class="gre">
+	    	<div class="left item-avatar one-line">
+				<img src="/static/images/dp.jpg" class="circle" width="35" />
+				<p>James Wolpert</p>
+			</div>
 		</div>
+		<div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
+        	<textarea placeholder="Type your message" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
+        </div>
+	    <div class="modal-footer">
+	      <a href="#!" class=" modal-action modal-close waves-effect waves-gree btn-flat">Send</a>
+	    </div>
+	</div>
+    <script>
+		// OPENS MODAL FOR EDITTING ARTICLE
+		function editArticle(id){
+			$("#post"+id).addClass('post-being-edited');
+			var curDescription = $("#post"+id).find(".post-desc").text();
+			var curSubject = $("#post"+id).find(".js-article-subject").text();
+			$('#edit-article').find('textarea').val(curDescription).addClass('desc-field');
+			$('#edit-article').find('.js-post-id').val(id);
+			$('#edit-article').find('.js-article-subject').text(curSubject);
+			$('#edit-article').openModal();
+		}
 
-	    <script>
-	    	$(document).ready(function(){
-	    		var $grid = $('#posts').masonry({
-				  itemSelector: '.col',
-				  percentPosition: true,
+		// CLOSE MODAL FOR EDITTING ARTICLE
+		function closeEditArticle(){
+			$('#edit-article').closeModal();
+		}
+
+		function saveEditedArticle(e){
+			e.preventDefault();
+			var form = e.currentTarget;
+			var data = $(form).serialize();
+
+			if(validaTor("true")) {
+				$.ajax({
+					url: "/app/editPost/",
+					type: 'POST',
+					data: data
+				})
+				.done(function (data) {
+					var data = JSON.parse(data)[0];
+					$('.post-being-edited').find(".post-desc").text(data.content);
+					//				TweenMax.to('#post'+id, .1, {y:-550, opacity: 0});
+					createToast("Post updated.");
+					console.log("success with data", data);
+				})
+				.fail(function (error) {
+					console.log("error returned is", error);
+					createToast("Error occured", true, 3000);
+				})
+				.always(function () {
+					console.log("Action complete!");
+					$('.post-being-edited').removeClass('post-being-edited');
+					closeEditArticle();
 				});
+			}
+		}
 
-	    		$('.collapsible').collapsible({
-			      accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
-			    });
-	    	});
-	    	function newArticle(){
-		        $('#new-post').openModal();
-        	}
+		function deletePost(id){
+			$.ajax({
+				url: "/app/deletePost/"+id+"/",
+				type: 'GET'
+			})
+			.done(function(data) {
+				TweenMax.to('#post'+id, .1, {y:-250, opacity: 0});
+				setTimeout(function(){
+					$('#post'+id).remove();
+					createToast("Post deleted.");
+				}, 100);
+				console.log("success. with data", data);
+			})
+			.fail(function(error) {
+				console.log("error returned is", error);
+				createToast("Error occured", true, 3000);
+			})
+			.always(function() {
+				console.log("Action complete!");
+			});
+		}
+		function recommendPost(id){
+			$.ajax({
+				url: "/app/recommend/"+id+"/",
+				type: 'GET'
+			})
+			.done(function(data) {
+				var data = JSON.parse(data)[0];
+				var favBtn = $("#post"+id).find(".btn-fav");
+				$('#post'+id).find('.js-fav-text').text(data.recommendation);
+				$("#post"+id).find(".js-favicon").toggleClass('true');
+				TweenMax.from(favBtn, .3, {scale:1.5});
+				console.log("success. with data", data);
+			})
+			.fail(function(error) {
+				console.log("error returned is", error);
+				createToast("Error occured", true, 3000);
+			})
+			.always(function() {
+				console.log("Action complete!");
+				// hideToast(postingCommentToastId);
+			});
+		}
 
-        	function sendFeedback(){
-		        $('#contact-modal').openModal();
-        	}
-	    </script>
+    	function deleteComment(id){
+			$.ajax({
+		    		url: "/app/deleteComment/"+id+"/",
+		    		type: 'GET'
+		    	})
+		    	.done(function(data) {
+		    		var data = JSON.parse(data)[0];
+		    		TweenMax.to('#comment'+id, .3, {x:-150, opacity: 0});
+		    		setTimeout(function(){
+		    			$('#comment'+id).parents('.card').find('.comments-count').text(data.total_comment);
+						$('#comment'+id).remove();
+						createToast("comment deleted.");
+					}, 300);
+		    		console.log("success. with data", data);
+		    	})
+		    	.fail(function(error) {
+		    		console.log("error returned is", error);
+		    		createToast("Error occured", true, 3000);
+		    	})
+		    	.always(function() {
+		    		console.log("Action complete!");
+		    		// hideToast(postingCommentToastId);
+		    	});
+		}
+
+    	$(document).ready(function(){
+    		// newArticle();
+    		$(document).on('click', '.adropdowner' ,function(event){
+    			var halfWidth = $(this).parent().find('.adropdown').width() / 2;
+    			var posLeft = $(this).offset();
+    			var posTop = event.clientY + 5;
+
+    			$('#shadow').css({display: 'block'});
+    			$(this).addClass('activeDropper');
+    			$(this).parent().find('.adropdown').slideDown(20);
+    		});
+
+    		$('#shadow').click(function(event) {
+    			$('.activeDropper').parents().find('.adropdown').slideUp(20);
+    			$('.activeDropper').removeClass('activeDropper');
+    			$(this).css({display: 'none'});
+    		});
+
+    		$('.adropdown li').click(function(event) {
+    			$(this).parent().slideUp(20);
+    			$('.activeDropper').removeClass('activeDropper');
+    			$('#shadow').css({display: 'none'});
+    		});
+
+    		$(".comment-area").autoGrow({
+				extraLine: false 
+			})
+
+			$(".comment-area").keyup(function(){
+				isEmpty = !$(this).val().length;
+
+				if(isEmpty)
+					$(this).parents('.left').find('button').attr({disabled: 'disabled'});
+				else
+					$(this).parents('.left').find('button').removeAttr('disabled');
+			});
+
+			$('#editArticleForm').on('submit', saveEditedArticle);
+
+			$('.comment-poster-form').on('submit', function(e){
+		    	e.preventDefault();
+		    	var data = $(this).serialize();
+		    	$(this).find('textarea').val('');
+		    	$(this).parents('.comments-div').find('.collection').addClass('waiting-for-comment');
+		    	$(this).parents('.card').find('.comments-count').addClass('wait-for-newcount')
+
+		    	var username = $(this).find('img').attr('data-username');
+		    	var dp = $(this).find('img').prop('src');
+
+		    	var postingCommentToastId = createToast("Posting comment....", false);
+		    	$.ajax({
+		    		url: $(this).attr('action'),
+		    		type: 'POST',
+		    		data: data,
+		    	})
+		    	.done(function(data) {
+		    		hideToast(postingCommentToastId, 300, true);
+		    		
+		    		setTimeout(function(){
+		    			createToast("Comment posted", true);
+		    		},300);
+
+		    		var data = JSON.parse(data)[0];
+		    		console.log("success. with data", data);
+		    		var newComment = '<li id="comment'+data.id+'" class="collection-item avatar" style="min-height: 10px;"><img src="'+dp+'" class="circle" width="35" /><span class="title" style="font-weight:400">'+username+'</span><p class="grey-text text-darken-1">'+data.comment+'</p><span class="secondary-content grey-text text-darken-1">just now <a href="javascript:void(0);" class="grey-text text-darken-5 adropdowner"><i class="zmdi zmdi-chevron-down"></i></a>&nbsp;<ul class="adropdown"><li><a href="javascript:void(0);" onclick="deleteComment('+data.id+')">Delete</a></li></ul></span></li>'
+		    		$('.waiting-for-comment').css({display: 'block'}).append(newComment);
+		    		$('.wait-for-newcount').text(data.total_comments);
+
+		    		$('.waiting-for-comment').removeClass('waiting-for-comment');
+		    		$('.wait-for-newcount').removeClass('.wait-for-newcount');
+		    	})
+		    	.fail(function(error) {
+		    		console.log("error returned is", error);
+		    		$('.waiting-for-comment').removeClass('waiting-for-comment');
+		    		$('.wait-for-newcount').removeClass('.wait-for-newcount');
+		    		
+		    		hideToast(postingCommentToastId, 300, true);
+		    		setTimeout(function(){
+		    			createToast("Error occured", true, 2000);
+		    		},300);
+		    	})
+		    	.always(function() {
+		    		console.log("Action complete!");
+		    	});
+		    });
+
+    		$('.comments-toggler').on('click', function(event) {
+    			var isOpen = $(this).parents('.card').find('.comments-div').hasClass('active-comments');
+    			$(this).parents('.card').find('.comments-div').slideToggle();
+
+    			if(!isOpen){
+    				$(this).parents('.card').find('.comments-div').addClass('active-comments');
+    				var commentBoxPos = $(this).parents('.card').find('.client-comment-area').offset().top;
+
+    				// BOTTOM EDGE OF BROWSER
+    				var botEdge = $(window).scrollTop() + window.innerHeight - 120;
+	    			// POSITION OF COMMENT BOX FROM BOTTOM EDGE OF BROWSER
+	    			var fromBot = commentBoxPos - botEdge;
+	    			// DISTANCE TO BE SCROLLED BY COMMENT BOX
+	    			var toSroll = $(window).scrollTop() + fromBot;
+
+	    			// do the scroll magic abra....hehe
+	    			if(fromBot > 0){
+	    				setTimeout(function(){
+		    				$('body').scrollTo(toSroll, 500, { axis:'y' });
+		    			}, 200);
+	    			}
+    			}else{
+    				$(this).parents('.card').find('.comments-div').removeClass('active-comments');
+    			}
+    		});
+
+    		$(".attachment-containe").niceScroll({cursorcolor:"#999",cursoropacitymax:1,touchbehavior:true});
+    		// MASONRY REFLOW OF POSTS
+   //  		var $grid = $('#posts').masonry({
+			//   itemSelector: '.col',
+			//   percentPosition: true,
+			// });
+
+    		$('.collapsible').collapsible({
+		      accordion : false // A setting that changes the collapsible behavior to expandable instead of the default accordion style
+		    });
+    	});
+
+    	// OPENS MODAL FOR NEW ARTICLE
+    	function newArticle(){
+	        $('#new-post').openModal({dismissible: true});
+			$('#new-post').find('textarea').addClass('desc-field');
+    	}
+
+    	// CLOSE MODAL FOR NEW ARTICLE
+    	function closeNewArticle(){
+    		$('#new-post').closeModal();
+    	}
+
+    	// OPEN FEEDBACK MODAL
+    	function sendFeedback(){
+	        $('#contact-modal').openModal();
+    	}
+
+    	// CHOOSE SUBJECT
+    	$('#dropdown1 li').on('click', function(){
+    		$(this).parents('form').find('a:first').text($(this).text());
+    		$('#selectedSubjectInput').val($(this).data('subid'));
+    	});
+
+    	var attachments = [];
+
+    	// DISPLAY CHOSEN IMAGES
+    	function readUrl(input) {
+    		$('.attachment-containe').find('img').each(function(index, el) {
+    			$(this).remove();
+    		});
+
+    		var files = input.files;
+		    if (files) {
+		    	var filesLength = parseInt(files.length +  $('.attachment-containe').find('img').length - 1);
+
+		    	if(filesLength < 4){
+			    	for (var i = 0; i < files.length; i++) {
+			    		var reader = new FileReader();
+
+				        reader.onload = function (e) {
+				        	var $image = $('<img class="attachment" src="'+e.target.result+'">');
+				        	$('.attachment-containe').prepend($image);
+				        }
+
+				        if(files[i].type === 'image/jpeg' || files[i].type === 'image/png'){
+				        	reader.readAsDataURL(files[i]);
+				        }
+				        else{
+				        	console.log(files[i].type);
+				        	createToast('Only Images allowed!');
+				        	// document.querySelector('#attacher').files.splice(i,);
+				        	continue;
+				        }
+
+				        if(i == (files.length - 1)){
+				        	scrollIt();
+				        }
+
+				        attachments.push(files[i]);
+			    	}
+			    }else{
+			    	 createToast('Only four attachments allowed!');
+			    }
+		    }
+
+		    function scrollIt(){
+		    	setTimeout(function(){
+		    		var last = parseInt($('.attachment-containe').find('.attachment').length) - 1;
+		    		var pluralS = (input.files.length > 1)  ? 's' : '' ;
+		        	$('.attachment-containe').scrollTo('.attachment:eq('+last+')', 500, { axis:'x' });
+    				$('#fileCount').html(document.querySelector('#attacher').files.length + ' file' + pluralS + ' &nbsp;');
+    				console.log($('#attacher').val());
+		    	}, 500);
+		    }
+		}
+		function updateWordCount(input){
+			var wordCount = input.value.split(" ").length;
+
+			if(input.value.length){
+				if(wordCount > 160)
+					input.value = input.value.substring(0,157) + '...';
+				$('#wordCount').text(wordCount + ' / 80');
+			}else
+				$('#wordCount').text(0 + ' / 80');
+	    	// input.value = 'walter';
+	    }
+
+	    $('#articleForm').on('submit', function(e){
+	    	if(!validaTor())
+	    		e.preventDefault();
+	    	else
+	    		createToast('Posting article!', false);
+	    });
+
+	    function validaTor(editting){
+	    	if($('#selectedSubjectInput').val().length > 1 || editting){
+	    		if($('.desc-field').val().length < 1){
+		    		createToast('Add some description.');
+		    		$('.desc-field').focus();
+		    		return false;
+		    	}else{
+					$('.desc-field').removeClass('desc-field');
+				}
+
+		    	return true
+	    	}
+	    	else{
+	    		createToast('Choose subject.');
+	    		$('#subjectChooser').trigger('click');
+	    		return false;
+	    	}
+	    }
+    </script>
 {% endblock %}

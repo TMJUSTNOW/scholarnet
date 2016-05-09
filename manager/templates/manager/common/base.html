@@ -21,8 +21,6 @@
         <link rel="stylesheet" href="{% static 'assets/css/xenon-components.css' %}">
         <link rel="stylesheet" href="{% static 'assets/css/xenon-skins.css' %}">
         <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
-        <link href="{% static 'sweetalert/sweet-alert.css' %}" rel="stylesheet" media="screen">
-        <link href="{% static 'sweetalert/ie9.css' %}" rel="stylesheet" media="screen">
 
         <script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
 
@@ -32,15 +30,16 @@
             <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
         <![endif]-->
     {% endblock %}
+    <link href="{% static 'sweetalert/sweet-alert.css' %}" rel="stylesheet" media="screen">
+    <link href="{% static 'sweetalert/ie9.css' %}" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="{% static 'alertifyjs/css/alertify.min.css' %}">
+    <script src="{% static 'alertifyjs/alertify.min.js' %}"></script>
 
 
 </head>
 <body class="page-body">
     {% block body %}
     {% endblock %}
-
-
-
 
 
     {% block main_scripts %}
@@ -51,20 +50,45 @@
         <script src="{% static 'assets/js/xenon-api.js' %}"></script>
         <script src="{% static 'assets/js/xenon-toggles.js' %}"></script>
         <script src="{% static 'assets/js/letterAvatar.js' %}"></script>
-        <script src="{% static 'sweetalert/sweet-alert.min.js' %}"></script>
 
         <!-- JavaScripts initializations and stuff -->
         <script src="{% static 'assets/js/xenon-custom.js' %}"></script>
-        <script>
-            {% for message in messages %}
-                {% if message.tags == 'error' %}
-                        alertify.error("{{ message }}");
-                {% else %}
-                        alertify.{{ message.tags }}("{{ message }}");
-                {% endif %}
-            {% endfor %}
-        </script>
+        <script src="https://js.pusher.com/3.0/pusher.min.js"></script>
     {% endblock %}
+    <script src="{% static 'sweetalert/sweet-alert.min.js' %}"></script>
+    <script>
+        {% for message in messages %}
+             {% if message.tags == 'error' %}
+                  alertify.error("{{ message }}");
+             {% else %}
+                  alertify.{{ message.tags }}("{{ message }}");
+             {% endif %}
+        {% endfor %}
+
+        $(".development").on('click', function(){
+            swal('Feature on Development');
+        });
+
+
+
+
+
+        // Enable pusher logging - don't include this in production
+        Pusher.log = function(message) {
+          if (window.console && window.console.log) {
+            window.console.log(message);
+          }
+        };
+
+        var pusher = new Pusher('3619f2e74eb77fcb6132', {
+          encrypted: true
+        });
+
+        var channel = pusher.subscribe('test_channel');
+        channel.bind('my_event', function(data) {
+          alert(data.message);
+        });
+    </script>
 
 	{% block scripts %}
     {% endblock %}
