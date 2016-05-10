@@ -87,9 +87,19 @@ def adminstratorsActivator(request, key, adminstratorId):
     if key == 'activate':
         adminstratorObj.is_active = True
         adminstratorObj.save()
+        activatedAdminstrator = User.objects.get(id=adminstratorId)
+        if activatedAdminstrator.is_active:
+            messages.success(request, activatedAdminstrator.username + " Successfully Activated")
+        else:
+            messages.error(request, "Activation Failed for " + activatedAdminstrator.username)
     elif key == 'deactivate':
         adminstratorObj.is_active = False
         adminstratorObj.save()
+        deactivatedAdminstrator = User.objects.get(id=adminstratorId)
+        if deactivatedAdminstrator.is_active:
+            messages.error(request, "Deactivation Failed for " + deactivatedAdminstrator.username)
+        else:
+            messages.success(request, deactivatedAdminstrator.username + " Successfully Deactivated")
     return HttpResponseRedirect("/manager/adminstrators/")
 
 
@@ -128,9 +138,19 @@ def studentsActivator(request, key,  studentId):
     if key == 'activate':
         studentObj.is_active = True
         studentObj.save()
+        activatedStudent = User.objects.get(id=studentId)
+        if activatedStudent.is_active:
+            messages.success(request, activatedStudent.username + " Successfully Activated")
+        else:
+            messages.error(request, "Activation Failed For " + activatedStudent.username)
     elif key == 'deactivate':
         studentObj.is_active = False
         studentObj.save()
+        deactivatedStudent = User.objects.get(id=studentId)
+        if deactivatedStudent.is_active:
+            messages.error(request, "Deactivation Failed for " + deactivatedStudent.username)
+        else:
+            messages.success(request, deactivatedStudent.username + " Deactivated")
     return HttpResponseRedirect("/manager/students/")
 
 
@@ -170,9 +190,19 @@ def educatorsActivator(request, key, educatorId):
     if key == 'activate':
         educatorObj.is_active = True
         educatorObj.save()
+        activatedEducator = User.objects.get(id=educatorId)
+        if activatedEducator.is_active:
+            messages.success(request, activatedEducator.username + " Successfully Activated")
+        else:
+            messages.error(request, "Activation Failed for " + activatedEducator.username)
     elif key == 'deactivate':
         educatorObj.is_active = False
         educatorObj.save()
+        deactivatedEducator = User.objects.get(id=educatorId)
+        if deactivatedEducator.is_active:
+            messages.error(request, "Deactivation Failed for " + deactivatedEducator.username)
+        else:
+            messages.success(request, deactivatedEducator.username + " Successfully Deactivated")
     return HttpResponseRedirect("/manager/educators/")
 
 

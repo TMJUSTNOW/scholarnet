@@ -203,7 +203,12 @@ def postSubjectList(request):
 @never_cache
 def getPostComments(request):
     postId = request.GET.get('post')
-    comments = DescriptionsComments.objects.filter(description_id=postId).order_by('-updated')
+    offset_limit = 5
+    if int(request.GET.get('offset')) == 0:
+        offset = 0
+    else:
+        offset = int(request.GET.get('offset')) - 1
+    comments = DescriptionsComments.objects.filter(description_id=postId).order_by('-updated')[int(offset)*offset_limit:(int(offset)*offset_limit)+offset_limit]
     content = []
     for comment in comments:
         info = {}
