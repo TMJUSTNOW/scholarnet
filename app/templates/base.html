@@ -165,6 +165,13 @@
 	}
 </style>
 
+<div class="layout-flex center-center hide-on-med-and-up" style="position: absolute;top:0;left:0;height: 100%;width: 100%;">
+	<p class="flow-text">
+		Please go download the app.
+	</p>
+</div>
+
+<div class="hide-on-small-only">
 	{% include "home/topnav.html" %}
 
 	<div class="row">
@@ -179,7 +186,7 @@
 
 		<div style="padding: 17px;padding-top: 80px;box-shadow: 0 0 1px rgba(0, 0, 0,0.26);overflow: auto" class="col l3 sidemenu sidemenu-right hide-on-med-and-down">{% include "home/rightmenu.html" %}</div>
 	</div>
-
+</div>
 
 
 
@@ -279,6 +286,7 @@
 		<script src="{% static 'materialize/js/jquery.nicescroll.min.js' %}"></script>
 		<script src="{% static 'materialize/js/jquery.scrollTo.min.js' %}"></script>
 		<script src="{% static 'materialize/js/jquery.autogrowtextarea.min.js' %}"></script>
+		<script src="{% static 'materialize/js/utils.js' %}" type="text/javascript"></script>
 	{% endblock %}
 
 
@@ -288,135 +296,6 @@
 		$(document).ready(function(){
 			$(".sidemenu").niceScroll({cursorcolor:"#999",cursoropacitymax:1,touchbehavior:true});
 		});
-
-		function createToast(message, autoclose = true, duration = 2000){
-			var id = 'toast'+parseInt($('atoast-container').length + 1);
-			var toast = '<div id="'+id+'" class="atoast-container"><div class="atoast">'+message+'</div></div>';
-			
-			pushToastsUp();
-
-			var toastCount = $('.atoast-container').length;
-
-			if(!toastCount)
-				$('body').append(toast);
-			else{
-				setTimeout(function(){
-					$('body').append(toast);
-				}, 300 * toastCount);
-			}
-
-			TweenMax.from('#'+id, .3, {y:50});
-
-			if(autoclose){
-				setTimeout(function(){
-					hideToast(id);
-				}, duration);
-			}else{
-				return id;
-			}
-		}
-
-		function pushToastsUp(){
-			var toastsArray = $('.atoast-container').length;
-
-			$('.atoast-container').each(function(index, el) {
-				if($('this').css('opacity') !== 0){
-					id = $(this).prop('id');
-					var newTop = $('#'+id).position().top - $('#'+id).height() - 10;
-
-					$('#'+id).css({top : newTop}, 350);
-					// console.log();
-					// TweenMax.to('#'+id, .3, {y:-180});
-				}
-			});
-		}
-
-		function hideToast(toastId, duration = 300, down = false){
-			var duration = duration / 1000;
-
-			if(!down)
-				TweenMax.to('#'+toastId+'', duration, {y:-50, opacity: 0});
-			else
-				TweenMax.to('#'+toastId+'', duration, {y:+50, opacity: 0});
-
-			setTimeout(function(){
-				$('#'+toastId+'').remove();
-			}, 200);
-		}
-
-		function showUSerDropdown(){
-			$('#user-dropdown').show();
-
-			setTimeout(function(){
-				$('#user-dropdown').find('.some-menu').addClass("open");
-			});
-		}
-
-		$('.js-menu-shower').click(function(e){
-			var target = $(this).data('target');
-			var dynamicPositioning = $('#'+target).hasClass('static-menu');
-
-			if(!dynamicPositioning){
-				var topPos = $(this).position().top + $(this).parent().offset().top - $(window).scrollTop();
-				var leftPos = $(this).position().left + $(this).parent().position().left;
-				var cardPos = $(this).offset().top;
-
-				var botEdge = $(window).scrollTop() + window.innerHeight - 200;
-				var fromBot = cardPos - botEdge;
-				var toSroll = $(window).scrollTop() + fromBot;
-
-				if(fromBot > 0){
-					$('body').scrollTo(toSroll, 500, { axis:'y' });
-					setTimeout(function(){
-						$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
-						$("#"+target).show();
-
-						setTimeout(function(){
-							$("#"+target).find('.some-menu').addClass("open");
-						});
-					}, 600);
-				}else{
-					fromBot = 0;
-					$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
-					$("#"+target).show();
-
-					setTimeout(function(){
-						$("#"+target).find('.some-menu').addClass("open");
-					});
-				}
-			}else{
-				$("#"+target).find('.some-menu').css({top: topPos + 15 - fromBot, left: leftPos - 200});
-				$("#"+target).show();
-
-				setTimeout(function(){
-					$("#"+target).find('.some-menu').addClass("open");
-				});
-			}
-		});
-
-		$('.some-menu-container').click(function(){
-			var mimi = $(this);
-			var menu = $(this).find('.some-menu');
-			$(this).find('.some-menu').removeClass("open");
-
-			setTimeout(function(){
-				mimi.hide();
-			});
-		});
-
-		$(window).scroll(function(){
-			$('.some-menu-container').each(function(){
-				var mimi = $(this);
-				var menu = $(this).find('.some-menu');
-				$(this).find('.some-menu').removeClass("open");
-
-				setTimeout(function(){
-					mimi.hide();
-				});
-			});
-		});
-
-
 	</script>
 
 

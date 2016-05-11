@@ -148,16 +148,23 @@ def login(request):
 
         user = auth.authenticate(username=username, password=password)
         if user is not None:
-            if user.is_active:
-                auth.login(request, user)
-                # messages.success(request, "Welcome: " + str(user.profile.display))
-                return HttpResponseRedirect("/app/home/")
-            else:
-                messages.info(request, "Your Account is Deativated")
-                return HttpResponseRedirect("/login/")
+            auth.login(request, user)
+            content = []
+            info = {}
+            info = {
+                "status": True,
+            }
+            content.append(info)
+            return HttpResponse(json.dumps(content))
+
         else:
-            messages.error(request, "Wrong Password or Phone Number")
-            return HttpResponseRedirect("/login/")
+            content = []
+            info = {}
+            info = {
+                "status": False,
+            }
+            content.append(info)
+            return HttpResponse(json.dumps(content))
     else:
         context = {
         }
