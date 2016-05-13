@@ -112,10 +112,10 @@
 	.some-menu {
 		position: absolute;
 		width: 170px;
-		padding: 1px 10px;
+		padding: 0;
 		/*top:65px;right: 20px;*/
-		background: #f6f6f6;
-		box-shadow: 0 2px 5px 0 rgba(0, 0, 0, .26);
+		background: #fefefe;
+		box-shadow: 0 2px 10px rgba(0, 0, 0, .26);
 		opacity: 0;
 		will-change:opacity;
 
@@ -151,16 +151,22 @@
 		-webkit-transform: none;
 		transform: none;
 	}
-	.some-menu > div{
-		margin:10px 0;width: 100%;
+	.some-menu > div, .some-menu > a{
+		margin:0;width: 100%;
+		padding: 10px;
 		min-height:30px;
 		color: #989898 !important;
+		display: block;
 	}
-	.some-menu div i{
+	.some-menu > a > i{
 		width: 25px;
 	}
-	.some-menu div a{
+	.some-menu > a > i + span{
 		margin-left:10px;
+		color: #989898 !important;
+	}
+	.some-menu > a:hover{
+		background: rgba(245,245,245,0.9);
 		color: #989898 !important;
 	}
 </style>

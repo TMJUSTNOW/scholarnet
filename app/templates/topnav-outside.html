@@ -1,0 +1,51 @@
+<style>
+	#mainNav{
+		position: fixed;z-index: 9;
+		padding: 0 20px;
+	}
+	@media (min-width:960px) {
+		#mainNav{
+			padding: 0 50px;
+		}
+	}
+	#searchbar{
+		width: calc(100% - 120px);
+		max-width: 400px;
+		margin:0;top: 0;
+	}
+	@media (min-width:960px) {
+		#searchbar{
+			max-width: 700px;
+		}
+	}
+</style>
+<nav id="mainNav" class="navbar blue layout-flex v-center h-space-between">
+	<a href="#" data-toggle="sidebar">
+		<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
+	</a>
+	<a class="layout-flex v-center hide-on-med-and-down js-menu-shower" data-target="user-dropdown" href="javascript:void(0);">
+		{% if user.profile.photo == None or user.profile.photo == "" %}
+		<img src="/static/images/dp.jpg" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
+		{% else %}
+		<img src="/static/{{ user.profile.photo }}" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
+		{% endif %}
+		<span style="display: inline-block;margin-left: 7px;">
+			{{ user.profile.display }}
+		</span>
+
+		<i style="margin-left: 8px;" class="zmdi zmdi-caret-down"></i>
+	</a>
+
+	<a href="javascript:void(0);" class="hide-on-large-only js-menu-shower" data-target="user-dropdown" style="display: flex;padding: 8px 15px">
+		<i class="zmdi zmdi-more-vert"></i>
+	</a>
+</nav>
+
+<div id="user-dropdown" class="some-menu-container static-menu">
+	<div class="some-menu from-down" style="right:0;top:65px">
+		<div href="/logout/" class="layout-flex v-center">
+			<i class="zmdi zmdi-lock-open"></i>
+			<span>Logout</span>
+		</div>
+	</div>
+</div>

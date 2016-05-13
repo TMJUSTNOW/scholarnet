@@ -9,6 +9,9 @@ from django.contrib.auth.models import *
 from django.views.decorators.csrf import csrf_exempt
 from pusher import Pusher
 from app.models import *
+import json
+import urllib
+import random
 
 
 @login_required
@@ -50,6 +53,39 @@ def home(request):
     }
     return render(request, "manager/index.html", context)
 
+@login_required
+def getUserPermissions(request):
+    perms = Group.objects.all().values('id', 'name')
+    response = json.dumps([i for i in perms])
+    return HttpResponse(response)
+
+@login_required
+def getUserPermittedGroups(request):
+    userId = request.GET.get('id')
+    userObject = User.objects.get(id=userId)
+    perms = userObject.groups.all()
+    content = []
+    for per in perms:
+        info = {}
+        info = {
+            'id': per.id,
+            'name': per.name,
+        }
+        content.append(info)
+    return HttpResponse(json.dumps(content))
+
+@login_required
+def getUserInformation(request):
+    userId = request.GET.get('id')
+    userObject = User.objects.get(id=userId)
+    content = []
+    info = {}
+    info = {
+        "imgUrl": str(userObject.profile.photo),
+        "display": userObject.profile.display,
+    }
+    content.append(info)
+    return HttpResponse(json.dumps(content))
 
 @login_required
 @page_template('manager/common/paginated_members.html')

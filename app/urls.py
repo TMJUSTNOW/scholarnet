@@ -11,9 +11,16 @@ urlpatterns = [
     #Base Url Loading the Login View Template
     url(r'^$', views.login, name='login'),
 
+    #Uurl for Regenerating the Account Verification Code
+    url(r'^verificationCodeRegenerate/$', views.verificationCodeRegenerate, name='verificationCodeRegenerate'),
+    #Account Verification for the registered User
+    url(r'^accountVerify/$', views.accountVerify, name='accountVerify'),
     # Url for Setting up the Profile
     url(r'^setup/$', views.setup, name='login'),
-
+    #url for getting setupCourseList
+    url(r'^setupCourseList/$', views.setupCourseList, name='setupCourseList'),
+    #Url for Setting The User Profile
+    url('^profileSetup/$', views.profileSetup, name='profileSetup'),
     # Url for Getting the Search School for Setup Page
     url(r'^setupGetSchool/$', views.setupGetSchool, name='setupGetSchool'),
     # Url for getting  the school for Teacher configuration page

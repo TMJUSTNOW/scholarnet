@@ -35,7 +35,7 @@
 			{% csrf_token %}
 			<div style="height: 60px;padding: 15px" class="gre">
 				<div class="left item-avatar one-line">
-					<img src="/static/images/dp.jpg" class="circle" width="35" />
+					<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
 					<p>{{user.profile.display}}</p>
 
 					<div class="secondary" style="margin-top: -10px; margin-right: -15px;">
@@ -89,7 +89,7 @@
 			{% csrf_token %}
 			<div style="display:flex;align-items:center;justify-content:space-between;height: 60px;padding: 15px">
 				<div style="display: flex;align-items: center">
-					<img src="/static/images/dp.jpg" class="circle" style="height: 35px;width:35px;" />
+					<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
 					<span style="margin-left: 10px">{{user.profile.display}}</span>
 				</div>
 				<div class="secondary">
@@ -115,7 +115,7 @@
     <div id="contact-modal" class="modal">
     	<div style="height: 60px;padding: 15px" class="gre">
 	    	<div class="left item-avatar one-line">
-				<img src="/static/images/dp.jpg" class="circle" width="35" />
+				<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
 				<p>James Wolpert</p>
 			</div>
 		</div>
@@ -171,6 +171,12 @@
 					closeEditArticle();
 				});
 			}
+		}
+
+		function reportPost(){
+			setTimeout(function(){
+				createToast("Thankyou! We have received your complaint.", true, 3000);
+			}, 2000)
 		}
 
 		function deletePost(id){
@@ -269,9 +275,14 @@
     		$(".comment-area").autoGrow({
 				extraLine: false 
 			})
-
-			$(".comment-area").keyup(function(){
-				isEmpty = !$(this).val().length;
+			.keydown(function(e){
+				if(e.keyCode == 13){
+					$(this).parents('form').trigger('submit');
+					return false;
+				}
+			})
+			.keyup(function(e){
+				var isEmpty = !$(this).val().length;
 
 				if(isEmpty)
 					$(this).parents('.left').find('button').attr({disabled: 'disabled'});

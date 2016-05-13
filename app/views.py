@@ -278,43 +278,175 @@ def home(request, template='home/index.html', extra_context=None):
             return HttpResponseRedirect("/app/setup/")
 
 
+"""
+A function for Regneratin the Account Verification Code
+"""
+def verificationCodeRegenerate(request):
+    if Recovery.objects.filter(phone=request.user.username, waiting=True).exists():
+        if Recovery.objects.filter(phone=request.user.username, waiting=True).count() > 1:
+            recoveryObject = Recovery.objects.filter(phone=request.user.username, waiting=True)
+            for rec in recoveryObject:
+                rec.delete()
+        else:
+            recoveryObject = Recovery.objects.get(Q(phone=request.user.username) and Q(waiting=True))
+            recoveryObject.delete()
+        #creating the New Recovery Code
+        newRecoveryCode = Recovery()
+        newRecoveryCode.phone = request.user.username
+        newRecoveryCode.code = random.randint(1000, 9999)
+        newRecoveryCode.waiting=False
+        newRecoveryCode.save()
+        content = []
+        info = {}
+        info = {
+            "status": True,
+            "message": "Activation Code Sent",
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+    else:
+        newRecoveryCode = Recovery()
+        newRecoveryCode.phone = request.user.username
+        newRecoveryCode.code = random.randint(1000, 9999)
+        newRecoveryCode.waiting = False
+        newRecoveryCode.save()
+        content = []
+        info = {}
+        info = {
+            "status": True,
+            "message": "Activation Code Sent",
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+    content = []
+    info = {}
+    info = {
+        "status": False,
+        "message": "Failed to Send Activation Code",
+    }
+    return HttpResponse(json.dumps(content))
+
+
+
+"""
+A function for Verifying the User Account
+"""
+@login_required
+def accountVerify(request):
+    code = request.GET.get('code')
+    if Recovery.objects.filter(phone=request.user.username, waiting=True, code=code).exists():
+        userObject = User.objects.get(id=request.user.id)
+        userObject.is_active = True
+        userObject.save()
+        verifiedUser = User.objects.get(id=request.user.id)
+        if verifiedUser.is_active:
+            userProfile = UserProfile.objects.get(user_id=request.user.id)
+            userProfile.config_state = 1
+            userProfile.save()
+        if Recovery.objects.filter(phone=request.user.username, waiting=True, code=code).count() > 1:
+            recoveryObject = Recovery.objects.filter(phone=request.user.username, waiting=True, code=code)
+            for rec in recoveryObject:
+                rec.delete()
+        else:
+            recoveryObject = Recovery.objects.get(Q(phone=request.user.username) and Q(waiting=True) and Q(code=code))
+            recoveryObject.delete()
+        content = []
+        info = {}
+        info = {
+            "status": True,
+            "message": "Account Activated Successfully",
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+    else:
+        pass
+    content = []
+    info = {}
+    info = {
+        "status": False,
+        "message": "Failed To Activate Account"
+    }
+    content.append(info)
+    return HttpResponse(json.dumps(content))
+
 
 """
 A function for handling the Profile Setup
 """
 @login_required
 def setup(request):
-    if request.user.profile.school_id != None:
-        courses = Courses.objects.filter(school_id=request.user.profile.school_id)
-    else:
-        courses = ''
-
-    teacherSchools = ''
-    techerSSubjects = ''
-    for group in request.user.groups.all():
-        if group.name == 'Teacher':
-            teacherSchools = TeacherSchool.objects.filter(user_id=request.user.id)
-            techerSSubjects = TeacherSubject.objects.filter(user_id=request.user.id)
+    if request.method == 'POST':
+        if request.POST or None:
+            userGroup = request.user.groups.all()
+            uGroups = []
+            for ug in userGroup:
+                uGroups.append(ug.name)
+            if 'Student' in uGroups:
+                chuo = request.POST.get('chuo')
+                course = request.POST.get('course')
+                academic = request.POST.get('academic')
+                year = request.POST.get('year')
+                userProfileObject = UserProfile.objects.get(user_id=request.user.id)
+                userProfileObject.school_id=chuo
+                userProfileObject.course_id=course
+                userProfileObject.academic_id = academic
+                yearObject = Year.objects.get(code=year)
+                userProfileObject.year_id=yearObject.id
+                userProfileObject.config_state=2
+                userProfileObject.save()
+                if UserProfile.objects.filter(user_id=request.user.id,school_id=chuo,course_id=course,academic_id=academic,year_id=year).exists():
+                    content = []
+                    info = {}
+                    info = {
+                        "status": True,
+                        "message": "Education Information Successfully Updated"
+                    }
+                    content.append(info)
+                    return HttpResponse(json.dumps(content))
+                else:
+                    content = []
+                    info = {}
+                    info = {
+                        "status": False,
+                        "message": "Failed to Update Education Information"
+                    }
+                    content.append(info)
+                    return HttpResponse(json.dumps(content))
         else:
             pass
+    else:
+        vyuo = School.objects.all().exclude(is_active=False)
+        context = {
+            "vyuo": vyuo,
+            "academicYears": AcademicYear.objects.all().exclude(is_active=False),
+            "title": 'Account Setup',
+        }
+        return render(request, "home/setup.html", context)
 
-    context = {
-        'ugroup': get_usergroup(request),
-        'courses': courses,
-        'years': Year.objects.all(),
-        'academics': AcademicYear.objects.filter()[:10],
-        'teacherSchools': teacherSchools,
-        'techerSSubjects': techerSSubjects,
-        "title": 'Account Setup',
-    }
-    return render(request, "home/setup.html", context)
-
-
+"""
+A function for Setting up the user Profile on Registration Progress
+"""
+@login_required
+def profileSetup(request):
+    if request.method == 'POST':
+        if request.POST or None:
+            user_pic = UserProfile.objects.get(user_id=request.user.id)
+            if request.POST or None:
+                user_pic.photo = request.FILES['pic']
+                user_pic.display = request.POST.get('display')
+                user_pic.save()
+                return HttpResponseRedirect("/app/home/")
+            else:
+                pass
+        else:
+            pass
+    else:
+        pass
+    return HttpResponseRedirect("/app/setup/")
 
 """
 A fucntion for Getting the List  of School Search for Setup
 """
-@csrf_exempt
 @login_required
 def setupGetSchool(request):
     if request.method == 'POST':
@@ -766,6 +898,17 @@ def coursesList(request, institute_id):
 
 
 """
+ A function rEturning the courses list for The Account Setup Configuration
+"""
+@login_required
+def setupCourseList(request):
+    institute_id=request.GET.get('id')
+    courses = Courses.objects.filter(school_id=institute_id).values('id', 'name', 'code')
+    response = json.dumps([i for i in courses])
+    return HttpResponse(response)
+
+
+"""
 A function Returning the Subject List Regarding the Course Id passed
 """
 @login_required
@@ -1180,7 +1323,6 @@ def register(request):
         }
         content.append(info)
         return HttpResponse(json.dumps(content))
-
 
 
 """

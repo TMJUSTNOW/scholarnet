@@ -22,6 +22,9 @@ urlpatterns = [
     url(r'^schools/$', views.schools, name='schools'),
     url(r'^deleteSchool/([0-9]+)/$', views.deleteSchool, name='deleteSchool'),
     url(r'^editSchool/([0-9]+)/$', views.editSchool, name='editSchool'),
+    url(r'^getUserPermissions/$', views.getUserPermissions, name='getUserPermissions'),
+    url(r'^getUserPermittedGroups/$', views.getUserPermittedGroups, name='getUserPermittedGroups'),
+    url(r'^getUserInformation/$', views.getUserInformation, name='getUserInformation'),
 
     #################################################################################
     # Url for Publishing Notifications to the users

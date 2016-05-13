@@ -38,12 +38,18 @@
 
 						<div id="post-menu-{{post.id}}" class="some-menu-container from-top-right">
 							<div class="some-menu">
-								<div class="layout-flex v-center">
-									<a href="javascript:void(0);" onclick="deletePost({{post.id}})">Delete</a>
-								</div>
-								<div class="layout-flex v-center">
-									<a href="javascript:void(0);" onclick="editArticle({{post.id}})">Edit</a>
-								</div>
+								{% if user.id == post.user.id %}
+									<a clas="layout-flex v-center" href="javascript:void(0);" onclick="deletePost({{post.id}})">
+										<span>Delete</span>
+									</a>
+									<a clas="layout-flex v-center" href="javascript:void(0);" onclick="editArticle({{post.id}})">
+										<span>Edit</span>
+									</a>
+								{% else %}
+								<a clas="layout-flex v-center" href="javascript:void(0);" onclick="reportPost({{post.id}})">
+									<span>Report abuse</span>
+								</a>
+								{% endif %}
 							</div>
 						</div>
 
@@ -118,7 +124,7 @@
 
 				<div class="client-comment-area left item-avatar one-line" style="box-shadow: 0 -1px 1px rgba(0,0,0,0.06);">
 					<form class="comment-poster-form" action="/app/publishComment/" method="POST">
-						{% if post.user.profile.photo == None %}
+						{% if user.profile.photo == None or user.profile.photo == "" %}
 							<img data-username="{{user.profile.display}}" src="/static/images/dp.jpg" class="circle" width="35" style="margin: 0 10px;" />
 						{% else %}
 							<img data-username="{{user.profile.display}}" src="/static/{{user.profile.photo}}" class="circle" width="35" style="margin: 0 10px;" />

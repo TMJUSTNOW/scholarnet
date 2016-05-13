@@ -209,6 +209,7 @@ class UserProfile(models.Model):
     year = models.ForeignKey(Year, null=True, blank=True)
     academic = models.ForeignKey(AcademicYear, null=True, blank=True)
     course = models.ForeignKey(Courses, null=True, blank=True)
+    config_state = models.IntegerField(default=0)
     photo = models.ImageField(upload_to="images/user/%Y/%m/%d", null=True, blank=True)
 
 
