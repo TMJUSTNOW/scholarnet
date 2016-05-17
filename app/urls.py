@@ -146,6 +146,7 @@ urlpatterns = [
 
     #url for Accessing the Scholarnet Drive
     url(r'^sdrive/$', views.sdrive, name='sdrive'),
+    url(r'^sdriverUploader/$', views.sdriverUploader, name='sdriverUploader'),
 
 
     #url for Setting of the Account

@@ -566,3 +566,76 @@ def setDisplayName(request):
 
 
 
+
+"""
+A function for Getting the Sdrive file according to the subjects
+"""
+def sdrive(request):
+    subject = request.GET.get('subject')
+    sdriveObjects = Sdrive.objects.filter(subject_id=subject)
+    content = []
+    for sdo in sdriveObjects:
+        info = {}
+        info = {
+            "date": str(sdo.updated),
+            "url": str(sdo.file),
+            "extension": '',
+            "caption": sdo.title,
+        }
+        content.append(info)
+
+    return HttpResponse(json.dumps(content))
+
+
+"""
+A function for Uploading the Sderive Files to the system
+"""
+@csrf_exempt
+def sdriveUploader(request):
+    if request.method == 'POST':
+        if request.POST or None:
+            newSdriveObject = Sdrive()
+            newSdriveObject.subject_id = request.POST.get('subject')
+            newSdriveObject.title = request.POST.get('title')
+            newSdriveObject.file = request.FILES['title']
+            content = []
+            try:
+                newSdriveObject.save()
+                info = {}
+                info = {
+                    "status": True,
+                    "message": "File Successfully Uploaded"
+                }
+                content.append(info)
+            except:
+                info = {}
+                info = {
+                    "status": False,
+                    "message": "Failed to Upload File"
+                }
+                content.append(info)
+            return HttpResponse(json.dumps(content))
+        else:
+            content = []
+            info = {}
+            info = {
+                "status": False,
+                "message": "Failed to Upload File"
+            }
+            content.append(info)
+            return HttpResponse(json.dumps(content))
+    else:
+        content = []
+        info = {}
+        info = {
+            "status": False,
+            "message": "Bad Request"
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+
+
+
+
+
+

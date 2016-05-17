@@ -2397,9 +2397,14 @@ def linker(request):
             user_ids.append(uid.user_id)
     elif 'Teacher' in uGroups:
         pass
+
+    linkedUserObjects = UserLinker.objects.filter(user_id=request.user.id)
+    linked_user_ids = []
+    for lu in linkedUserObjects:
+        linked_user_ids.append(lu.follower_id)
     context = {
         "upgrop": get_usergroup(request),
-        "fusers": User.objects.filter(id__in=user_ids),
+        "fusers": User.objects.filter(id__in=user_ids).exclude(id__in=linked_user_ids),
         "title": "Linker",
         "linkers": linkers,
     }
@@ -2492,8 +2497,66 @@ def setLinker(request):
 
 @login_required
 def sdrive(request):
-    content=""
-    return render(request, "home/sdrive.html", content)
+    subject_ids = []
+    for ugroup in request.user.groups.all():
+        if ugroup.name == 'Student':
+            userSubjects = Subjects.objects.filter(course_id=request.user.profile.course_id)
+            for us in userSubjects:
+                subject_ids.append(us.id)
+
+    context = {
+        "files": Sdrive.objects.filter(subject_id__in=subject_ids).order_by("-updated"),
+    }
+    return render(request, "home/sdrive.html", context)
+
+"""
+ A function for handling the uploading of files to the Sdrive
+"""
+@login_required
+def sdriverUploader(request):
+    if request.method == 'POST':
+        if request.POST or None:
+            content = []
+            newFileObject = Sdrive()
+            newFileObject.user_id = request.user.id
+            newFileObject.subject_id = request.POST.get('subject')
+            newFileObject.file = request.FILES['file']
+            newFileObject.title = request.POST.get('title')
+            try:
+                newFileObject.save()
+                info = {}
+                info = {
+                    "status": True,
+                    "message": "File Successfully Uploaded",
+                }
+                content.append(info)
+            except:
+                info = {}
+                info = {
+                    "status": False,
+                    "message": "Failed to Upload",
+                }
+                content.append(info)
+            return HttpResponse(json.dumps(content))
+        else:
+            content = []
+            info = {}
+            info = {
+                "status": False,
+                "message": "Failed"
+            }
+            content.append(info)
+            return HttpResponse(content)
+    else:
+        content = []
+        info = {}
+        info = {
+            "status": False,
+            "message": "Bad Request, Only Post Request is Allowed"
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+
 
 
 @login_required

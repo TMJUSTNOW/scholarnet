@@ -337,3 +337,18 @@ class TeacherSchool(models.Model):
     user = models.ForeignKey(User)
     school = models.ForeignKey(School)
     is_active = models.BooleanField(default=True)
+
+
+class Sdrive(models.Model):
+    user = models.ForeignKey(User)
+    subject = models.ForeignKey(Subjects)
+    title = models.TextField()
+    file = models.FileField(upload_to="images/user/%Y/%m/%d", null=False, blank=False)
+    update = models.DateTimeField(auto_now=True, null=False, blank=False)
+    is_active = models.BooleanField(default=True)
+
+class FileCourse(models.Model):
+    sdrive = models.ForeignKey(Sdrive)
+    course = models.ForeignKey(Courses)
+    updated = models.DateTimeField(auto_now=True)
+    is_active = models.BooleanField(default=True)
