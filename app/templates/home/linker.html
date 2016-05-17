@@ -1,10 +1,22 @@
 {% extends "base.html" %}
 {% load staticfiles %}
-	{% block body %}
+	{% block content %}
 	<style>
+		.page-container{
+			position: relative;top:60px;left: 0;
+			width: 100%;
+			padding: 20px 40px
+		}
+		@media (min-width:960px) {
+			.page-container{
+				width: calc(60% - 80px);
+				left: 19%;
+			}
+		}
 		.a-box{
+			display: inline-block;
 			cursor: pointer;
-			width: 33%;
+			width: 32%;
 			color: #888;
 			box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
 		}
@@ -17,12 +29,53 @@
 		.a-box > .card-content{
 			padding: 12px 5px;
 		}
+
+		/*.amodal{*/
+			/*background: black;*/
+			/*position: fixed;top:0;left:0;*/
+			/*width:100%;height:100%; z-index:9;*/
+		/*}*/
+		/*.amodal > .amodal-content{*/
+			/*position: relative;width: 45%;height:70%;*/
+			/*background: white;*/
+		/*}*/
+		/*.amodal > .amodal-header{*/
+			/*position: relative;*/
+			/*height: 110px; margin-bottom: 30px;*/
+			/*background: red;*/
+		/*}*/
+		/*.amodal > .amodal-dp{*/
+			/*height: 100px;width: 100px;*/
+			/*border-radius: 50%;position: absolute;left:30px;bottom:-35px;*/
+		/*}*/
+		/*.amodal > .amodal-username{*/
+			/*position: absolute;left: 150px; bottom : 10px;*/
+			/*font-size: 30px; color:white;*/
+			/*text-shadow: 0 0 0 rgba(0,0,0,0.26);*/
+		/*}*/
+		/*.amodal > .amodal-button{*/
+			/*position: absolute;right:30px; bottom:-25px;*/
+		/*}*/
+		/*.amodal > .amodal-body{*/
+			/*height: calc(100% - 130px);*/
+			/*padding:20px 30px;overflow-y:auto;*/
+		/*}*/
 	</style>
 
-		<div class="page-container re" style="margin-top: -20px;position: relative;top:0;left: 12%; width: 88%; padding: 20px 40px">
-			<div class="grey-text a-divider">Universities / Colleges</div>
-			<div clas="layout-flex">
-				{% if linkers|length != 0 %}
+		<div class="page-container re">
+			{% if fusers|length == 0 and linkers|length == 0%}
+				<div class="grey-text a-divider center" style="margin-top: 80px;">
+					<i class="zmdi zmdi-mood-bad" style="font-size: 40px"></i>
+					<br>
+					<p class="flow-text">
+						Sorry, we have no links to connect you with right now.<br>Please check back later.
+					</p>
+				</div>
+			{% endif %}
+
+			{% if linkers|length != 0 %}
+				<div class="grey-text a-divider">Universities / Colleges</div>
+				<div clas="layout-flex">
 					{% for link in linkers %}
 						<div class="card a-box">
 							<div class="header layout-flex v-end purple">
@@ -30,74 +83,253 @@
 							</div>
 							<div class="card-content">
 								<!--<br>-->
-								<a href="javascript:void(0);" class="grey-text" style="padding:1px 10px;">FOLLOW</a>
+								<a href="javascript:void(0);" class="grey-text" style="padding:1px 10px;">LINK</a>
 							</div>
 						</div>
 					{% endfor %}
-				{% else %}
-					<div class="layout-flex center-center grey-text text-darken-1" style="height: 60px; font-size: 17px">
-						There are no schools right now. Check back later
-					</div>
-				{% endif %}
-			</div>
+				</div>
+			{% endif %}
 
-			<div class="grey-text a-divider">Courses</div>
-			<div clas="layout-flex">
-				{% if subjects|length != 0 %}
-					{% for subject in subjects|slice:":6" %}
-					<div class="card a-box" style="width: 32%; display: inline-block">
-						<div class="header layout-flex v-end {{subject.color.name}}">
-							<p class="{% if subject.color.isLight %}black-text{% else %}white-text{% endif %}">
-								{{subject}}
-							</p>
-						</div>
-						<div class="card-content">
-							<!--<br>-->
-							<a href="javascript:void(0);" class="grey-text" style="padding:1px 10px;">FOLLOW</a>
-						</div>
-					</div>
-					{% endfor %}
-				{% else %}
-					<div class="layout-flex center-center grey-text text-darken-1" style="height: 60px; font-size: 17px">
-						There are no courses right now. Check back later.
-					</div>
-				{% endif %}
-			</div>
-
-			<div class="grey-text a-divider">Users</div>
-			<div clas="layout-flex">
-				{% if fusers|length != 0 %}
+			{% if fusers|length != 0 %}
+				<div class="grey-text a-divider">Users</div>
+				<div clas="layout-flex">
 					{% for fu in fusers %}
-						<div class="card a-box" style="width: 32%; display: inline-block">
+						<div class="card a-box">
 							<div class="header ad-bg layout-flex v-end">
 								<div class="layout-flex v-center">
 									<img class="circle" style="width: 35px; height: 35px;" src="{{fu.profile.get_photo}}" data-adaptive-background alt="">
-									<p class="{% if fus.profile.color.isLight %}black-text{% else %}white-text{% endif %}" style="margin-left: 5px;">{{fu.profile.display}}</p>
+									<p class="username-text {% if fus.profile.color.isLight %}black-text{% else %}white-text{% endif %}" style="margin-left: 5px;">{{fu.profile.display}}</p>
 								</div>
 							</div>
 							<div class="card-content">
 								<!--<br>-->
-								<a href="javascript:void(0);" class="grey-text" style="padding:1px 10px;">FOLLOW</a>
+								<span class="group hide">user</span>
+								<span class="fid hide">{{fu.id}}</span>
+								<span class="chuo hide">{{fu.profile.school.name}}</span>
+								<span class="somo hide">{{fu.profile.course.name}}</span>
+								<span class="mwaka hide">{{fu.profile.year.name}}</span>
+
+								<a href="javascript:void(0);" class="grey-text" style="padding:1px 10px;" onclick="followSomn('user', {{fu.id}})">LINK</a>
 							</div>
 						</div>
 					{% endfor %}
-				{% else %}
-					<div class="layout-flex center-center grey-text text-darken-1" style="height: 60px; font-size: 20px">
-						You have no subjects
-					</div>
-				{% endif %}
+				</div>
+			{% endif %}
+		</div>
+		<style>
+			.amodal{
+				display: none;
+				background: rgba(0,0,0,0.7);
+				position: fixed;top:0;left:0;
+				width:100%;height:100%; z-index:9;
+
+				-webkit-transition: opacity 0.35s;
+				-moz-transition: opacity 0.35s;
+				-ms-transition: opacity 0.35s;
+				-o-transition: opacity 0.35s;
+				transition: opacity 0.35s;
+			}
+
+			.amodal.show{
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				opacity: 1;
+			}
+
+			.amodal > .content{
+				position: relative;width: 65%;height:80%;
+				background: white;color:#777;
+
+				-webkit-animation-duration: 0.28s;
+				animation-duration: 0.28s;
+				-webkit-animation-fill-mode: both;
+				animation-fill-mode: both;
+			}
+
+			.amodal > .content.opening{
+				-webkit-animation-name: fadeInDown;
+				animation-name: fadeInDown;
+			}
+
+			.amodal > .content.closing{
+				-webkit-animation-name: fadeOutUp;
+				animation-name: fadeOutUp;
+			}
+
+			@-webkit-keyframes fadeInDown {
+				from {
+					opacity: 0;
+					-webkit-transform: translate3d(0, -30%, 0);
+					transform: translate3d(0, -30%, 0);
+				}
+
+				100% {
+					opacity: 1;
+					-webkit-transform: none;
+					transform: none;
+				}
+			}
+
+			@keyframes fadeInDown {
+				from {
+					opacity: 0;
+					-webkit-transform: translate3d(0, -30%, 0);
+					transform: translate3d(0, -30%, 0);
+				}
+
+				100% {
+					opacity: 1;
+					-webkit-transform: none;
+					transform: none;
+				}
+			}
+
+			@-webkit-keyframes fadeOutUp {
+				from {
+					opacity: 1;
+				}
+
+				100% {
+					opacity: 0;
+					-webkit-transform: translate3d(0, -100%, 0);
+					transform: translate3d(0, -100%, 0);
+				}
+			}
+
+			@keyframes fadeOutUp {
+				from {
+					opacity: 1;
+				}
+
+				100% {
+					opacity: 0;
+					-webkit-transform: translate3d(0, -100%, 0);
+					transform: translate3d(0, -100%, 0);
+				}
+			}
+
+			@media (min-width:960px) {
+				.amodal > .content{
+					width: 35%;
+				}
+			}
+		</style>
+		<div class="amodal" onclick="closeAModal()">
+			<div class="content">
+				<div class="header" style="height: 110px; margin-bottom: 30px; position: relative;">
+					<img src="" alt="" style="height: 100px;width: 100px;border-radius: 50%;position: absolute;left:30px;bottom:-35px;">
+					<span class="username-text" style="position: absolute;left: 150px; bottom : 10px; font-size: 30px; color:white; text-shadow: 0 0 0 rgba(0,0,0,0.26)"></span>
+					<button class="btn-floating btn-large pink" style="position: absolute;right:30px; bottom:-25px;"><i class="zmdi zmdi-account-add"></i></button>
+				</div>
+				<div style="height: calc(100% - 130px);padding:20px 30px;overflow-y:auto;">
+					<ul class="collection no-border">
+						<li class="collection-item avatar grey-text text-darken-1">
+							<i class="circle zmdi zmdi-graduation-cap"></i>
+							<span class="title">College / University</span>
+							<p class="chuo"></p>
+						</li>
+						<li class="collection-item avatar grey-text text-darken-1">
+							<i class="circle zmdi zmdi-book"></i>
+							<span class="title">Course</span>
+							<p class="somo"></p>
+						</li>
+						<li class="collection-item avatar grey-text text-darken-1">
+							<i class="circle zmdi zmdi-calendar"></i>
+							<span class="title">Year</span>
+							<p class="mwaka"></p>
+						</li>
+					</ul>
+				</div>
 			</div>
 		</div>
-		<div class="layout-flex" style="background: black; position: fixed;top:0;left:0;">
-
-		</div>
+		<script src="/static/materialize/js/TweenMax.min.js"></script>
 		<script>
 			$('.a-box').on("click", function(){
+				var topBg = $(this).find('.ad-bg').css('background-color');
+				var imgSrc = $(this).find('img').attr('src');
+				var username = $(this).find('.username-text').text();
+				var usernameColor = $(this).find('.username-text').css('color');
+				var group = $(this).find('.group').text();
+				var fid = $(this).find('.fid').text();
+				var chuo = $(this).find('.chuo').text();
+				var mwaka = $(this).find('.mwaka').text();
+				var somo = $(this).find('.somo').text();
+
+
+				$('.amodal').find('.header').css('background', topBg);
+				$('.amodal').find('img').attr('src', imgSrc);
+				$('.amodal').find('.username-text').css('color', usernameColor).text(username);
+				$('.amodal').find('.chuo').text(chuo);
+				$('.amodal').find('.somo').text(somo);
+				$('.amodal').find('.mwaka').text(mwaka);
+				$('.amodal').find('button').attr('onclick', 'followSomn("'+group+'", '+fid+')');
+
 				openAModal();
 			});
 
-//			function openAModal(){
-//				$('amodal').css();
-//			}
+			$('.a-box a').on('click', function(e){
+				e.stopPropagation();
+			});
+
+			$('.amodal .content').on('click', function(e){
+				e.stopPropagation();
+			});
+
+			function openAModal(){
+				$('.amodal')
+						.addClass('show')
+						.find('.content').addClass('opening');
+
+				setTimeout(function(){
+					$('.amodal').find('.content').removeClass('opening');
+				}, 	300);
+			}
+
+			function closeAModal(){
+				$('.amodal').find('.content').addClass('closing');
+
+				setTimeout(function(){
+					$('.amodal')
+							.removeClass('show')
+							.find('.content').removeClass('closing');
+				}, 	100);
+			}
+
+			function followSomn(group, id){
+				var linkerToastId = createToast("Linking....", false);
+
+				$.ajax({
+					url: "/app/setLinker/?"+group+"="+id,
+					type: 'GET'
+				})
+				.done(function(data){
+					var data = JSON.parse(data)[0];
+					console.log(data);
+					if(data.status)
+					{
+						setTimeout(function(){
+							createToast("Successfully linked");
+						},300);
+					}else{
+						setTimeout(function(){
+							createToast("Successfully unlinked");
+						},300);
+					}
+
+					console.log("Success: " + data);
+				})
+				.fail(function(error){
+					setTimeout(function(){
+						createToast("Error occured");
+					},300);
+
+					console.log("Error: " + error);
+				})
+				.always(function() {
+					hideToast(linkerToastId, 300, true);
+					console.log("Action complete!");
+				});
+			}
 		</script>
 	{% endblock %}

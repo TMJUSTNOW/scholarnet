@@ -337,25 +337,3 @@ class TeacherSchool(models.Model):
     user = models.ForeignKey(User)
     school = models.ForeignKey(School)
     is_active = models.BooleanField(default=True)
-
-
-#########################################################################################################
-# A Class for creating Scholarnet Drive
-#########################################################################################################
-class Sdrive(models.Model):
-    user = models.ForeignKey(User)
-    file = models.FileField()
-    subject = models.ForeignKey(Subjects)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    is_active = models.BooleanField(default=True)
-
-
-##########################################################################################################
-# A class for creating Scholarnet Course Sdrive Sharing Table
-##########################################################################################################
-class FileCourse(models.Model):
-    sdrive = models.ForeignKey(Sdrive)
-    course = models.ForeignKey(Courses)
-    updated = models.DateTimeField(auto_now=True, null=True)
-    is_active = models.BooleanField(default=True)
-

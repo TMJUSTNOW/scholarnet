@@ -1,10 +1,12 @@
 {% extends 'base-outside.html' %}
 
 {% block body %}
-<div class="layout-flex h-center">
+<div class="layout-flex center-center" style="position: absolute;top:0;left:0;width: 100%;height:100%;">
     <div>
         <h2 class="red-text section-head">ERROR 508!</h2>
         <h5 class="section-head grey-text text-darken-1">Sorry, you reached limit for this resource.</h5>
+
+        <a class="btn blue waves-effect waves-light right" href="/app/home/">GO BACK</a>
     </div>
 </div>
 {% endblock %}

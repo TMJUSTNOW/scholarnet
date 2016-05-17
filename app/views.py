@@ -15,7 +15,6 @@ from django.contrib.auth.models import *
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.core.exceptions import PermissionDenied
 import json
 import urllib
 import random
@@ -2429,10 +2428,11 @@ def setLinker(request):
     if request.method == 'GET' and 'user' in request.GET:
         userLinkerObject = UserLinker()
         userLinkerObject.user_id = request.user.id
-        followUser = User.objects.get(id=request.GET.get('user'))
-        userLinkerObject.follower = followUser
+        followUer = User.objects.get(id=request.GET.get('user'))
+        userLinkerObject.follower = followUer
         if UserLinker.objects.filter(user_id=request.user.id, follower=request.GET.get('user')).count() == 0:
             userLinkerObject.save()
+        if UserLinker.objects.filter(user_id=request.user.id, follower=followUer).count() > 0:
             info = {}
             info = {
                 "status": True,
@@ -2450,6 +2450,7 @@ def setLinker(request):
         courseLinkerObject.course_id = request.GET.get('course')
         if CourseLinker.objects.filter(user_id=request.user.id, course_id=request.GET.get('course')).count() == 0:
             courseLinkerObject.save()
+        if CourseLinker.objects.filter(user_id=request.user.id, course_id=request.GET.get('course')).count() > 0:
             info = {}
             info = {
                 "status": True,
@@ -2499,4 +2500,3 @@ def sdrive(request):
 def settings(request):
     content = ""
     return render(request, "home/settings.html", content)
-
