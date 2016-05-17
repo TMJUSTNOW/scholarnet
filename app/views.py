@@ -15,6 +15,7 @@ from django.contrib.auth.models import *
 from django.forms import modelformset_factory
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
+from django.core.exceptions import PermissionDenied
 import json
 import urllib
 import random
@@ -132,6 +133,33 @@ def getUserSubjects(request):
         elif ugroup.name == 'Student':
             subjects = Subjects.objects.filter(course_id=request.user.profile.course.id)
     return subjects
+
+
+
+@login_required
+def colors(request):
+    colors= [{"name": "red", "code":"#f44336", "isLight": False},
+             {"name":"pink","code":"#e91e63","isLight":False},
+             {"name":"purple","code":"#9c27b0","isLight":False},
+             {"name":"deep-purple","code":"#673ab7","isLight":False},
+             {"name":"indigo","code":"#3f51b5","isLight":False},
+             {"name":"blue","code":"#2196f3","isLight":False},
+             {"name":"light-blue","code":"#03a9f4","isLight":False},
+             {"name":"cyan","code":"#00bcd4","isLight":True},
+             {"name":"teal","code":"#009688","isLight":True},
+             {"name":"green","code":"#4caf50","isLight":True},
+             {"name":"light-green","code":"#8bc34a","isLight":True},
+             {"name":"lime","code":"#cddc39","isLight":True},
+             {"name":"yellow","code":"#ffeb3b","isLight":True},
+             {"name":"amber","code":"#ffc107","isLight":True},
+             {"name":"orange","code":"#ff9800","isLight":True},
+             {"name":"deep-orange","code":"#ff5722","isLight":True},
+             {"name":"brown","code":"#795548","isLight":False},
+             {"name":"grey","code":"#9e9e9e","isLight":True},
+             {"name":"blue-grey","code":"#607d8b","isLight":False}]
+    colorJson = json.dumps(colors)
+    return colorJson
+
 
 
 """
@@ -408,10 +436,38 @@ def setup(request):
                     info = {}
                     info = {
                         "status": False,
-                        "message": "Failed to Update Education Information"
+                        "message": "Failed to Updated Education Information"
                     }
                     content.append(info)
                     return HttpResponse(json.dumps(content))
+            elif 'Teacher' in uGroups:
+                chuo = request.POST.get('chuo')
+                course = request.POST.get('course')
+                academic = request.POST.get('academic')
+                year = request.POST.get('year')
+                userProfileObject = UserProfile.objects.get(user_id=request.user.id)
+                userProfileObject.school_id = chuo
+                userProfileObject.course_id = course
+                userProfileObject.academic_id = academic
+                yearObject = Year.objects.get(code=year)
+                userProfileObject.year_id = yearObject.id
+                userProfileObject.config_state = 2
+                userProfileObject.save()
+
+                newTeacherSubjectObject = TeacherSubject()
+                newTeacherSubjectObject.user_id = request.user.id
+                newTeacherSubjectObject.subject_id = request.POST.get('subject')
+                if TeacherSubject.objects.filter(user_id=request.user.id,
+                                                 subject_id=request.POST.get('subject')).count() == 0:
+                    newTeacherSubjectObject.save()
+                content = []
+                info = {}
+                info = {
+                    "status": True,
+                    "message": "Education Information Successfully Updated"
+                }
+                content.append(info)
+                return HttpResponse(json.dumps(content))
         else:
             pass
     else:
@@ -424,6 +480,17 @@ def setup(request):
         return render(request, "home/setup.html", context)
 
 """
+A function for handling the user profile
+"""
+@login_required
+def profile(request):
+    context = {
+        "puser": User.objects.get(id=request.user.id),
+    }
+    return render(request, "home/profile.html", context)
+
+
+"""
 A function for Setting up the user Profile on Registration Progress
 """
 @login_required
@@ -434,15 +501,66 @@ def profileSetup(request):
             if request.POST or None:
                 user_pic.photo = request.FILES['pic']
                 user_pic.display = request.POST.get('display')
+                user_pic.config_state = 3
                 user_pic.save()
-                return HttpResponseRedirect("/app/home/")
+                content = []
+                info = {}
+                info = {
+                    "status": True,
+                }
+                content.append(info)
+                return HttpResponse(json.dumps(content))
             else:
-                pass
+                content = []
+                info = {}
+                info = {
+                    "status": False
+                }
+                content.append(info)
+                return HttpResponse(json.dumps(content))
         else:
-            pass
+            content = []
+            info = {}
+            info = {
+                "status": False
+            }
+            content.append(info)
+            return HttpResponse(json.dumps(content))
     else:
-        pass
-    return HttpResponseRedirect("/app/setup/")
+        content = []
+        info = {}
+        info = {
+            "status": False
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+
+
+@login_required
+def profilePic(request):
+    if request.method == 'POST':
+        user_pic = UserProfile.objects.get(user_id=request.user.id)
+        user_pic.photo = request.FILES['pic']
+        user_pic.save()
+
+        newUserPic = UserProfile.objects.get(user_id=request.user.id)
+        content = []
+        info = {}
+        info = {
+            "status": True,
+            "url": str(newUserPic.photo)
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+    else:
+        content = []
+        info = {}
+        info = {
+            "status": False,
+            "message": "Bad Request"
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
 
 """
 A fucntion for Getting the List  of School Search for Setup
@@ -575,16 +693,23 @@ def deleteTeacherSubject(request, subjectId):
 A function for getting user subject list in the configuration page
 """
 @login_required
-def loadTeacherSubjectList(request, courseId, academicId, yearId):
-    context = ''
-    context += '<label>Subject</label>'
-    context += '<select name="subject" class="form-control" required>'
-    context += '<option value="">Please Select ...</option>'
-    subjects = Subjects.objects.filter(course_id=courseId, year_id=yearId)
+def loadTeacherSubjectList(request):
+    courseId = request.GET.get('courseId')
+    academicId = request.GET.get('academicId')
+    yearId = request.GET.get('yearId')
+    yearObject = Year.objects.get(code=yearId)
+    subjects = Subjects.objects.filter(course_id=courseId, year_id=yearObject.id)
+    content = []
     for subject in subjects:
-        context += '<option value="'+str(subject.id)+'">'+str(subject.name)+' ('+str(subject.code)+')</option>'
-    context += '</select>'
-    return HttpResponse(context)
+        info = {}
+        info = {
+            "id": subject.id,
+            "subject": subject.name,
+            "code": subject.code,
+        }
+        content.append(info)
+
+    return HttpResponse(json.dumps(content))
 
 
 
@@ -2255,26 +2380,31 @@ def linker(request):
     if request.user.profile.course.course_category_id != None:
         userCourseCategoryId = request.user.profile.course.course_category_id
 
-    linkers = Courses.objects.filter(course_category_id=userCourseCategoryId, level_id=request.user.profile.course.level_id)
+    linkers = Courses.objects.filter(course_category_id=userCourseCategoryId,
+                                     level_id=request.user.profile.course.level_id).exclude(id=request.user.profile.course.id).order_by("?")[:10]
+    userGroups = request.user.groups.all()
+    uGroups = []
+    for ug in userGroups:
+        uGroups.append(ug.name)
+
+    user_ids = []
+    course_ids = []
+    if 'Student' in uGroups:
+        course_ids.append(request.user.profile.course.id)
+        for uCourse in Courses.objects.filter(course_category_id=request.user.profile.course.course_category_id,
+                                              level_id=request.user.profile.course.level_id):
+            course_ids.append(uCourse.id)
+        for uid in UserProfile.objects.filter(course_id__in=course_ids).exclude(user_id=request.user.id):
+            user_ids.append(uid.user_id)
+    elif 'Teacher' in uGroups:
+        pass
     context = {
         "upgrop": get_usergroup(request),
-        "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id,
-                                            year_id=request.user.profile.year_id),
-        "members": getFellowMembers(request),
+        "fusers": User.objects.filter(id__in=user_ids),
         "title": "Linker",
         "linkers": linkers,
     }
     return render(request, "home/linker.html", context)
-
-
-@login_required
-def getLinkerStatus(request, schoolId):
-    context = ""
-    if SchoolLinker.objects.filter(school_id=schoolId).count() > 0:
-        context += '<span class ="badge badge-success">Connected/Linked </span>'
-    else:
-        context += '<span class ="badge badge-danger" >Not Connected/Linked </span>'
-    return HttpResponse(context)
 
 @login_required
 def getlinkerAction(request, schoolId):
@@ -2294,14 +2424,79 @@ def getlinkerAction(request, schoolId):
     return HttpResponse(context)
 
 @login_required
-def setLinker(request, key, schoolId):
-    if key == 'link':
-        linkObj = SchoolLinker()
-        linkObj.school_id=schoolId
-        linkObj.user_id=request.user.id
-        linkObj.save()
-    elif key == 'unlink':
-        linkObj = SchoolLinker.objects.get(Q(school_id=schoolId) & Q(user_id=request.user.id))
-        linkObj.delete()
-    response = '<script>window.location="/app/linker/";</script>'
-    return HttpResponse(response)
+def setLinker(request):
+    content = []
+    if request.method == 'GET' and 'user' in request.GET:
+        userLinkerObject = UserLinker()
+        userLinkerObject.user_id = request.user.id
+        followUser = User.objects.get(id=request.GET.get('user'))
+        userLinkerObject.follower = followUser
+        if UserLinker.objects.filter(user_id=request.user.id, follower=request.GET.get('user')).count() == 0:
+            userLinkerObject.save()
+            info = {}
+            info = {
+                "status": True,
+            }
+            content.append(info)
+        else:
+            info = {}
+            info = {
+                "status": False
+            }
+            content.append(info)
+    elif request.method == 'GET' and 'course' in request.GET:
+        courseLinkerObject = CourseLinker()
+        courseLinkerObject.user_id = request.user.id
+        courseLinkerObject.course_id = request.GET.get('course')
+        if CourseLinker.objects.filter(user_id=request.user.id, course_id=request.GET.get('course')).count() == 0:
+            courseLinkerObject.save()
+            info = {}
+            info = {
+                "status": True,
+            }
+            content.append(info)
+        else:
+            info = {}
+            info = {
+                "status": False,
+            }
+            content.append(info)
+    elif request.method == 'GET' and 'school' in request.GET:
+        schoolLinkerObject = SchoolLinker()
+        schoolLinkerObject.user_id = request.user.id
+        schoolLinkerObject.school_id = request.GET.get('school')
+        if SchoolLinker.objects.filter(user_id=request.user.id, school_id=request.GET.get('school')).count() == 0:
+            SchoolLinker.save()
+        if SchoolLinker.objects.filter(user_id=request.user.id, school_id=request.GET.get('school')).count() > 0:
+            info = {}
+            info = {
+                "status": True,
+            }
+            content.append(info)
+        else:
+            info = {}
+            info = {
+                "status": False,
+            }
+            content.append(info)
+    else:
+        info = {}
+        info = {
+            "status": False,
+        }
+        content.append(info)
+
+    return HttpResponse(json.dumps(content))
+
+
+@login_required
+def sdrive(request):
+    content=""
+    return render(request, "home/sdrive.html", content)
+
+
+@login_required
+def settings(request):
+    content = ""
+    return render(request, "home/settings.html", content)
+

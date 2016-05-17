@@ -1,20 +1,38 @@
 <style>
+	#left-menu{
+		-webkit-transition: padding-top 0.35s;
+		-moz-transition: padding-top 0.35s ;
+		-ms-transition: padding-top 0.35s ;
+		-o-transition: padding-top 0.35s ;
+		transition: padding-top 0.35s ;;
+	}
 	#left-menu .collection-item.active{
 		background: rgba(158,158,158,0.14) !important;
 	}
 </style>
 <ul class="collection no-borders">
-	<li class="collection-item grey-text text-darken-1 active">
-		<a href="/app/home/">
-			<i class="zmdi zmdi-home"></i>
-			<span class="title">Home</span>
-		</a>
-	</li>
 	<a href="/app/home/" class="collection-item grey-text text-darken-1">
-		<i class="zmdi zmdi-collection-item"></i>
-		<span class="title">Subjects</span>
+		<i class="zmdi zmdi-home"></i>
+		<span class="title">Home</span>
 	</a>
-	<!-- <hr class="separator">
+	<a href="/app/linker/" class="collection-item grey-text text-darken-1">
+		<i class="zmdi zmdi-shuffle"></i>
+		<span class="title">Linker</span>
+	</a>
+	<a href="/app/sdrive/" class="collection-item grey-text text-darken-1">
+		<i class="zmdi zmdi-collection-pdf"></i>
+		<span class="title">Sdrive</span>
+	</a>
+	<hr class="separator">
+	<a href="javascript:void(0);" onclick="sendFeedback()" class="collection-item grey-text text-darken-1">
+		<i class="zmdi zmdi-comment-alt-text"></i>
+		<span class="title">Contact us</span>
+	</a>
+	<a href="/app/settings/" class="collection-item grey-text text-darken-1">
+		<i class="zmdi zmdi-settings"></i>
+		<span class="title">Settings</span>
+	</a>
+	<!--
 	{% for subject in subjects %}
 		<a href="/app/subjectReader/{{ subject.id }}/" style="margin-left: 50px" class="collection-item grey-text text-darken-1 left-align">
 			{{ subject.name|truncatewords:3 }}
@@ -22,3 +40,14 @@
 		<hr class="separator" style="margin: 1px">
 	{% endfor %} -->
 </ul>
+
+<script>
+	$('.collection-item').each(function(){
+		var isCurrent = $(this).attr('href') == window.location.pathname;
+
+		if(isCurrent)
+			$(this).addClass('active');
+		else
+			$(this).removeClass('active');
+	});
+</script>

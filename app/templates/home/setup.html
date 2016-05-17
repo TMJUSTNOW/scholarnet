@@ -2,7 +2,21 @@
 {% load endless %}
 
 {% block body %}
-<div class="row" style="position: absolute;height: 100%;width:100%;padding: 0;margin: 0;padding-top: 140px">
+<style>
+    body.locked{
+        overflow: hidden;
+    }
+</style>
+<div class="a-pane layout-flex as-column v-center h-center" style="display:none;position: absolute;height: 100%;width:100%;padding: 0;margin: 0;background: transparent">
+    <h2 class="section-head grey-text text-lighten-2">Congratulations!</h2>
+    <h5 class="section-head grey-text text-lighten-2">you have completed configurations</h5>
+    <br>
+    <a href="/app/home" class="btn blue waves-effect waves-light right" onclick="verifyAcc()">
+        GET STARTED
+    </a>
+</div>
+
+<div class="a-pane row" style="display:non;position: absolute;height: 100%;width:100%;padding: 0;margin: 0;padding-top: 140px">
     <div class="col l6 m6 layout-flex center-center" style="height: calc(100% - 80px); border-right:1px solid #bdbdbd;">
         <div class="grey-text text-lighten-1 layout-flex as-column center-center" style="margin: auto;height: 300px; width: 300px; border-radius: 50%; border:3px solid #e1e1e1">
             <span hidden id="stepsCompleted">{{user.profile.config_state}}</span>
@@ -48,26 +62,25 @@
                         <label>Institution</label>
                     </div>
 
-                    <div class="input-fiel col m12">
+                    <div class="col {% for group in user.groups.all %} {% if 'Teacher' == group.name %}m6{% else %}m12{% endif %}{% endfor %}" style="margin-top: 10px;">
                         <label>Course</label>
-                        <select require id="courseList" class="non-convertable" name="course">
+                        <select require id="courseList" class="non-convertable" name="course" onchange="populateSubjects()">
                             <option value="" disabled selected>Choose your option</option>
                         </select>
                     </div>
-                </div>
-                <div class="row">
-                    <div class="input-field col m6">
-                        <select require name="academic">
+                    <div class="input-field col m6" style="margin-top: 30px;">
+                        <select require name="academic" onchange="populateSubjects()">
                             <option value="" disabled selected>Choose your option</option>
                             {% for year in academicYears %}
                             <option value="{{year.id}}">{{year.name}} / {{year.name|add:1}}</option>
                             {% endfor %}
                         </select>
-                        <label>Academic year</label>
+                        <label>
+                            Academic year
+                        </label>
                     </div>
-
-                    <div class="input-field col m6">
-                        <select require name="year">
+                    <div class="input-field col m6" style="margin-top: 30px;">
+                        <select require name="year" onchange="populateSubjects()">
                             <option value="" disabled selected>Choose your option</option>
                             <option value="1">1</option>
                             <option value="2">2</option>
@@ -76,6 +89,12 @@
                             <option value="5">5</option>
                         </select>
                         <label>Year of study</label>
+                    </div>
+                    <div class="col m6 {% for group in user.groups.all %} {% if 'Teacher' == group.name %}show{% else %}hide{% endif %}{% endfor %}" style="margin-top: 10px;">
+                        <label>Subject</label>
+                        <select id="subjectsList" class="non-convertable" name="subject">
+                            <option value="" disabled selected>Choose your option</option>
+                        </select>
                     </div>
                 </div>
 
@@ -88,14 +107,14 @@
         </div>
 
         <div class="config-field col m10 offset-m1 layout-flex v-center h-center as-column" style="height:calc(100% - 30px);padding-bottom: 20px;display: {% if user.profile.config_state == 2 %} block {% else %} none {% endif %}">
-            <form id="profileFor" action="/app/profileSetup/" method="post" enctype="multipart/form-data">
+            <form id="profileForm" action="/app/profileSetup/" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <h2 class="section-head flow-text grey-text text-darken-2">Profile</h2>
 
                 <div class="col m12 layout-flex v-center" style="height: 200px">
                     <img id="dp-placeholder" style="width: 200px;height: 180px" src="/static/images/dp.jpg">
                     &emsp;&emsp;
-                    <input type="file" name="pic" onchange="setDp(this)">
+                    <input id="displayPic" type="file" name="pic">
                 </div>
                 <div class="col m12 input-field" style="margin-top: 30px;">
                     <input required type="text" name="display" id="username" autocomplete="off" required />
@@ -111,24 +130,73 @@
         </div>
     </div>
 </div>
-
+<script src="/static/materialize/js/fireworks.js"></script>
 <script>
+    var file;
 
     $(document).ready(function(){
         updatePercentCompleted();
     });
 
-    function setDp(input) {
-        if (input.files && input.files[0]) {
+    function populateSubjects(){
+        var yid, acid, cid;
+
+        cid = $('select[name="course"]').val();
+        yid = $('select[name="year"]').val();
+        acid = $('select[name="academic"]').val();
+
+//        console.log("course : " + cid + ", year : " + yid + ", academic : "+acid);
+
+        if (cid && yid && acid){
+            var fetchSubjectListToastId = createToast("Fetching subjects....", false);
+            var url = '/app/loadTeacherSubjectList/?courseId=' + cid + "&academicId=" + acid + "&yearId=" + yid;
+
+            $.ajax({
+                url: url,
+                type: 'GET'
+            })
+            .done(function (data) {
+                var data = JSON.parse(data);
+                var chooseSomething = '<option value="" disabled selected>Choose your option</option>';
+                $('#subjectsList').html(chooseSomething);
+
+                for (var i = 0; i < data.length; i++) {
+                    var sbj = data[i];
+//                    console.log(sbj);
+                    var option = '<option value="' + sbj.id + '">' + sbj.subject + '(' + sbj.code + ')</option>';
+                    $('#subjectsList').append(option);
+                }
+
+//                console.log("success. with data", data);
+            })
+            .fail(function (error) {
+                console.log("error returned is", error);
+
+                setTimeout(function () {
+                    createToast("Error occured", true, 2000);
+                }, 300);
+            })
+            .always(function () {
+                hideToast(fetchSubjectListToastId, 300, true);
+                console.log("Action complete!");
+            });
+        }
+    }
+
+    $('#displayPic').on("change", function() {
+        var files = this.files;
+        console.log(files);
+        if (files && files[0]) {
             var reader = new FileReader();
+            file = files[0];
 
             reader.onload = function (e) {
                 document.querySelector('#dp-placeholder').src = e.target.result;
-            }
+            };
 
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
         }
-    }
+    });
 
     function regenerateCode(){
         var url = '/app/verificationCodeRegenerate/';
@@ -214,7 +282,7 @@
                 $('#courseList').append(option);
             }
 
-            console.log("success. with data", data);
+//            console.log("success. with data", data);
         })
         .fail(function(error) {
             console.log("error returned is", error);
@@ -228,49 +296,6 @@
             console.log("Action complete!");
         });
     }
-
-    $('#profileForm').on('submit', function(e){
-        e.preventDefault();
-        var data = $(this).serialize();
-        var url = $(this).attr('action');
-
-        var setupAcademyToastId = createToast("Saving changes....", false);
-
-        $.ajax({
-            url: url,
-            type: 'POST',
-            data: data
-        })
-        .done(function(data) {
-            var data = JSON.parse(data)[0];
-
-            if(data.status)
-            {
-                setTimeout(function(){
-                    createToast("Profile updated");
-                },300);
-
-                switchToConfig(2);
-            }else{
-                setTimeout(function(){
-                    createToast("Profile not updated");
-                },300);
-            }
-
-            console.log("success. with data", data);
-        })
-        .fail(function(error) {
-            console.log("error returned is", error);
-
-            setTimeout(function(){
-                createToast("Error occured");
-            },300);
-        })
-        .always(function() {
-            hideToast(setupAcademyToastId, 300, true);
-            console.log("Action complete!");
-        });
-    });
 
 
     $('#academicForm').on('submit', function(e){
@@ -318,6 +343,62 @@
         }
     });
 
+    $('#profileForm').on('submit', function(e){
+        e.preventDefault();
+
+        var data = new FormData();
+//        var file = $('input[name="pic"]').files[0];
+        var username = $('input[name="display"]').val();
+        var token = $('input[name="csrfmiddlewaretoken"]').val();
+
+        data.append("pic", file);
+        data.append("display", username);
+        data.append("csrfmiddlewaretoken", token);
+
+        var url = $(this).attr('action');
+        var setupProfileToastId = createToast("Saving changes....", false);
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: data,
+            processData : false,
+            contentType : false
+        })
+        .done(function(data) {
+            var data = JSON.parse(data)[0];
+
+            if(data.status)
+            {
+                setTimeout(function(){
+                    createToast("Profile updated");
+                },300);
+
+                $('.username').text(username);
+                $('.userDp').attr("src", file);
+
+                showComplete();
+            }else{
+                setTimeout(function(){
+                    createToast("Profile not updated");
+                },300);
+            }
+
+            console.log("success. with data", data);
+        })
+        .fail(function(error) {
+            console.log("error returned is", error);
+
+            setTimeout(function(){
+                createToast("Error occured");
+            },300);
+        })
+        .always(function() {
+            hideToast(setupProfileToastId, 300, true);
+            console.log("Action complete!");
+        });
+    });
+
     function validateAcademicForm(){
         $('#academicForm select').each(function(){
             if(!$(this).val()){
@@ -330,6 +411,11 @@
         });
 
         return true;
+    }
+
+    function showComplete(){
+        $('.a-pane').fadeToggle();
+        ShowFireworks();
     }
 
     function switchToConfig(index){

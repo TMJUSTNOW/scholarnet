@@ -2,6 +2,41 @@
 	#mainNav{
 		position: fixed;z-index: 9;
 		padding: 0 20px;
+
+		-webkit-transition: height 0.35s;
+		-moz-transition: height 0.35s;
+		-ms-transition: height 0.35s;
+		-o-transition: height 0.35s;
+		transition: height 0.35s;
+	}
+	#mainNav.show-tabs{
+		height: 120px;
+	}
+	#topTabsContainer{
+		opacity: 0;
+		pointer-events: none;
+		margin-top:11.5px;position: absolute;
+		width:calc(100% - 140px);left: 0;
+		padding: 0 20px;
+	}
+	@media (min-width:960px) {
+		#topTabsContainer{
+			margin-top:8px;
+			width:30%;left: 35%
+		}
+	}
+	#mainNav.show-tabs #topTabsContainer{
+		opacity: 1;
+		pointer-events: auto;
+	}
+	#topTabsContainer .tabs{
+		background: transparent;padding: 0 10px
+	}
+	#topTabsContainer .tabs .indicator{
+		height:3px;background: #fff;
+	}
+	#topTabsContainer .tabs .tab a{
+		color: #fff;
 	}
 	@media (min-width:960px) {
 		#mainNav{
@@ -9,6 +44,7 @@
 		}
 	}
 	#searchbar{
+		display: none;
 		width: calc(100% - 120px);
 		max-width: 400px;
 		margin:0;top: 0;
@@ -19,34 +55,39 @@
 		}
 	}
 </style>
-<nav id="mainNav" class="navbar blue layout-flex v-center h-space-between">
-	<a href="#" data-toggle="sidebar">
-		<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
-	</a>
-	<div id="searchbar" class="hide-on-small-only">
-		<input type="text" name="s" placeholder="Search" />
-	</div>
-	<a class="layout-flex v-center hide-on-med-and-down js-menu-shower" data-target="user-dropdown" href="javascript:void(0);">
-		{% if user.profile.photo == None %}
-		<img src="/static/images/dp.jpg" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
-		{% else %}
-		<img src="/static/{{ user.profile.photo }}" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
-		{% endif %}
-		<span style="display: inline-block;margin-left: 7px;">
+<nav id="mainNav" class="navba blue">
+	<div class="layout-flex v-center h-space-between">
+		<a href="#" data-toggle="sidebar">
+			<h5 style="margin:0;line-height: 60px">Scholarnet</h5>
+		</a>
+		<div id="searchbar" class="hide-on-small-only">
+			<input type="text" name="s" placeholder="Search" />
+		</div>
+		<a class="layout-flex v-center hide-on-med-and-down js-menu-shower" data-target="user-dropdown" href="javascript:void(0);">
+			<img class="userDp" src="{{user.profile.get_photo}}" style="width: 40px; height: 40px; border-radius: 50%;display: flex;" />&nbsp;
+		<span style="display: inline-block;margin-left: 7px;" class="username">
 			{{ user.profile.display }}
 		</span>
 
-		<i style="margin-left: 8px;" class="zmdi zmdi-caret-down"></i>
-	</a>
+			<i style="margin-left: 8px;" class="zmdi zmdi-caret-down"></i>
+		</a>
 
-	<a href="javascript:void(0);" class="hide-on-large-only js-menu-shower" data-target="user-dropdown" style="display: flex;padding: 8px 15px">
-		<i class="zmdi zmdi-more-vert"></i>
-	</a>
+		<a href="javascript:void(0);" class="hide-on-large-only js-menu-shower" data-target="user-dropdown" style="display: flex;padding: 8px 15px">
+			<i class="zmdi zmdi-more-vert"></i>
+		</a>
+	</div>
+	<div id="topTabsContainer">
+		<ul class="tabs">
+			<li class="tab"><a href="#about">About</a></li>
+			<li class="tab"><a href="#posts">Posts</a></li>
+			<li class="tab"><a href="#following">Following</a></li>
+		</ul>
+	</div>
 </nav>
 
 <div id="user-dropdown" class="some-menu-container static-menu">
 	<div class="some-menu from-down" style="right:10px;top:65px">
-		<a href="app/profile/" class="layout-flex v-center">
+		<a href="/app/profile/" class="layout-flex v-center">
 			<i class="zmdi zmdi-account-o"></i>
 			<span>Profile</span>
 		</a>

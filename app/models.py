@@ -11,6 +11,7 @@ from django.template.defaultfilters import slugify
 from django.db.models import Q
 import secretballot
 import datetime
+import random
 
 
 
@@ -124,6 +125,28 @@ class Subjects(models.Model):
         verbose_name = u'Subject'
         verbose_name_plural = u'Subjects'
 
+    def color(self):
+        colors = [{"name": "red", "code": "#f44336", "isLight": False},
+                  {"name": "pink", "code": "#e91e63", "isLight": False},
+                  {"name": "purple", "code": "#9c27b0", "isLight": False},
+                  {"name": "deep-purple", "code": "#673ab7", "isLight": False},
+                  {"name": "indigo", "code": "#3f51b5", "isLight": False},
+                  {"name": "blue", "code": "#2196f3", "isLight": False},
+                  {"name": "light-blue", "code": "#03a9f4", "isLight": False},
+                  {"name": "cyan", "code": "#00bcd4", "isLight": True},
+                  {"name": "teal", "code": "#009688", "isLight": True},
+                  {"name": "green", "code": "#4caf50", "isLight": False},
+                  {"name": "light-green", "code": "#8bc34a", "isLight": True},
+                  {"name": "lime", "code": "#cddc39", "isLight": True},
+                  {"name": "yellow", "code": "#ffeb3b", "isLight": True},
+                  {"name": "amber", "code": "#ffc107", "isLight": True},
+                  {"name": "orange", "code": "#ff9800", "isLight": False},
+                  {"name": "deep-orange", "code": "#ff5722", "isLight": True},
+                  {"name": "brown", "code": "#795548", "isLight": True},
+                  {"name": "grey", "code": "#9e9e9e", "isLight": False},
+                  {"name": "blue-grey", "code": "#607d8b", "isLight": False}]
+        return random.choice(colors)
+
     def __str__(self):
         return self.name
 
@@ -134,6 +157,24 @@ class Subjects(models.Model):
 class SchoolLinker(models.Model):
     school = models.ForeignKey(School)
     user = models.ForeignKey(User)
+
+
+###########################################################################################
+# A class for creating User Linking Table
+###########################################################################################
+class UserLinker(models.Model):
+    user = models.ForeignKey(User)
+    follower = models.ForeignKey(User, related_name='user')
+    is_active = models.BooleanField(default=False)
+
+
+###########################################################################################
+# A class for creating course Linking Table
+###########################################################################################
+class CourseLinker(models.Model):
+    user = models.ForeignKey(User)
+    course = models.ForeignKey(Courses)
+    is_active = models.BooleanField(default=True)
 
 
 
@@ -212,6 +253,33 @@ class UserProfile(models.Model):
     config_state = models.IntegerField(default=0)
     photo = models.ImageField(upload_to="images/user/%Y/%m/%d", null=True, blank=True)
 
+    def color(self):
+        colors = [{"name": "red", "code": "#f44336", "isLight": False},
+                  {"name": "pink", "code": "#e91e63", "isLight": False},
+                  {"name": "purple", "code": "#9c27b0", "isLight": False},
+                  {"name": "deep-purple", "code": "#673ab7", "isLight": False},
+                  {"name": "indigo", "code": "#3f51b5", "isLight": False},
+                  {"name": "blue", "code": "#2196f3", "isLight": False},
+                  {"name": "light-blue", "code": "#03a9f4", "isLight": False},
+                  {"name": "cyan", "code": "#00bcd4", "isLight": True},
+                  {"name": "teal", "code": "#009688", "isLight": True},
+                  {"name": "green", "code": "#4caf50", "isLight": False},
+                  {"name": "light-green", "code": "#8bc34a", "isLight": True},
+                  {"name": "lime", "code": "#cddc39", "isLight": True},
+                  {"name": "yellow", "code": "#ffeb3b", "isLight": True},
+                  {"name": "amber", "code": "#ffc107", "isLight": True},
+                  {"name": "orange", "code": "#ff9800", "isLight": False},
+                  {"name": "deep-orange", "code": "#ff5722", "isLight": True},
+                  {"name": "brown", "code": "#795548", "isLight": True},
+                  {"name": "grey", "code": "#9e9e9e", "isLight": False},
+                  {"name": "blue-grey", "code": "#607d8b", "isLight": False}]
+        return random.choice(colors)
+
+    def get_photo(self):
+        if self.user.profile.photo != '' or self.user.profile.photo != None:
+            return '/static/' + str(self.user.profile.photo)
+        else:
+            return '/static/images/dp.jpg'
 
 User.profile = property(lambda u: UserProfile.objects.get_or_create(user=u)[0])
 
@@ -269,3 +337,25 @@ class TeacherSchool(models.Model):
     user = models.ForeignKey(User)
     school = models.ForeignKey(School)
     is_active = models.BooleanField(default=True)
+
+
+#########################################################################################################
+# A Class for creating Scholarnet Drive
+#########################################################################################################
+class Sdrive(models.Model):
+    user = models.ForeignKey(User)
+    file = models.FileField()
+    subject = models.ForeignKey(Subjects)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+
+##########################################################################################################
+# A class for creating Scholarnet Course Sdrive Sharing Table
+##########################################################################################################
+class FileCourse(models.Model):
+    sdrive = models.ForeignKey(Sdrive)
+    course = models.ForeignKey(Courses)
+    updated = models.DateTimeField(auto_now=True, null=True)
+    is_active = models.BooleanField(default=True)
+

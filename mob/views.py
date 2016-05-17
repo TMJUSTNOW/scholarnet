@@ -320,16 +320,8 @@ def setPost(request):
             if Images.objects.filter(description_id=articleObj.id, name=request.FILES[filename].name).count() == 0:
                 newImage.save()
         response = HttpResponse(json.dumps({"message": "Successfully Post"}))
-        # response["Access-Control-Allow-Origin"] = "*"
-        # response["Access-Control-Allow-Methods"] = "POST"
-        # response["Access-Control-Max-Age"] = "1000"
-        # response["Access-Control-Allow-Headers"] = "*"
     else:
         response = HttpResponse(json.dumps({"message": "Failed Post"}))
-        # response["Access-Control-Allow-Origin"] = "*"
-        # response["Access-Control-Allow-Methods"] = "POST, GET, OPTIONS"
-        # response["Access-Control-Max-Age"] = "1000"
-        # response["Access-Control-Allow-Headers"] = "*"
 
     return HttpResponse(response)
 

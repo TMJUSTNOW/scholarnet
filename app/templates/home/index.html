@@ -22,7 +22,7 @@
 	</style>
 {% endblock %}
 	{% block body %}
-		<section class="deep-orange" style="positio: relative;">
+		<section class="deep-orang" style="positio: relative;">
 			{% include "home/entry_home_article_page.html" %}
 			<button onclick="newArticle()" class="btn-floating btn-floating-bottom btn-large pink"><i class="zmdi zmdi-edit"></i></button>
 		</section>
@@ -35,7 +35,7 @@
 			{% csrf_token %}
 			<div style="height: 60px;padding: 15px" class="gre">
 				<div class="left item-avatar one-line">
-					<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
+					<img src="/static/{{profile.get_photo}}" class="circle" width="35" />
 					<p>{{user.profile.display}}</p>
 
 					<div class="secondary" style="margin-top: -10px; margin-right: -15px;">
@@ -89,7 +89,7 @@
 			{% csrf_token %}
 			<div style="display:flex;align-items:center;justify-content:space-between;height: 60px;padding: 15px">
 				<div style="display: flex;align-items: center">
-					<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
+					<img src="/static/{{profile.get_photo}}" class="circle" width="35" />
 					<span style="margin-left: 10px">{{user.profile.display}}</span>
 				</div>
 				<div class="secondary">
@@ -112,20 +112,6 @@
 		</form>
 	</div>
 
-    <div id="contact-modal" class="modal">
-    	<div style="height: 60px;padding: 15px" class="gre">
-	    	<div class="left item-avatar one-line">
-				<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
-				<p>James Wolpert</p>
-			</div>
-		</div>
-		<div class="modal-content re" style="margin-top: 1px; height: calc(100% - 255px); padding: 5px">
-        	<textarea placeholder="Type your message" name="" id="" cols="30" rows="10" style="height: 100%;backgroun: white;width: 100%;font-size: 17px; border: none;resize: none;"></textarea>
-        </div>
-	    <div class="modal-footer">
-	      <a href="#!" class=" modal-action modal-close waves-effect waves-gree btn-flat">Send</a>
-	    </div>
-	</div>
     <script>
 		// OPENS MODAL FOR EDITTING ARTICLE
 		function editArticle(id){
@@ -386,11 +372,6 @@
     	// CLOSE MODAL FOR NEW ARTICLE
     	function closeNewArticle(){
     		$('#new-post').closeModal();
-    	}
-
-    	// OPEN FEEDBACK MODAL
-    	function sendFeedback(){
-	        $('#contact-modal').openModal();
     	}
 
     	// CHOOSE SUBJECT

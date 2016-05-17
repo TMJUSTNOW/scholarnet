@@ -218,11 +218,12 @@
             }
 
             $(document).ready(function(){
-                $(".js-registration-form").on('submit', function(e){
-                    e.preventDefault();
-                    var data = $(this).serialize();
+//                $(".js-login-form").find('label').addClass('active');
 
-//                  [{"phone": "+255715497059", "message": "Successfully Registered", "status": true}]
+                $(".js-registration-form").on('submit', function(e){
+                   e.preventDefault();
+                   var data = $(this).serialize();
+
                    if(validateRegisterForm()){
                        var registeringToastId = createToast("Registering...", false);
 
