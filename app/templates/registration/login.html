@@ -137,7 +137,6 @@
                                         <label for="username">Phone-Number</label>
                                     </div>
                                     <div class="col m12 input-field">
-                                        <input type="hidden" name="next" />
                                         <input type="password" class="form-control" name="password" id="passwd" autocomplete="off" required />
                                         <label for="passwd">Password</label>
                                     </div>
@@ -209,10 +208,10 @@
             Copyright &copy; 2016 Scholarnet
         </center>
 
-        <script src="{% static 'assets/js/jquery-1.11.1.min.js' %}"></script>
-        <script src="{% static 'materialize/js/materialize.min.js' %}" type="text/javascript"></script>
-        <script src="{% static 'assets/js/TweenMax.min.js' %}"></script>
-        <script src="{% static 'materialize/js/utils.js' %}" type="text/javascript"></script>
+        <script src="/static/materialize/js/jquery.min.js"></script>
+        <script src="/static/materialize/js/materialize.min.js" type="text/javascript"></script>
+        <script src="/static/materialize/js/TweenMax.min.js"></script>
+        <script src="/static/materialize/js/utils.js" type="text/javascript"></script>
         <script>
             function switchForm(to){
                 $('.a-form').fadeToggle(400);
@@ -315,6 +314,7 @@
                     console.log("Phone test failed.");
 
                     $('.js-login-form input[name="username"]').focus();
+                    $('.js-login-form input[name="username"]').parent('.col').find('label').addClass('active');
                     createToast("Invalid phone number");
                 }
             }

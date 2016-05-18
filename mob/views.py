@@ -579,7 +579,7 @@ def sdrive(request):
         info = {
             "date": str(sdo.updated),
             "url": str(sdo.file),
-            "extension": '',
+            "extension": str(sdo.type()),
             "caption": sdo.title,
         }
         content.append(info)
@@ -597,7 +597,7 @@ def sdriveUploader(request):
             newSdriveObject = Sdrive()
             newSdriveObject.subject_id = request.POST.get('subject')
             newSdriveObject.title = request.POST.get('title')
-            newSdriveObject.file = request.FILES['title']
+            newSdriveObject.file = request.FILES['file']
             content = []
             try:
                 newSdriveObject.save()

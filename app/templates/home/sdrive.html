@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-
+{% load humanize %}
 {% block content %}
     <style>
         .page-container{
             position: relative;top:60px;left: 0;
-            width: 100%;
+            width: 100%;min-height: 80px;
             padding: 20px 40px
         }
         @media (min-width:960px) {
@@ -13,8 +13,447 @@
                 left: 19%;
             }
         }
+        .a-box{
+            display: inline-block;
+            cursor: pointer;
+            margin: 5px;
+            width: calc(33% - 12px);
+            color: #888;
+            box-shadow: 0 1px 4px 0 rgba(0,0,0,0.14);
+        }
+        .a-box > .header{
+            height: 50px; line-height: 50px;
+        }
+        .a-box > .header > .file-name{
+            padding-left: 10px;
+            font-size: 17px;border-bottom: 1px solid #eee;
+            width: calc(100% - 45px);
+            /*width: calc(100% - 12px);*/
+            overflow: hidden;
+            white-space: nowrap; text-overflow: ellipsis
+        }
+        .a-box > .header > .more-stuff{
+            margin-left: auto;padding-right:5px;
+        }
+        .a-box > .card-content{
+            padding: 12px 5px;
+            height:100px;
+            line-height: 70px;
+            text-align: center;
+            font-size:60px;
+        }
+
+        .a-box > .card-action{
+            padding: 7px;
+        }
+
+        .mla{
+            margin-left: auto;
+        }
+
+        .icon-btn{
+            width: 30px;
+            height: 30px;
+            line-height: 22px;
+            padding: 5px;
+            border-radius: 50%;
+            margin-left: 10px;
+        }
+
+        .amodal{
+            display: none;
+            background: rgba(0,0,0,0.7);
+            position: fixed;top:0;left:0;
+            width:100%;height:100%; z-index:9;
+
+            -webkit-transition: opacity 0.35s;
+            -moz-transition: opacity 0.35s;
+            -ms-transition: opacity 0.35s;
+            -o-transition: opacity 0.35s;
+            transition: opacity 0.35s;
+        }
+
+        .amodal.show{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+        }
+        .amodal .collection-item{
+            text-align: left;
+        }
+        .amodal > .content{
+            text-align: center;
+            position: relative;width: 50%;min-height:35%;
+            background: white;color:#777;
+
+            -webkit-animation-duration: 0.28s;
+            animation-duration: 0.28s;
+            -webkit-animation-fill-mode: both;
+            animation-fill-mode: both;
+        }
+
+        @media (min-width:960px) {
+            .amodal > .content{
+                width: 25%;
+            }
+        }
+
+        .amodal > .content.opening{
+            -webkit-animation-name: fadeInDown;
+            animation-name: fadeInDown;
+        }
+
+        .amodal > .content.closing{
+            -webkit-animation-name: fadeOutUp;
+            animation-name: fadeOutUp;
+        }
+
+        @-webkit-keyframes fadeInDown {
+            from {
+                opacity: 0;
+                -webkit-transform: translate3d(0, -30%, 0);
+                transform: translate3d(0, -30%, 0);
+            }
+
+            100% {
+                opacity: 1;
+                -webkit-transform: none;
+                transform: none;
+            }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                -webkit-transform: translate3d(0, -30%, 0);
+                transform: translate3d(0, -30%, 0);
+            }
+
+            100% {
+                opacity: 1;
+                -webkit-transform: none;
+                transform: none;
+            }
+        }
+
+        @-webkit-keyframes fadeOutUp {
+            from {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                -webkit-transform: translate3d(0, -100%, 0);
+                transform: translate3d(0, -100%, 0);
+            }
+        }
+
+        @keyframes fadeOutUp {
+            from {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                -webkit-transform: translate3d(0, -100%, 0);
+                transform: translate3d(0, -100%, 0);
+            }
+        }
+
+        .amodal .header{
+            position: relative;
+            height: 110px; margin-bottom: 30px;
+            background: #aaa;
+        }
+        .amodal .dp{
+            height: 100px;width: 100px;
+            border-radius: 50%;position: absolute;left:30px;bottom:-35px;
+        }
+        .amodal .username{
+            position: absolute;left: 150px; bottom : 10px;
+            font-size: 30px; color:white;
+            text-shadow: 0 0 0 rgba(0,0,0,0.26);
+        }
+        .amodal .body{
+            height: calc(100% - 130px);
+            padding:20px 30px;overflow-y:auto;
+        }
+
+
     </style>
     <div class="page-container">
+        <div class="card a-box grey lighten-4 layout-flex center-center" style="height:205px;line-height: 205px;text-align: center">
+            <a href="javascript:void(0);" class="grey-text text-darken-" style="padding:20px; border: 1px dashed #9e9e9e; font-size: 20px" onclick="openExplorer()">
+                choose file
+            </a>
+        </div>
+        {% for file in files %}
+            <div id="afile{{file.id}}" class="card a-box">
+                <div class="header layout-flex">
+                    <div class="file-name">
+                        {{file.title}}
+                    </div>
+                    <div class="layout-flex center-center more-stuff">
+                        <a href="javascript:void(0);" class="btn-flat center icon-btn js-menu-shower" data-target="file{{file.id}}">
+                            <i class="zmdi zmdi-more-vert grey-text text-darken-1"></i>
+                        </a>
+                    </div>
+                </div>
+                <div class="card-content {{file.color}} {{file.color}}-text text-lighten-5">
+                    {{file.type}}
+                </div>
+                <div class="card-action layout-flex v-center">
+                    <div class="layout-flex as-column">
+                        <span class="grey-text text-darken-2" style="font-size: 14px">{{file.updated|naturalday}}</span>
+                        <span style="font-size: 12px">{{file.size}}&nbsp;</span>
+                    </div>
+                    <div class="mla ">
+                        <a href="/static/{{file.file}}" class="btn-flat center icon-btn grey lighten-3" style="margin: 5px" title="Download">
+                            <i class="zmdi zmdi-download grey-text text-darken-1"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
 
+            <div id="file{{file.id}}" class="some-menu-container is-file from-top-righ">
+                <div class="some-menu" style="width: 120px">
+                    <a clas="layout-flex v-center" href="javascript:void(0);" onclick="deleteFile({{file.id}})">
+                        <span>Delete file</span>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+
+        <div id="dummyFile" class="card a-box hide">
+            <div class="header layout-flex">
+                <div class="file-name">
+                    {{file.title}}
+                </div>
+                <div class="layout-flex center-center more-stuff">
+                    <a href="javascript:void(0);" class="btn-flat center icon-btn js-menu-shower" data-target="file">
+                        <i class="zmdi zmdi-more-vert grey-text text-darken-1"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="card-content {{file.color}} {{file.color}}-text text-lighten-5">
+                {{file.type}}
+            </div>
+            <div class="card-action layout-flex v-center">
+                <div class="layout-flex as-column">
+                    <span class="grey-text text-darken-2" style="font-size: 14px">{{file.updated|naturalday}}</span>
+                    <span style="font-size: 12px">{{file.size}}&nbsp;</span>
+                </div>
+                <div class="mla">
+                    <a href="/static/{{file.file}}" class="btn-flat center icon-btn grey lighten-4" title="Download">
+                        <i class="zmdi zmdi-download grey-text text-darken-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
     </div>
+    <div class="amodal sho" onclick="closeAModal()">
+        <div class="content">
+            <input type="text" name="theTitle" class="hide">
+            <form id="fileSubmitForm" action="/app/sdriveUploader/" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input id="size" class="file-size-input" type="hidden" name="size">
+                <input type="file" name="file" class="hide" onchange="previewFile(this)">
+                <div style="height: 100%;padding:20px 30px;overflow-y:show;">
+                    <div class="file-bg white-text" style="border-radius:50%;height: 70px;width: 70px;text-align: center;line-height: 70px;font-size:18px;margin: auto;margin-top: -55px;margin-bottom: 20px;"></div>
+                    <div class="row">
+                        <div class="col m12 input-field" style="font-size: 25px;">
+                            <input class="file-title" type="text" placeholder="Enter file name" name="title">
+                            <label class="file-title-label">File name</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col m12 input-field subjectField" style="font-siz: 25px;">
+                            <select require id="subject" name="subject">
+                                <option value="" disabled selected>Choose your option</option>
+
+                                {% for subj in subjects %}
+                                <option value="{{subj.id}}">{{subj.name}}({{subj.code}})</option>
+                                {% endfor %}
+                            </select>
+                            <label>Subject</label>
+                        </div>
+                    </div>
+                    <p class="file-size" style="font-size: 20px;margin: 25px 0;text-align: center"></p>
+
+                    <button class="btn-flat waves-effect waves-grey pink-text" style="font-size: 18px;">UPLOAD FILE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        var file;
+
+        function openExplorer(){
+            $('input:file').trigger('click');
+        }
+
+        function previewFile(input){
+            var files = input.files;
+
+            if (files && files[0]) {
+                var reader = new FileReader();
+                file = files[0];
+
+                reader.onload = function (e) {
+//                    e.target.result
+                    var typeColors = { xls  : "#4CAF50", pdf  : "#f44336", docx : "#0D47A1", doc  : "#0D47A1", ppt  : "#ff7053", pptx : "#ff7053"};
+                    var typeColors2 = { xls  : "green", pdf  : "red", docx : "indigo", doc  : "indigo", ppt  : "deep-orange", pptx : "deep-orange"};
+                    var validTypes = [ "xls", "pdf", "docx", "doc", "ppt", "pptx"];
+                    var splitName = file.name.split('.');
+                    var type = splitName[splitName.length - 1];
+                    splitName.splice(splitName.length - 1);
+                    var name = splitName.join('.');
+                    var addedS = file.size > 1000 ? 's' : '';
+                    var size = file.size/1000+' Kb'+addedS;
+                    var background = typeColors[type];
+                    var isValid = jQuery.inArray(type, validTypes);
+
+                    if(isValid != -1){
+                        $('.amodal .file-bg').css('background-color', background).text(type.toUpperCase());
+                        $('.amodal .file-title').val(name);
+                        $('.amodal .file-size-input').val(size);
+                        $('.amodal .file-size').text(size);
+                        $('.file-title-label').addClass('active');
+                        openAModal();
+                    }else{
+                        createToast("Unsupported file format");
+                    }
+                };
+
+                reader.readAsDataURL(file);
+            }
+        }
+
+        $('#fileSubmitForm').on('submit', function(e){
+            e.preventDefault();
+
+            var data = new FormData();
+            var name = $('.amodal .file-title').val();
+            var subject = $('.amodal #subject').val();
+            var size = $('.amodal #size').val();
+            var token = $('input[name="csrfmiddlewaretoken"]').val();
+
+            data.append("file", file);
+            data.append("title", name);
+            data.append("subject", subject);
+            data.append("size", size);
+            data.append("csrfmiddlewaretoken", token);
+
+            var url = $(this).attr('action');
+
+            if(!$('#subject').val()){
+                createToast("Please choose a subject");
+                $('.subjectField input').focus();
+            }else{
+                var fileUploadToastId = createToast("Saving changes....", false);
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: data,
+                    processData : false,
+                    contentType : false
+                })
+                .done(function(data) {
+                    var data = JSON.parse(data)[0];
+
+                    if(data.status)
+                    {
+                        setTimeout(function(){
+                            createToast("File successfully uploaded");
+                            $('#dummyFile').clone().append(".page-container");
+                        },300);
+                    }else{
+                        setTimeout(function(){
+                            createToast("File  not uploaded");
+                        },300);
+                    }
+
+                    console.log("success. with data", data);
+                })
+                .fail(function(error) {
+                    console.log("error returned is", error);
+
+                    setTimeout(function(){
+                        createToast("Error occured");
+                    },300);
+                })
+                .always(function() {
+                    hideToast(fileUploadToastId, 300, true);
+                    console.log("Action complete!");
+                    closeAModal();
+                });
+            }
+        });
+
+        $('.amodal .content').on('click', function(e){
+            e.stopPropagation();
+        });
+
+        function openAModal(){
+            $('.amodal')
+                    .addClass('show')
+                    .find('.content').addClass('opening');
+
+            setTimeout(function(){
+                $('.amodal').find('.content').removeClass('opening');
+            }, 	300);
+        }
+
+        function closeAModal(){
+            $('.amodal').find('.content').addClass('closing');
+            setTimeout(function(){
+                $('.amodal')
+                        .removeClass('show')
+                        .find('.content').removeClass('closing');
+            }, 	100);
+        }
+
+        function deleteFile(file_id){
+            var filedeleteToastId = createToast("Saving changes....", false);
+            $.ajax({
+                url: "/app/deleteFile/?file="+file_id,
+                type: 'GET',
+            })
+            .done(function(data) {
+                var data = JSON.parse(data)[0];
+
+                if(data.status)
+                {
+                    setTimeout(function(){
+                        createToast("File deleted");
+                        TweenMax.to($('#afile'+file_id), 0.3, { y : -100+'%', opacity : 0});
+
+                        setTimeout(function(){
+                            $('#afile'+file_id).remove();
+                        }, 230)
+                    },300);
+                }else{
+                    setTimeout(function(){
+                        createToast("Failed to delete");
+                    },300);
+                }
+
+                console.log("success. with data", data);
+            })
+            .fail(function(error) {
+                console.log("error returned is", error);
+
+                setTimeout(function(){
+                    createToast("Error occured");
+                },300);
+            })
+            .always(function() {
+                hideToast(filedeleteToastId, 300, true);
+                console.log("Action complete!");
+                closeAModal();
+            });
+        }
+    </script>
 {% endblock %}

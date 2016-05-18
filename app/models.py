@@ -12,6 +12,7 @@ from django.db.models import Q
 import secretballot
 import datetime
 import random
+import os
 
 
 
@@ -276,7 +277,7 @@ class UserProfile(models.Model):
         return random.choice(colors)
 
     def get_photo(self):
-        if self.user.profile.photo != '' or self.user.profile.photo != None:
+        if self.user.profile.photo != '' or self.user.profile.photo != None or os.path.isfile('/static/' + str(self.user.profile.photo)):
             return '/static/' + str(self.user.profile.photo)
         else:
             return '/static/images/dp.jpg'
@@ -343,9 +344,26 @@ class Sdrive(models.Model):
     user = models.ForeignKey(User)
     subject = models.ForeignKey(Subjects)
     title = models.TextField()
+    size = models.TextField()
     file = models.FileField(upload_to="images/user/%Y/%m/%d", null=False, blank=False)
-    update = models.DateTimeField(auto_now=True, null=False, blank=False)
+    updated = models.DateTimeField(auto_now=True, null=False, blank=False)
     is_active = models.BooleanField(default=True)
+
+    def type(self):
+        splittedString = str(self.file)
+        tp = splittedString.split('.')[-1]
+        return tp
+
+    def color(self):
+        splittedString = str(self.file)
+        tp = splittedString.split('.')[-1]
+        extension = tp
+        colorDict = {'xls': "green", 'pdf': "red",
+                      'docx': "indigo", 'doc': "indigo",
+                      'ppt': "deep-orange", 'pptx': "deep-orange"}
+        return colorDict.get(extension)
+
+
 
 class FileCourse(models.Model):
     sdrive = models.ForeignKey(Sdrive)

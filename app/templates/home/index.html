@@ -35,7 +35,7 @@
 			{% csrf_token %}
 			<div style="height: 60px;padding: 15px" class="gre">
 				<div class="left item-avatar one-line">
-					<img src="/static/{{profile.get_photo}}" class="circle" width="35" />
+					<img src="{{user.profile.get_photo}}" class="circle" width="35" />
 					<p>{{user.profile.display}}</p>
 
 					<div class="secondary" style="margin-top: -10px; margin-right: -15px;">
@@ -159,10 +159,16 @@
 			}
 		}
 
-		function reportPost(){
+		function reportPost(message, delay){
+			if(delay == null)
+				var delay = 2000;
+
+			if(message == null)
+				var message = "Thankyou! We have received your complaint.";
+
 			setTimeout(function(){
-				createToast("Thankyou! We have received your complaint.", true, 3000);
-			}, 2000)
+				createToast(message, true, 3000);
+			}, delay);
 		}
 
 		function deletePost(id){

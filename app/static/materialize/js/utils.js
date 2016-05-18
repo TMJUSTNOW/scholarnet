@@ -1,9 +1,14 @@
 var toastCount = 0;
 
-function createToast(message, autoclose = true, duration = 2000){
+function createToast(message, autoclose, duration){
     var id = 'toast'+parseInt($('atoast-container').length + 1);
     var toast = '<div id="'+id+'" class="atoast-container"><div class="atoast">'+message+'</div></div>';
 
+    if(autoclose == null)
+        autoclose = true;
+
+    if(duration == null)
+        duration = 2000;
 
     //var toastCount = $('.atoast-container').length;
 
@@ -45,7 +50,13 @@ function pushToastsUp(){
     });
 }
 
-function hideToast(toastId, duration = 300, down = false){
+function hideToast(toastId, duration, down){
+    if(!down)
+        down = false;
+
+    if(!duration)
+        duration = 300;
+
     var duration = duration / 1000;
 
     if(!down)
@@ -58,18 +69,19 @@ function hideToast(toastId, duration = 300, down = false){
     }, 200);
 }
 
-// OPEN FEEDBACK MODAL
-function sendFeedback(){
-    $('#contact-modal').openModal();
-}
-
 $('.js-menu-shower').click(function(e){
     var target = $(this).data('target');
     var dynamicPositioning = $('#'+target).hasClass('static-menu');
+    var isFile = $('#'+target).hasClass('is-file');
 
     if(!dynamicPositioning){
+        var parentLeft = $(this).parent().position().left;
+
+        if(isFile)
+            var parentLeft = $(this).parent().offset().left;
+
         var topPos = $(this).position().top + $(this).parent().offset().top - $(window).scrollTop();
-        var leftPos = $(this).position().left + $(this).parent().position().left;
+        var leftPos = $(this).position().left + parentLeft;
         var cardPos = $(this).offset().top;
 
         var botEdge = $(window).scrollTop() + window.innerHeight - 200;

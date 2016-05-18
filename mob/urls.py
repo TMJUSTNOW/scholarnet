@@ -144,4 +144,9 @@ urlpatterns = [
     #############################################################################
     url(r'^sdrive/$', views.sdrive, name='sdrive'),
 
+    #############################################################################
+    # Url for Uploading the file  Sdrive
+    #############################################################################
+    url(r'^sdriveUploader/$', views.sdriveUploader, name='sdriveUploader'),
+
         ]

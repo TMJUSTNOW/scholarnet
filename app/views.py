@@ -130,7 +130,7 @@ def getUserSubjects(request):
                 subjects_ids.append(tsubject.subject.id)
             subjects = Subjects.objects.filter(id__in=subjects_ids)
         elif ugroup.name == 'Student':
-            subjects = Subjects.objects.filter(course_id=request.user.profile.course.id)
+            subjects = Subjects.objects.filter(course_id=request.user.profile.course.id, year_id=request.user.profile.year_id)
     return subjects
 
 
@@ -262,9 +262,12 @@ def home(request, template='home/index.html', extra_context=None):
                         for userRel in userRelatedCourses:
                             user_course_id.append(userRel.id)
             subject_ids = []
-            subs = getUserSubjects(request)
-            for sub in subs:
-                subject_ids.append(sub.id)
+            if request.method == 'GET' and 'subject' in request.GET:
+                subject_ids.append(request.GET.get('subject'))
+            else:
+                subs = getUserSubjects(request)
+                for sub in subs:
+                    subject_ids.append(sub.id)
 
             ImageFormSet = modelformset_factory(Images, form=ImageForm, extra=4)
 
@@ -2405,6 +2408,7 @@ def linker(request):
     context = {
         "upgrop": get_usergroup(request),
         "fusers": User.objects.filter(id__in=user_ids).exclude(id__in=linked_user_ids),
+        "subjects": getUserSubjects(request),
         "title": "Linker",
         "linkers": linkers,
     }
@@ -2506,6 +2510,7 @@ def sdrive(request):
 
     context = {
         "files": Sdrive.objects.filter(subject_id__in=subject_ids).order_by("-updated"),
+        "subjects": getUserSubjects(request),
     }
     return render(request, "home/sdrive.html", context)
 
@@ -2513,7 +2518,7 @@ def sdrive(request):
  A function for handling the uploading of files to the Sdrive
 """
 @login_required
-def sdriverUploader(request):
+def sdriveUploader(request):
     if request.method == 'POST':
         if request.POST or None:
             content = []
@@ -2522,6 +2527,7 @@ def sdriverUploader(request):
             newFileObject.subject_id = request.POST.get('subject')
             newFileObject.file = request.FILES['file']
             newFileObject.title = request.POST.get('title')
+            newFileObject.size = request.POST.get('size')
             try:
                 newFileObject.save()
                 info = {}
@@ -2557,9 +2563,35 @@ def sdriverUploader(request):
         content.append(info)
         return HttpResponse(json.dumps(content))
 
+@login_required
+def deleteFile(request):
+    sdriveId = request.GET.get('file')
+    fileObject = Sdrive.objects.get(id=sdriveId)
+    fileObject.delete()
+    if Sdrive.objects.filter(id=sdriveId).exists():
+        content = []
+        info = {}
+        info = {
+            "status": False,
+            "message": "Failed to Delete File"
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+    else:
+        content = []
+        info = {}
+        info = {
+            "status": True,
+            "message": "File Successfully Deleted"
+        }
+        content.append(info)
+        return HttpResponse(json.dumps(content))
+
 
 
 @login_required
 def settings(request):
-    content = ""
+    content = {
+        "subjects": Subjects.objects.filter(course_id=request.user.profile.course_id, year_id=request.user.profile.year_id),
+    }
     return render(request, "home/settings.html", content)

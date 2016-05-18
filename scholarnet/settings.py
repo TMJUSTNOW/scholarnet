@@ -54,6 +54,7 @@ INSTALLED_APPS = (
     'corsheaders',
     'tastypie',
     'easy_thumbnails',
+    'django_cleanup',
 )
 TEMPLATES = [
     {
