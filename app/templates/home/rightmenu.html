@@ -50,7 +50,7 @@
 
 <div class="grey-text" style="display: flex;align-items: center"><h6>Subjects</h6> <a href="javascript:void(0);" style="margin-left: auto"></a></div>
 {% for subject in subjects %}
-	<a href="/app/home/?subject={{ subject.id }}&name={{ subject.name }}">
+	<a href="/app/home/?subject={{subject.id}}&name={{subject.name}}">
 		<div class="white shadow-1dp" style="margin-top: 15px; padding: 10px; display: flex; align-items: center;">
 			<span class="{{subject.color.name}} grey-text text-lighten-5 circle" style="width: 35px;height: 35px;line-height: 35px;text-align: center;">{{subject.name|slice:':1'}}</span>
 			<p style="margin: 0 10px;overflow: hidden;white-space: nowrap; text-overflow:ellipsis">{{subject.name|truncatechars:30}}</p>

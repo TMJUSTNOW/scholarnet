@@ -14,14 +14,10 @@
 	</div>
 {% else %}
     {% for post in posts %}
-        <div id="post{{post.id}}" class="card col s12 m12 l7 offset-l3" style="padding:0">
+        <div id="post{{post.id}}" class="card col s12 m12 l9 offset-l1" style="padding:0;margin-lef: 2.5%">
 			<div class="layout-flex v-center h-space-between" style="height: 60px;padding: 15px">
 					<div class="layout-flex v-center">
-						{% if post.user.profile.photo == None %}
-							<img src="/static/images/dp.jpg" class="circle" style="height:35px;width:35" />
-						{% else %}
-							<img src="/static/{{ post.user.profile.photo }}" class="circle" style="height:35px;width:35" />
-						{% endif %}
+						<img src="{{ post.user.profile.get_photo }}" class="circle" style="height:35px;width:35" />
 						<p style="margin-left: 8px">{{ post.user.profile.display }}</p>
 					</div>
 					<span class="hide js-article-subject">{{post.subject}}</span>
@@ -46,7 +42,7 @@
 										<span>Edit</span>
 									</a>
 								{% else %}
-								<a clas="layout-flex v-center" href="javascript:void(0);" onclick="reportPost({{post.id}})">
+								<a clas="layout-flex v-center" href="javascript:void(0);" onclick="reportPost()">
 									<span>Report abuse</span>
 								</a>
 								{% endif %}
@@ -102,11 +98,7 @@
 				<ul class="collection grey lighten-4" style="margin:0;width: 100%; display: {% if post.comments < 1 %} none {% endif %};">
 					{% for comment in post.comment %}
 						<li id="comment{{comment.id}}" class="collection-item avatar" style="min-height: 10px;">
-							{% if comment.user.profile.photo == None %}
-								<img src="/static/images/dp.jpg" class="circle" width="35" />
-							{% else %}
-								<img src="/static/{{ comment.user.profile.photo }}" class="circle" width="35" />
-							{% endif %}
+							<img src="{{ comment.user.profile.get_photo }}" class="circle" width="35" />
 							<span class="title" style="font-weight:400">{{ comment.user.profile.display }}</span>
 							<p class="grey-text text-darken-1">{{comment.comment}}</p>
 							<span class="secondary-content grey-text text-darken-5" style="margin-top: -4px; font-size: 14px">
@@ -127,7 +119,7 @@
 						{% if user.profile.photo == None or user.profile.photo == "" %}
 							<img data-username="{{user.profile.display}}" src="/static/images/dp.jpg" class="circle" width="35" style="margin: 0 10px;" />
 						{% else %}
-							<img data-username="{{user.profile.display}}" src="/static/{{user.profile.photo}}" class="circle" width="35" style="margin: 0 10px;" />
+							<img data-username="{{user.profile.display}}" src="{{user.profile.get_photo}}" class="circle" height="35px" width="35" style="margin: 0 10px;" />
 						{% endif %}
 
 						{% csrf_token %}

@@ -10,13 +10,19 @@
 		}
 		.btn-floating.btn-floating-bottom{
 			position: fixed;
-			bottom: 20px;right: 20px;
+			bottom: 20px;right: 30px;
 		}
 
 		@media (min-width:960px) {
 			.btn-floating.btn-floating-bottom{
 				position: fixed;bottom:20px;
-				right:calc(28% + 15px) !important;
+				right:calc(28% + 5px) !important;
+			}
+		}
+
+		@media (max-width:905px) {
+			#new-post{
+				width: 60%;
 			}
 		}
 	</style>
@@ -157,18 +163,6 @@
 					closeEditArticle();
 				});
 			}
-		}
-
-		function reportPost(message, delay){
-			if(delay == null)
-				var delay = 2000;
-
-			if(message == null)
-				var message = "Thankyou! We have received your complaint.";
-
-			setTimeout(function(){
-				createToast(message, true, 3000);
-			}, delay);
 		}
 
 		function deletePost(id){

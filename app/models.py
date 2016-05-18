@@ -277,7 +277,7 @@ class UserProfile(models.Model):
         return random.choice(colors)
 
     def get_photo(self):
-        if self.user.profile.photo != '' or self.user.profile.photo != None or os.path.isfile('/static/' + str(self.user.profile.photo)):
+        if os.path.isfile('/static/' + str(self.user.profile.photo)):
             return '/static/' + str(self.user.profile.photo)
         else:
             return '/static/images/dp.jpg'

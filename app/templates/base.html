@@ -33,6 +33,26 @@
 </head>
 <body>
 <style>
+	#loader{
+		position: fixed;
+		top:0;left: 0;
+		height: 100%;width: 100%;
+		background: rgba(255, 255, 255, 0.4);
+		z-index: 999999;
+
+		-webkit-transform: translate3d(0, -100%, 0);
+		-moz-transform: translate3d(0, -100%, 0);
+		-ms-transform: translate3d(0, -100%, 0);
+		-o-transform: translate3d(0, -100%, 0);
+		transform: translate3d(0, -100%, 0);
+	}
+	#loader.show{
+		-webkit-transform: none;
+		-moz-transform: none;
+		-ms-transform: none;
+		-o-transform: none;
+		transform: none;
+	}
 	select.non-convertable{
 		display: block;
 	}
@@ -232,7 +252,7 @@
 		</div>
 
 		{% block content %}
-		<div class="col m8 offset-m2 l8 offset-l1" style="margin-top: 60px; position: absolute; height:calc(100% - 60px);">
+		<div class="col m8 offset-m2 l7 offset-l2" style="margin-top: 60px; position: absolute; height:calc(100% - 60px);">
 			<div style="height: 20px" class="hide-on-small-only">&nbsp;</div>
 			{% block body %} {% endblock %}
 		</div>
@@ -332,10 +352,55 @@
 		</div>
 	</div>
 
+	<div id="loader" class="layout-flex center-center">
+		<!--<img src="/static/images/loader2.gif" alt="">-->
+		<div class="hid preloader-wrapper big active">
+			<div class="spinner-layer spinner-blue">
+				<div class="circle-clipper left">
+					<div class="circle"></div>
+				</div><div class="gap-patch">
+				<div class="circle"></div>
+			</div><div class="circle-clipper right">
+				<div class="circle"></div>
+			</div>
+			</div>
+
+			<div class="spinner-layer spinner-red">
+				<div class="circle-clipper left">
+					<div class="circle"></div>
+				</div><div class="gap-patch">
+				<div class="circle"></div>
+			</div><div class="circle-clipper right">
+				<div class="circle"></div>
+			</div>
+			</div>
+
+			<div class="spinner-layer spinner-yellow">
+				<div class="circle-clipper left">
+					<div class="circle"></div>
+				</div><div class="gap-patch">
+				<div class="circle"></div>
+			</div><div class="circle-clipper right">
+				<div class="circle"></div>
+			</div>
+			</div>
+
+			<div class="spinner-layer spinner-green">
+				<div class="circle-clipper left">
+					<div class="circle"></div>
+				</div><div class="gap-patch">
+				<div class="circle"></div>
+			</div><div class="circle-clipper right">
+				<div class="circle"></div>
+			</div>
+			</div>
+		</div>
+	</div>
+
 	<div id="contact-modal" class="modal">
 		<div style="height: 60px;padding: 15px" class="gre">
 			<div class="left item-avatar one-line">
-				<img src="/static/{% if user.profile.photo == None or user.profile.photo = ''%}images/dp.jpg{% else %}{{user.profile.photo}}{% endif %}" class="circle" width="35" />
+				<img src="{{user.profile.get_photo}}" class="circle" width="35" />
 				<p>{{user.profile.display}}</p>
 			</div>
 		</div>
@@ -384,6 +449,7 @@
 			});
 
 			function reportPost(message, delay){
+				toggleLoading();
 				if(delay == null)
 					var delay = 2000;
 
@@ -391,6 +457,7 @@
 					var message = "Thankyou! We have received your complaint.";
 
 				setTimeout(function(){
+					toggleLoading();
 					createToast(message, true, 3000);
 				}, delay);
 			}
@@ -464,6 +531,10 @@
 				setTimeout(function(){
 					$('#'+toastId+'').remove();
 				}, 200);
+			}
+
+			function toggleLoading(){
+				$("#loader").toggleClass('show');
 			}
 		</script>
 	{% endblock %}
